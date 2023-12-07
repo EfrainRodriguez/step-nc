@@ -18,9 +18,6 @@ import {
  * @see ISO-10303-11:2004 8.2.1 Array data type
  */
 export class STPArray<T> extends OrderedAggregation<T> {
-  private _lowerBound: number;
-  private _upperBound: number;
-  private _unique: boolean;
   private _optional: boolean;
 
   /**
@@ -38,38 +35,8 @@ export class STPArray<T> extends OrderedAggregation<T> {
     unique: boolean = false,
     optional: boolean = false
   ) {
-    super(items);
-    this._lowerBound = lowerBound;
-    this._upperBound = upperBound;
-    this._unique = unique;
+    super(items, lowerBound, upperBound, unique);
     this._optional = optional;
-    this.validate();
-  }
-
-  public get lowerBound(): number {
-    return this._lowerBound;
-  }
-
-  public set lowerBound(lowerBound: number) {
-    this._lowerBound = lowerBound;
-    this.validate();
-  }
-
-  public get upperBound(): number {
-    return this._upperBound;
-  }
-
-  public set upperBound(upperBound: number) {
-    this._upperBound = upperBound;
-    this.validate();
-  }
-
-  public get unique(): boolean {
-    return this._unique;
-  }
-
-  public set unique(unique: boolean) {
-    this._unique = unique;
     this.validate();
   }
 
