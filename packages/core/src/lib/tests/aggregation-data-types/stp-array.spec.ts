@@ -12,6 +12,11 @@ describe('STPArray', () => {
     expect(stpArray.getItems()).toEqual([1, 2, 3]);
   });
 
+  test('should empty the array', () => {
+    const stpArray = new STPArray<number>([], 0, 5, false, false);
+    expect(stpArray.getItems()).toEqual([]);
+  });
+
   test('should validate unique and optional properties', () => {
     const stpArray = new STPArray<number>(
       [1, 1, 2, undefined as unknown as number],

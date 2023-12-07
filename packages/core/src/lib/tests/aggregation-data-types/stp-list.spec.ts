@@ -12,6 +12,11 @@ describe('STPList', () => {
     expect(stpList.getItems()).toEqual([1, 2, 3]);
   });
 
+  test('should empty the list', () => {
+    const stpList = new STPList<number>([]);
+    expect(stpList.getItems()).toEqual([]);
+  });
+
   test('should validate unique properties', () => {
     const stpList = new STPList<number>([1, 1, 2], 1, 5, true);
     expect(stpList.getItems()).toEqual([1, 2]);
