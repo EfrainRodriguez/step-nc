@@ -7,6 +7,15 @@ import { SimpleDataInvalidValueException } from '../exceptions';
  * @see ISO-10303-11:2004 8.1.5 Boolean data type
  */
 export class STPBoolean extends SimpleData<boolean> {
+  /**
+   * Initializes a new instance of the boolean data type.
+   * @param value The value.
+   */
+  constructor(value: boolean) {
+    super(value);
+    this.validate();
+  }
+
   protected validate(): void {
     if (typeof this._value !== 'boolean') {
       throw new SimpleDataInvalidValueException(this._value, STPBoolean.name);

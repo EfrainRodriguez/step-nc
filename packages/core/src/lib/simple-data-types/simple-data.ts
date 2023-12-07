@@ -18,7 +18,6 @@ export abstract class SimpleData<T> {
    */
   constructor(value: T) {
     this._value = value;
-    this.validate();
   }
 
   public get value(): T {

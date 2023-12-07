@@ -5,7 +5,7 @@ import {
 } from '../exceptions';
 import {
   isValidNumber,
-  isRealPrecisionAllowed
+  isValidRealPrecision
 } from '../utils/validations.utils';
 
 /**
@@ -32,7 +32,7 @@ export class STPReal extends SimpleData<number> {
       throw new SimpleDataInvalidValueException(this._value, STPReal.name);
     }
     if (this._precision !== undefined) {
-      if (!isRealPrecisionAllowed(this._precision)) {
+      if (!isValidRealPrecision(this._precision)) {
         throw new SimpleDataRealPrecisionNotAllowedException(this._precision);
       }
     }
