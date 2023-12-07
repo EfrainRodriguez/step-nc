@@ -11,6 +11,17 @@ describe('STPBinary', () => {
     expect(stpBinary.value).toBe('101010');
   });
 
+  test('should return a the value', () => {
+    const stpBinary = new STPBinary('101010');
+    expect(stpBinary.value).toBe('101010');
+  });
+
+  test('should set a new value', () => {
+    const stpBinary = new STPBinary('101010');
+    stpBinary.value = '110110';
+    expect(stpBinary.value).toBe('110110');
+  });
+
   test('STPBinary should throw SimpleDataInvalidValueException for an invalid value (non-string)', () => {
     expect(() => new STPBinary(10101 as unknown as string)).toThrow(
       SimpleDataInvalidValueException
