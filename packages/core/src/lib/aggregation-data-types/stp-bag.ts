@@ -7,7 +7,7 @@ import {
 import {
   isValidAggregationLowerBound,
   isValidAggregationUpperBound
-} from '../utils/validations.utils';
+} from '../utils/';
 
 /**
  * A bag data type has as its domain unordered collections of like elements. The optional lower

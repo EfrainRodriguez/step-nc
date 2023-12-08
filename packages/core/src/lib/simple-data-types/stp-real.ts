@@ -3,10 +3,7 @@ import {
   SimpleDataInvalidValueException,
   SimpleDataRealPrecisionNotAllowedException
 } from '../exceptions';
-import {
-  isValidNumber,
-  isValidRealPrecision
-} from '../utils/validations.utils';
+import { isValidNumber, isValidRealPrecision } from '../utils';
 
 /**
  * The real data type has as its domain all rational, irrational and scientific real numbers. It is

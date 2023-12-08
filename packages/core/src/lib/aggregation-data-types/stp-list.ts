@@ -7,7 +7,7 @@ import {
 import {
   isValidAggregationLowerBound,
   isValidAggregationUpperBound
-} from '../utils/validations.utils';
+} from '../utils';
 
 /**
  * A list data type has as its domain sequences of like elements. The optional lower and upper

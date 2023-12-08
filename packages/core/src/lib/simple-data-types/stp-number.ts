@@ -1,6 +1,6 @@
 import { SimpleData } from './simple-data';
 import { SimpleDataInvalidValueException } from '../exceptions';
-import { isValidNumber } from '../utils/validations.utils';
+import { isValidNumber } from '../utils';
 
 /**
  * The number data type has as its domain all numeric values in the language. The number data

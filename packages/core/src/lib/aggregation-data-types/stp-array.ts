@@ -7,7 +7,7 @@ import {
 import {
   isValidAggregationLowerBound,
   isValidAggregationUpperBound
-} from '../utils/validations.utils';
+} from '../utils';
 
 /**
  * An array data type has as its domain indexed, fixed-size collections of like elements. The lower

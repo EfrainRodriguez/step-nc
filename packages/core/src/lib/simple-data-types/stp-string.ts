@@ -4,7 +4,7 @@ import {
   SimpleDataMaxLengthExceededException,
   SimpleDataStringMaxLengthNotAllowedException
 } from '../exceptions';
-import { isValidStringMaxLength } from '../utils/validations.utils';
+import { isValidStringMaxLength } from '../utils';
 
 /**
  * The string data type has as its domain sequences of characters. The characters that are
