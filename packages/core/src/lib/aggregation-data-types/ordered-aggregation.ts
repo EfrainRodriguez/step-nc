@@ -53,4 +53,8 @@ export abstract class OrderedAggregation<T> extends Aggregation<T> {
     this._items.splice(index, 1);
     this.validate();
   }
+
+  public getAt(index: number): T {
+    return this._items[index];
+  }
 }
