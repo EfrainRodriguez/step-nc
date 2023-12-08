@@ -12,6 +12,16 @@ describe('STPList', () => {
     expect(stpList.getItems()).toEqual([1, 2, 3]);
   });
 
+  test('should return a item by value', () => {
+    const stpList = new STPList<number>([1, 2, 3]);
+    expect(stpList.get(2)).toEqual(2);
+  });
+
+  test('should return a item at index', () => {
+    const stpList = new STPList<number>([1, 2, 3]);
+    expect(stpList.getAt(1)).toEqual(2);
+  });
+
   test('should empty the list', () => {
     const stpList = new STPList<number>([]);
     expect(stpList.getItems()).toEqual([]);

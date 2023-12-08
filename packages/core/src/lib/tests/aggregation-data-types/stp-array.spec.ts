@@ -12,6 +12,16 @@ describe('STPArray', () => {
     expect(stpArray.getItems()).toEqual([1, 2, 3]);
   });
 
+  test('should return a item by value', () => {
+    const stpArray = new STPArray<number>([1, 2, 3], 2, 5, false, false);
+    expect(stpArray.get(2)).toEqual(2);
+  });
+
+  test('should return a item at index', () => {
+    const stpArray = new STPArray<number>([1, 2, 3], 2, 5, false, false);
+    expect(stpArray.getAt(1)).toEqual(2);
+  });
+
   test('should empty the array', () => {
     const stpArray = new STPArray<number>([], 0, 5, false, false);
     expect(stpArray.getItems()).toEqual([]);

@@ -12,6 +12,11 @@ describe('STPBag', () => {
     expect(stpBag.getItems()).toEqual([1, 2, 3]);
   });
 
+  test('should return a item by value', () => {
+    const stpBag = new STPBag<number>([1, 2, 3]);
+    expect(stpBag.get(2)).toEqual(2);
+  });
+
   test('should empty the bag', () => {
     const stpBag = new STPBag<number>([]);
     expect(stpBag.getItems()).toEqual([]);

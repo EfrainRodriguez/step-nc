@@ -12,6 +12,11 @@ describe('STPSet', () => {
     expect(stpSet.getItems()).toEqual([1, 2, 3]);
   });
 
+  test('should return a item by value', () => {
+    const stpSet = new STPSet<number>([1, 2, 3]);
+    expect(stpSet.get(2)).toEqual(2);
+  });
+
   test('should empty the set', () => {
     const stpSet = new STPSet<number>([]);
     expect(stpSet.getItems()).toEqual([]);
