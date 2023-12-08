@@ -13,6 +13,15 @@ export type LogicalBase = boolean | undefined;
  * @see ISO-10303-11:2004 8.1.4 Logical data type
  */
 export class STPLogical extends SimpleData<LogicalBase> {
+  /**
+   * Initializes a new instance of the logical data type.
+   * @param value The value.
+   */
+  constructor(value: LogicalBase) {
+    super(value);
+    this.validate();
+  }
+
   protected validate(): void {
     if (typeof this._value !== 'boolean' && this._value !== undefined) {
       throw new SimpleDataInvalidValueException(this._value, STPLogical.name);

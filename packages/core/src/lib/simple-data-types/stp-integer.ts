@@ -7,6 +7,15 @@ import { SimpleDataInvalidValueException } from '../exceptions';
  * @see ISO-10303-11:2004 8.1.3 Integer data type
  */
 export class STPInteger extends SimpleData<number> {
+  /**
+   * Initializes a new instance of the integer data type.
+   * @param value The value.
+   */
+  constructor(value: number) {
+    super(value);
+    this.validate();
+  }
+  
   protected validate(): void {
     if (!Number.isInteger(this._value)) {
       throw new SimpleDataInvalidValueException(this._value, STPInteger.name);

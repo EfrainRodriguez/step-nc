@@ -3,10 +3,7 @@ import {
   SimpleDataInvalidValueException,
   SimpleDataRealPrecisionNotAllowedException
 } from '../exceptions';
-import {
-  isValidNumber,
-  isRealPrecisionAllowed
-} from '../utils/validations.utils';
+import { isValidNumber, isValidRealPrecision } from '../utils';
 
 /**
  * The real data type has as its domain all rational, irrational and scientific real numbers. It is
@@ -32,7 +29,7 @@ export class STPReal extends SimpleData<number> {
       throw new SimpleDataInvalidValueException(this._value, STPReal.name);
     }
     if (this._precision !== undefined) {
-      if (!isRealPrecisionAllowed(this._precision)) {
+      if (!isValidRealPrecision(this._precision)) {
         throw new SimpleDataRealPrecisionNotAllowedException(this._precision);
       }
     }

@@ -4,7 +4,7 @@ import {
   SimpleDataMaxLengthExceededException,
   SimpleDataStringMaxLengthNotAllowedException
 } from '../exceptions';
-import { isValidStringMaxLength } from '../utils/validations.utils';
+import { isValidStringMaxLength } from '../utils';
 
 /**
  * The binary data type has as its domain sequences of bits, each bit being represented by 0 or 1.

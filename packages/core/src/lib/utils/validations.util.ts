@@ -5,7 +5,7 @@ export const isValidNumber = (value: number): boolean => {
   return true;
 };
 
-export const isRealPrecisionAllowed = (precision: number): boolean => {
+export const isValidRealPrecision = (precision: number): boolean => {
   const minPrecision = 0;
   const maxPrecision = 14;
 
@@ -22,5 +22,25 @@ export const isValidStringMaxLength = (length: number): boolean => {
 
   return (
     isValidNumber(length) && Number.isInteger(length) && length >= minLength
+  );
+};
+
+export const isValidAggregationLowerBound = (lowerBound: number): boolean => {
+  const minLowerBound = 0;
+
+  return (
+    isValidNumber(lowerBound) &&
+    Number.isInteger(lowerBound) &&
+    lowerBound >= minLowerBound
+  );
+};
+
+export const isValidAggregationUpperBound = (upperBound: number): boolean => {
+  const minUpperBound = 1;
+
+  return (
+    isValidNumber(upperBound) &&
+    Number.isInteger(upperBound) &&
+    upperBound >= minUpperBound
   );
 };

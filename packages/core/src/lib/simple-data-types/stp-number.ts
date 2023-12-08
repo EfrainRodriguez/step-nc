@@ -1,6 +1,6 @@
 import { SimpleData } from './simple-data';
 import { SimpleDataInvalidValueException } from '../exceptions';
-import { isValidNumber } from '../utils/validations.utils';
+import { isValidNumber } from '../utils';
 
 /**
  * The number data type has as its domain all numeric values in the language. The number data
@@ -8,6 +8,15 @@ import { isValidNumber } from '../utils/validations.utils';
  * @see ISO-10303-11:2004 8.1.1 Number data type
  */
 export class STPNumber extends SimpleData<number> {
+  /**
+   * Initializes a new instance of the number data type.
+   * @param value The value.
+   */
+  constructor(value: number) {
+    super(value);
+    this.validate();
+  }
+
   protected validate(): void {
     if (!isValidNumber(this._value)) {
       throw new SimpleDataInvalidValueException(this._value, STPNumber.name);
