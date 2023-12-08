@@ -59,6 +59,10 @@ export abstract class Aggregation<T> {
     this.validate();
   }
 
+  public get(item: T): T | undefined {
+    return this._items.find((i) => i === item);
+  }
+
   public remove(item: T): void {
     const index = this._items.indexOf(item);
     if (index > -1) {
