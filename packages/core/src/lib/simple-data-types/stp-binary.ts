@@ -1,6 +1,6 @@
 import { SimpleData } from './simple-data';
 import {
-  SimpleDataInvalidValueException,
+  InvalidDataTypeException,
   SimpleDataMaxLengthExceededException,
   SimpleDataStringMaxLengthNotAllowedException
 } from '../exceptions';
@@ -30,7 +30,7 @@ export class STPBinary extends SimpleData<string> {
    */
   static fromHex(value: string, maxLength?: number | undefined): STPBinary {
     if (!/^[0-9A-Fa-f]+$/.test(value)) {
-      throw new SimpleDataInvalidValueException(value, STPBinary.name);
+      throw new InvalidDataTypeException(value, STPBinary.name);
     }
     if (maxLength === undefined) {
       maxLength = value.length * 4;
@@ -46,10 +46,10 @@ export class STPBinary extends SimpleData<string> {
 
   protected validate(): void {
     if (typeof this._value !== 'string') {
-      throw new SimpleDataInvalidValueException(this._value, STPBinary.name);
+      throw new InvalidDataTypeException(this._value, STPBinary.name);
     }
     if (!/^[01]+$/.test(this._value)) {
-      throw new SimpleDataInvalidValueException(this._value, STPBinary.name);
+      throw new InvalidDataTypeException(this._value, STPBinary.name);
     }
     if (this._maxLength !== undefined) {
       if (!isValidStringMaxLength(this._maxLength)) {

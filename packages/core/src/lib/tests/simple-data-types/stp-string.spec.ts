@@ -1,6 +1,6 @@
 import { STPString } from '../../simple-data-types';
 import {
-  SimpleDataInvalidValueException,
+  InvalidDataTypeException,
   SimpleDataMaxLengthExceededException,
   SimpleDataStringMaxLengthNotAllowedException
 } from '../../exceptions';
@@ -13,7 +13,7 @@ describe('STPString', () => {
 
   test('should throw an error if the value is not a valid value', () => {
     expect(() => new STPString(20 as unknown as string)).toThrow(
-      SimpleDataInvalidValueException
+      InvalidDataTypeException
     );
   });
 

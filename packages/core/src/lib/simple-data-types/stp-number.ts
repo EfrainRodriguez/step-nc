@@ -1,5 +1,5 @@
 import { SimpleData } from './simple-data';
-import { SimpleDataInvalidValueException } from '../exceptions';
+import { InvalidDataTypeException } from '../exceptions';
 import { isValidNumber } from '../utils';
 
 /**
@@ -19,7 +19,7 @@ export class STPNumber extends SimpleData<number> {
 
   protected validate(): void {
     if (!isValidNumber(this._value)) {
-      throw new SimpleDataInvalidValueException(this._value, STPNumber.name);
+      throw new InvalidDataTypeException(this._value, STPNumber.name);
     }
   }
 }

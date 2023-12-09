@@ -1,19 +1,19 @@
 import {
-  SimpleDataInvalidValueException,
+  InvalidDataTypeException,
   SimpleDataMaxLengthExceededException,
   SimpleDataRealPrecisionNotAllowedException,
   SimpleDataStringMaxLengthNotAllowedException,
-  SIMPLE_DATA_INVALID_VALUE_EXCEPTION,
+  INVALID_DATA_TYPE_EXCEPTION,
   SIMPLE_DATA_MAX_LENGTH_EXCEEDED_EXCEPTION,
   SIMPLE_DATA_REAL_PRECISION_NOT_ALLOWED_EXCEPTION,
   SIMPLE_DATA_STRING_MAX_LENGTH_NOT_ALLOWED_EXCEPTION
 } from '../../exceptions';
 
-describe('SimpleDataInvalidValueException', () => {
+describe('InvalidDataTypeException', () => {
   it('should create an instance with the correct message and code', () => {
-    const exception = new SimpleDataInvalidValueException('invalid', 'Type');
+    const exception = new InvalidDataTypeException('invalid', 'Type');
     expect(exception.message).toBe('The value invalid is not a valid Type.');
-    expect(exception.code).toBe(SIMPLE_DATA_INVALID_VALUE_EXCEPTION);
+    expect(exception.code).toBe(INVALID_DATA_TYPE_EXCEPTION);
   });
 });
 

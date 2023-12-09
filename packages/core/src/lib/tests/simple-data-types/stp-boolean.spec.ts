@@ -1,5 +1,5 @@
 import { STPBoolean } from '../../simple-data-types';
-import { SimpleDataInvalidValueException } from '../../exceptions';
+import { InvalidDataTypeException } from '../../exceptions';
 
 describe('STPBoolean', () => {
   test('should create an instance of STPBoolean with a valid value (true)', () => {
@@ -14,7 +14,7 @@ describe('STPBoolean', () => {
 
   test('should throw an error if the value is not a valid value', () => {
     expect(() => new STPBoolean('20' as unknown as boolean)).toThrow(
-      SimpleDataInvalidValueException
+      InvalidDataTypeException
     );
   });
 

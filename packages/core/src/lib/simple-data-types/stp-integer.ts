@@ -1,5 +1,5 @@
 import { SimpleData } from './simple-data';
-import { SimpleDataInvalidValueException } from '../exceptions';
+import { InvalidDataTypeException } from '../exceptions';
 
 /**
  * The integer data type has as its domain all integer numbers. It is a specialization of the real
@@ -18,7 +18,7 @@ export class STPInteger extends SimpleData<number> {
   
   protected validate(): void {
     if (!Number.isInteger(this._value)) {
-      throw new SimpleDataInvalidValueException(this._value, STPInteger.name);
+      throw new InvalidDataTypeException(this._value, STPInteger.name);
     }
   }
 }

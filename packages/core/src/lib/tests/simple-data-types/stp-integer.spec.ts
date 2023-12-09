@@ -1,5 +1,5 @@
 import { STPInteger } from '../../simple-data-types';
-import { SimpleDataInvalidValueException } from '../../exceptions';
+import { InvalidDataTypeException } from '../../exceptions';
 
 describe('STPInteger', () => {
   test('should create an instance of STPInteger with a valid number', () => {
@@ -9,23 +9,23 @@ describe('STPInteger', () => {
 
   test('should throw an error if the value is not a number', () => {
     expect(() => new STPInteger('20' as unknown as number)).toThrow(
-      SimpleDataInvalidValueException
+      InvalidDataTypeException
     );
   });
 
   test('should throw an error if the value is NaN', () => {
-    expect(() => new STPInteger(NaN)).toThrow(SimpleDataInvalidValueException);
+    expect(() => new STPInteger(NaN)).toThrow(InvalidDataTypeException);
   });
 
-  test('should throw SimpleDataInvalidValueException for Infinity', () => {
+  test('should throw InvalidDataTypeException for Infinity', () => {
     expect(() => new STPInteger(Infinity)).toThrow(
-      SimpleDataInvalidValueException
+      InvalidDataTypeException
     );
   });
 
-  test('should throw SimpleDataInvalidValueException for -Infinity', () => {
+  test('should throw InvalidDataTypeException for -Infinity', () => {
     expect(() => new STPInteger(-Infinity)).toThrow(
-      SimpleDataInvalidValueException
+      InvalidDataTypeException
     );
   });
 

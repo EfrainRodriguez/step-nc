@@ -1,26 +1,9 @@
 import { ExceptionBase } from './base.exception';
 import {
-  SIMPLE_DATA_INVALID_VALUE_EXCEPTION,
   SIMPLE_DATA_MAX_LENGTH_EXCEEDED_EXCEPTION,
   SIMPLE_DATA_REAL_PRECISION_NOT_ALLOWED_EXCEPTION,
   SIMPLE_DATA_STRING_MAX_LENGTH_NOT_ALLOWED_EXCEPTION
 } from './codes.exception';
-
-/**
- * This exception is thrown when a value is invalid.
- */
-export class SimpleDataInvalidValueException extends ExceptionBase {
-  code = SIMPLE_DATA_INVALID_VALUE_EXCEPTION;
-
-  /**
-   * Initializes a new instance of the class InvalidValueException.
-   * @param value The invalid value.
-   * @param type The type of the value.
-   */
-  constructor(value: unknown, type: string) {
-    super(`The value ${String(value)} is not a valid ${type}.`);
-  }
-}
 
 /**
  * This exception is thrown when a value exceeds the maximum length.

@@ -1,6 +1,6 @@
 import { SimpleData } from './simple-data';
 import {
-  SimpleDataInvalidValueException,
+  InvalidDataTypeException,
   SimpleDataRealPrecisionNotAllowedException
 } from '../exceptions';
 import { isValidNumber, isValidRealPrecision } from '../utils';
@@ -26,7 +26,7 @@ export class STPReal extends SimpleData<number> {
 
   protected validate(): void {
     if (!isValidNumber(this._value)) {
-      throw new SimpleDataInvalidValueException(this._value, STPReal.name);
+      throw new InvalidDataTypeException(this._value, STPReal.name);
     }
     if (this._precision !== undefined) {
       if (!isValidRealPrecision(this._precision)) {

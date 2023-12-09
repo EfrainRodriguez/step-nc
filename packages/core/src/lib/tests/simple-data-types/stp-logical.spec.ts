@@ -1,5 +1,5 @@
 import { STPLogical, LogicalBase } from '../../simple-data-types';
-import { SimpleDataInvalidValueException } from '../../exceptions';
+import { InvalidDataTypeException } from '../../exceptions';
 
 describe('STPLogical', () => {
   test('should create an instance of STPLogical with a valid boolean (true)', () => {
@@ -17,9 +17,9 @@ describe('STPLogical', () => {
     expect(stpLogical.value).toBe(undefined);
   });
 
-  test('should throw SimpleDataInvalidValueException for an invalid logical (number)', () => {
+  test('should throw InvalidDataTypeException for an invalid logical (number)', () => {
     expect(() => new STPLogical(42 as unknown as LogicalBase)).toThrow(
-      SimpleDataInvalidValueException
+      InvalidDataTypeException
     );
   });
 

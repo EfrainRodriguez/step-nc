@@ -1,5 +1,5 @@
 import { SimpleData } from './simple-data';
-import { SimpleDataInvalidValueException } from '../exceptions';
+import { InvalidDataTypeException } from '../exceptions';
 
 /**
  * The logical data type has as its domain the three types true, false, and unknown.
@@ -24,7 +24,7 @@ export class STPLogical extends SimpleData<LogicalBase> {
 
   protected validate(): void {
     if (typeof this._value !== 'boolean' && this._value !== undefined) {
-      throw new SimpleDataInvalidValueException(this._value, STPLogical.name);
+      throw new InvalidDataTypeException(this._value, STPLogical.name);
     }
   }
 }

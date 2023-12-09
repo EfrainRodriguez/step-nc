@@ -1,6 +1,6 @@
 import { SimpleData } from './simple-data';
 import {
-  SimpleDataInvalidValueException,
+  InvalidDataTypeException,
   SimpleDataMaxLengthExceededException,
   SimpleDataStringMaxLengthNotAllowedException
 } from '../exceptions';
@@ -27,7 +27,7 @@ export class STPString extends SimpleData<string> {
 
   protected validate(): void {
     if (typeof this._value !== 'string') {
-      throw new SimpleDataInvalidValueException(this._value, STPString.name);
+      throw new InvalidDataTypeException(this._value, STPString.name);
     }
     if (this._maxLength !== undefined) {
       if (!isValidStringMaxLength(this._maxLength)) {

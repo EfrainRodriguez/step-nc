@@ -1,5 +1,5 @@
 import { SimpleData } from './simple-data';
-import { SimpleDataInvalidValueException } from '../exceptions';
+import { InvalidDataTypeException } from '../exceptions';
 
 /**
  * The boolean data type has as its domain the two literals true and false. The boolean data
@@ -18,7 +18,7 @@ export class STPBoolean extends SimpleData<boolean> {
 
   protected validate(): void {
     if (typeof this._value !== 'boolean') {
-      throw new SimpleDataInvalidValueException(this._value, STPBoolean.name);
+      throw new InvalidDataTypeException(this._value, STPBoolean.name);
     }
   }
 }

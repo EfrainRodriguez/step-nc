@@ -1,6 +1,6 @@
 import { STPReal } from '../../simple-data-types';
 import {
-  SimpleDataInvalidValueException,
+  InvalidDataTypeException,
   SimpleDataRealPrecisionNotAllowedException
 } from '../../exceptions';
 
@@ -15,25 +15,25 @@ describe('STPReal', () => {
     expect(stpReal.value).toBe(42.12);
   });
 
-  test('should throw SimpleDataInvalidValueException for an invalid number', () => {
+  test('should throw InvalidDataTypeException for an invalid number', () => {
     expect(() => new STPReal('20.20' as unknown as number)).toThrow(
-      SimpleDataInvalidValueException
+      InvalidDataTypeException
     );
   });
 
-  test('should throw SimpleDataInvalidValueException for NaN', () => {
-    expect(() => new STPReal(NaN)).toThrow(SimpleDataInvalidValueException);
+  test('should throw InvalidDataTypeException for NaN', () => {
+    expect(() => new STPReal(NaN)).toThrow(InvalidDataTypeException);
   });
 
-  test('should throw SimpleDataInvalidValueException for Infinity', () => {
+  test('should throw InvalidDataTypeException for Infinity', () => {
     expect(() => new STPReal(Infinity)).toThrow(
-      SimpleDataInvalidValueException
+      InvalidDataTypeException
     );
   });
 
-  test('should throw SimpleDataInvalidValueException for -Infinity', () => {
+  test('should throw InvalidDataTypeException for -Infinity', () => {
     expect(() => new STPReal(-Infinity)).toThrow(
-      SimpleDataInvalidValueException
+      InvalidDataTypeException
     );
   });
 

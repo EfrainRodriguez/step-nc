@@ -1,5 +1,7 @@
+// common exception codes
+export const INVALID_DATA_TYPE_EXCEPTION = 'STP-EXCEPTION-0001';
+
 // exception codes related to simple data types
-export const SIMPLE_DATA_INVALID_VALUE_EXCEPTION = 'STP-EXCEPTION-0001';
 export const SIMPLE_DATA_MAX_LENGTH_EXCEEDED_EXCEPTION = 'STP-EXCEPTION-0002';
 export const SIMPLE_DATA_REAL_PRECISION_NOT_ALLOWED_EXCEPTION =
   'STP-EXCEPTION-0003';

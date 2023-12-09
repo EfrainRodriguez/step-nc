@@ -1,6 +1,6 @@
 import { STPBinary } from '../../simple-data-types';
 import {
-  SimpleDataInvalidValueException,
+  InvalidDataTypeException,
   SimpleDataMaxLengthExceededException,
   SimpleDataStringMaxLengthNotAllowedException
 } from '../../exceptions';
@@ -22,15 +22,15 @@ describe('STPBinary', () => {
     expect(stpBinary.value).toBe('110110');
   });
 
-  test('STPBinary should throw SimpleDataInvalidValueException for an invalid value (non-string)', () => {
+  test('STPBinary should throw InvalidDataTypeException for an invalid value (non-string)', () => {
     expect(() => new STPBinary(10101 as unknown as string)).toThrow(
-      SimpleDataInvalidValueException
+      InvalidDataTypeException
     );
   });
 
-  test('STPBinary should throw SimpleDataInvalidValueException for an invalid binary value', () => {
+  test('STPBinary should throw InvalidDataTypeException for an invalid binary value', () => {
     expect(() => new STPBinary('invalid')).toThrow(
-      SimpleDataInvalidValueException
+      InvalidDataTypeException
     );
   });
 
@@ -80,9 +80,9 @@ describe('STPBinary', () => {
     expect(stpBinary.value).toBe('00011010');
   });
 
-  test('STPBinary.fromHex should throw SimpleDataInvalidValueException for an invalid hexadecimal value', () => {
+  test('STPBinary.fromHex should throw InvalidDataTypeException for an invalid hexadecimal value', () => {
     expect(() => STPBinary.fromHex('invalid')).toThrow(
-      SimpleDataInvalidValueException
+      InvalidDataTypeException
     );
   });
 
