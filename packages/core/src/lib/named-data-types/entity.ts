@@ -1,4 +1,4 @@
-import { AttributeBase } from '../attribute';
+import { AttributeBase } from '../interfaces';
 import { generateUUID } from '../utils';
 
 /**

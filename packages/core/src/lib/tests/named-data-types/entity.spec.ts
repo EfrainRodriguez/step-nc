@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Entity } from '../../named-data-types';
 import { Attribute } from '../../decorators';
-import { AttributeBase } from '../../attribute';
+import { AttributeBase } from '../../interfaces';
 
 describe('Entity', () => {
   class SampleEntity extends Entity {

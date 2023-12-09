@@ -1,4 +1,4 @@
-export * from './attribute';
+export * from './interfaces';
 export * from './exceptions';
 export * from './decorators';
 export * from './named-data-types';
