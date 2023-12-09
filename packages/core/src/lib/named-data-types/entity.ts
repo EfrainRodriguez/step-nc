@@ -28,22 +28,23 @@ export abstract class Entity {
     return this._createdAt;
   }
 
-  public static getClassName(): string {
-    return this.name;
+  public getClassName(): string {
+    return this.constructor.name;
   }
 
-  public static getAttributes(): AttributeBase[] {
-    const attributes: AttributeBase[] = [];
-    Object.entries(this).forEach(([key, value]) => {
+  public getAttributes(): AttributeBase[] {
+    const attrs: AttributeBase[] = [];
+    const prototype = Object.getPrototypeOf(this);
+    Object.entries(prototype).forEach(([key, value]) => {
       if (!key.startsWith('_')) {
-        attributes.push({
+        attrs.push({
           value,
           name: key,
-          type: Reflect.getMetadata('attribute:type', this, key)
+          type: Reflect.getMetadata('attribute:type', prototype, key)
         });
       }
     });
-    return attributes;
+    return attrs;
   }
 
   protected abstract validate(): void;

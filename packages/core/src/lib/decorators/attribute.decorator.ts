@@ -1,14 +1,12 @@
 import { Entity } from '../named-data-types/entity';
 
 export interface AttributeOptions {
-  name?: string;
   type: string;
 }
 
-export const Attribute = <T>({ type, name }: AttributeOptions) => {
+export const Attribute = <T>({ type }: AttributeOptions) => {
   return (target: Entity, key: string | symbol) => {
     let value: T;
-    key = name || key;
 
     Reflect.defineMetadata('attribute:type', type, target, key);
 
