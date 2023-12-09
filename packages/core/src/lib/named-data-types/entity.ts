@@ -1,5 +1,9 @@
+import { AttributeBase } from '../attribute';
 import { generateUUID } from '../utils';
 
+/**
+ * An entity identifier is a string of characters that is used to identify an entity data type.
+ */
 export type EntityId = string;
 
 /**
@@ -20,8 +24,26 @@ export abstract class Entity {
     return this._id;
   }
 
-  get createdAt(): Date { 
+  get createdAt(): Date {
     return this._createdAt;
+  }
+
+  public static getClassName(): string {
+    return this.name;
+  }
+
+  public static getAttributes(): AttributeBase[] {
+    const attributes: AttributeBase[] = [];
+    Object.entries(this).forEach(([key, value]) => {
+      if (!key.startsWith('_')) {
+        attributes.push({
+          value,
+          name: key,
+          type: Reflect.getMetadata('attribute:type', this, key)
+        });
+      }
+    });
+    return attributes;
   }
 
   protected abstract validate(): void;
