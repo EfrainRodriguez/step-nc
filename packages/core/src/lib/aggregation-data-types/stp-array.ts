@@ -40,10 +40,17 @@ export class STPArray<T> extends OrderedAggregation<T> {
     this.validate();
   }
 
+  /**
+   * Returns true if the array can contain empty elements.
+   */
   public get optional(): boolean {
     return this._optional;
   }
 
+  /**
+   * Sets whether the array can contain empty elements.
+   * @param optional Indicates whether the array can contain empty elements.
+   */
   public set optional(optional: boolean) {
     this._optional = optional;
     this.validate();

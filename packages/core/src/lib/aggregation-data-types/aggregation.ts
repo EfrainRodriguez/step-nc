@@ -41,28 +41,50 @@ export abstract class Aggregation<T> {
   protected _items: T[];
   protected readonly _size: number;
 
+  /**
+   * Creates an instance of aggregation.
+   * @param items The items of the aggregation.
+   */
   constructor(items: T[] = []) {
     this._items = items;
     this._size = this._items.length;
   }
 
+  /**
+   * Returns the number of items in the aggregation.
+   */
   public get size(): number {
     return this._size;
   }
 
+  /**
+   * Clears the aggregation.
+   */
   public clear(): void {
     this._items = [];
   }
 
+  /**
+   * Adds an item to the aggregation.
+   * @param item The item to add.
+   */
   public add(item: T): void {
     this._items.push(item);
     this.validate();
   }
 
+  /**
+   * Returns the specified item in the aggregation.
+   * @param item The item to get.
+   */
   public get(item: T): T | undefined {
     return this._items.find((i) => i === item);
   }
 
+  /**
+   * Removes the specified item from the aggregation.
+   * @param item The item to remove.
+   */
   public remove(item: T): void {
     const index = this._items.indexOf(item);
     if (index > -1) {
@@ -71,20 +93,34 @@ export abstract class Aggregation<T> {
     this.validate();
   }
 
+  /**
+   * Returns true if the aggregation contains the specified item.
+   * @param item The item to check.
+   */
   public has(item: T): boolean {
     return this._items.includes(item);
   }
 
+  /**
+   * Iterates over the items of the aggregation.
+   */
   public forEach(
     callbackfn: (value: T, index: number, array: T[]) => void
   ): void {
     this._items.forEach(callbackfn);
   }
 
+  /**
+   * Returns the items of the aggregation.
+   */
   public getItems(): T[] {
     return this._items;
   }
 
+  /**
+   * Sets the items of the aggregation.
+   * @param items The items to set.
+   */
   public setItems(items: T[]): void {
     this._items = items;
     this.validate();

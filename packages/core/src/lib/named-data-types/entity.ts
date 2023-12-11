@@ -46,7 +46,7 @@ export abstract class Entity {
 
   /**
    * Returns the attributes of the entity. The attributes are defined as public properties of the
-   * entity data type. The attribute type is defined by the decorator @attribute.
+   * entity data type. The attribute type is defined by the decorator @Attribute.
    */
   public getAttributes(): AttributeBase[] {
     const attrs: AttributeBase[] = [];

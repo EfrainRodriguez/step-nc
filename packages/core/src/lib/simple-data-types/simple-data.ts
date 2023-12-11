@@ -20,10 +20,17 @@ export abstract class SimpleData<T> {
     this._value = value;
   }
 
+  /**
+   * Returns the value of the simple data type.
+   */
   public get value(): T {
     return this._value;
   }
 
+  /**
+   * Sets the value of the simple data type.
+   * @param value The value of the simple data type originating from the JavaScript world.
+   */
   public set value(value: T) {
     this._value = value;
     this.validate();

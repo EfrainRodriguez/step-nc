@@ -19,10 +19,16 @@ export class STPSelect<T extends Entity> {
     this.validate();
   }
 
+  /**
+   * Returns the value of the select data type.
+   */
   get value(): T {
     return this._value;
   }
 
+  /**
+   * Sets the value of the select data type.
+   */
   set value(value: T) {
     this._value = value;
   }

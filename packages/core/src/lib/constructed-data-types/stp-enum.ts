@@ -17,10 +17,16 @@ export class STPEnum<T extends string> {
     this.validate();
   }
 
+  /**
+   * Returns the value of the enumeration data type.
+   */
   get value(): Uppercase<T> {
     return this._value;
   }
 
+  /**
+   * Sets the value of the enumeration data type.
+   */
   set value(value: Uppercase<T>) {
     this._value = value;
   }
