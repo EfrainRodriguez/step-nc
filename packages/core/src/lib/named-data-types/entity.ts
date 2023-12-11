@@ -15,23 +15,39 @@ export abstract class Entity {
   protected readonly _id: EntityId;
   protected readonly _createdAt: Date;
 
+  /**
+   * Creates an instance of entity. The entity identifier is generated automatically.
+   */
   constructor() {
     this._id = generateUUID();
     this._createdAt = new Date();
   }
 
+  /**
+   * Returns the entity identifier.
+   */
   get id(): EntityId {
     return this._id;
   }
 
+  /**
+   * Returns the creation date of the entity.
+   */
   get createdAt(): Date {
     return this._createdAt;
   }
 
+  /**
+   * Returns the name of the entity data type.
+   */
   public getClassName(): string {
     return this.constructor.name;
   }
 
+  /**
+   * Returns the attributes of the entity. The attributes are defined as public properties of the
+   * entity data type. The attribute type is defined by the decorator @attribute.
+   */
   public getAttributes(): AttributeBase[] {
     const attrs: AttributeBase[] = [];
     const prototype = Object.getPrototypeOf(this);
