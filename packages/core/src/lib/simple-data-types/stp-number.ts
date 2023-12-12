@@ -17,6 +17,18 @@ export class STPNumber extends SimpleData<number> {
     this.validate();
   }
 
+  /**
+   * This function returns a function for parsing a number to an instance of STPNumber.
+   * @returns A function for parsing a number.
+   */
+  public static parse() {
+    /**
+     * This function parses a number to an instance of STPNumber.
+     * @param value The number value to be parsed.
+     */
+    return (value: number) => new STPNumber(value);
+  }
+
   protected validate(): void {
     if (!isValidNumber(this._value)) {
       throw new InvalidDataTypeException(this._value, STPNumber.name);

@@ -31,6 +31,18 @@ export class STPEnum<T extends string> {
     this._value = value;
   }
 
+  /**
+   * This function returns a function for parsing a string to an instance of STPEnum.
+   * @returns A function for parsing a string.
+   */
+  public static parse<U extends string>() {
+    /**
+     * This function parses a string to an instance of STPEnum.
+     * @param value The string value to be parsed.
+     */
+    return (value: Uppercase<U>) => new STPEnum<U>(value);
+  }
+
   protected validate(): void {
     if (this._value !== this._value.toUpperCase()) {
       throw new InvalidDataTypeException(this._value, STPEnum.name);

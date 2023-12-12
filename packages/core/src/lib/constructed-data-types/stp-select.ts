@@ -33,6 +33,18 @@ export class STPSelect<T extends Entity> {
     this._value = value;
   }
 
+  /**
+   * This function returns a function for parsing an entity to an instance of STPSelect.
+   * @returns A function for parsing an entity.
+   */
+  public static parse<U extends Entity>() {
+    /**
+     * This function parses an entity to an instance of STPSelect.
+     * @param value The entity value to be parsed.
+     */
+    return (value: U) => new STPSelect<U>(value);
+  }
+
   protected validate(): void {
     if (!(this._value instanceof Entity)) {
       throw new InvalidDataTypeException(this._value, STPSelect.name);

@@ -44,6 +44,20 @@ export class STPBinary extends SimpleData<string> {
     );
   }
 
+  /**
+   * This function returns a function for parsing a string to an instance of STPBinary.
+   * @param options Options for parsing the string. The options are:
+   * - maxLength: The maximum length of the string.
+   * @returns A function for parsing a string to an instance of STPBinary.
+   */
+  public static parse(options?: { maxLength?: number }) {
+    /**
+     * This function parses a string to an instance of STPBinary.
+     * @param value The string value to be parsed.
+     */
+    return (value: string) => new STPBinary(value, options?.maxLength);
+  }
+
   protected validate(): void {
     if (typeof this._value !== 'string') {
       throw new InvalidDataTypeException(this._value, STPBinary.name);

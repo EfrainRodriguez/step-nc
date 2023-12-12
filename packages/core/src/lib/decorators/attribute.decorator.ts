@@ -4,18 +4,18 @@ import { Entity } from '../named-data-types/entity';
  * This interface defines the structure of parameters for the decorator @Attribute.
  */
 export interface AttributeOptions {
-  type: string;
+  parse: (value: any) => any;
 }
 
 /**
  * The decorator @Attribute is used to define the type of an attribute of an entity data type.
- * @param type The type of the attribute as string.
+ * @param parse The function used to parse the value of the attribute from JavaScript to STEP.
  */
-export const Attribute = <T>({ type }: AttributeOptions) => {
+export const Attribute = <T>({ parse }: AttributeOptions) => {
   return (target: Entity, key: string | symbol) => {
     let value: T;
 
-    Reflect.defineMetadata('attribute:type', type, target, key);
+    Reflect.defineMetadata('attribute:parse', parse, target, key);
 
     const getter = function (): T {
       return value;

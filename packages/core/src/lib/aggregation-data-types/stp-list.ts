@@ -34,6 +34,32 @@ export class STPList<T> extends OrderedAggregation<T> {
     this.validate();
   }
 
+  /**
+   * This function returns a function for parsing a list to an instance of STPList.
+   * @param parser The parser for the items.
+   * @param options Options for parsing the list. The options are:
+   * - lowerBound: The lower bound of the list.
+   * - upperBound: The upper bound of the list.
+   * - unique: Indicates whether the list can contain duplicate elements.
+   * @returns A function for parsing a list.
+   */
+  public static parse<T>(
+    parser: (value: T) => any,
+    options?: { lowerBound?: number; upperBound?: number; unique?: boolean }
+  ) {
+    /**
+     * This function parses a list to an instance of STPList.
+     * @param items The items to be parsed.
+     */
+    return (items: T[]) =>
+      new STPList<T>(
+        items.map((item) => parser(item)),
+        options?.lowerBound,
+        options?.upperBound,
+        options?.unique
+      );
+  }
+
   protected validate(): void {
     if (this._unique) {
       this._items = [...new Set(this._items)];

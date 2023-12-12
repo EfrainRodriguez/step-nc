@@ -16,6 +16,18 @@ export class STPBoolean extends SimpleData<boolean> {
     this.validate();
   }
 
+  /**
+   * This function returns a function for parsing a boolean value to an instance of STPBoolean.
+   * @returns A function for parsing a boolean value.
+   */
+  public static parse() {
+    /**
+     * This function parses a boolean value to an instance of STPBoolean.
+     * @param value The boolean value to be parsed.
+     */
+    return (value: boolean) => new STPBoolean(value);
+  }
+
   protected validate(): void {
     if (typeof this._value !== 'boolean') {
       throw new InvalidDataTypeException(this._value, STPBoolean.name);

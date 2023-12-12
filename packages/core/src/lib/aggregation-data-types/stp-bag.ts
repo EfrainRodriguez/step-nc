@@ -27,6 +27,30 @@ export class STPBag<T> extends UnorderedAggregation<T> {
     this.validate();
   }
 
+  /**
+   * This function returns a function for parsing a bag to an instance of STPBag.
+   * @param parser The parser for the items.
+   * @param options Options for parsing the bag. The options are:
+   * - lowerBound: The lower bound of the bag.
+   * - upperBound: The upper bound of the bag.
+   * @returns A function for parsing a bag.
+   */
+  public static parse<T>(
+    parser: (value: T) => any,
+    options?: { lowerBound?: number; upperBound?: number }
+  ) {
+    /**
+     * This function parses a bag to an instance of STPBag.
+     * @param items The items to be parsed.
+     */
+    return (items: T[]) =>
+      new STPBag<T>(
+        items.map((item) => parser(item)),
+        options?.lowerBound,
+        options?.upperBound
+      );
+  }
+
   protected validate(): void {
     if (this._lowerBound !== undefined) {
       if (!isValidAggregationLowerBound(this._lowerBound)) {

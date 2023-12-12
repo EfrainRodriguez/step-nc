@@ -25,6 +25,20 @@ export class STPString extends SimpleData<string> {
     this.validate();
   }
 
+  /**
+   * This function returns a function for parsing a string to an instance of STPString.
+   * @param options Options for parsing the string. The options are:
+   * - maxLength: The maximum length of the string.
+   * @returns A function for parsing a string.
+   */
+  public static parse(options?: { maxLength?: number }) {
+    /**
+     * This function parses a string to an instance of STPString.
+     * @param value The string value to be parsed.
+     */
+    return (value: string) => new STPString(value, options?.maxLength);
+  }
+
   protected validate(): void {
     if (typeof this._value !== 'string') {
       throw new InvalidDataTypeException(this._value, STPString.name);

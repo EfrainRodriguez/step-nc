@@ -24,6 +24,20 @@ export class STPReal extends SimpleData<number> {
     }
   }
 
+  /**
+   * This function returns a function for parsing a number to an instance of STPReal.
+   * @param options Options for parsing the number. The options are:
+   * - precision: The precision of the real value.
+   * @returns A function for parsing a number.
+   */
+  public static parse(options?: { precision?: number }) {
+    /**
+     * This function parses a number to an instance of STPReal.
+     * @param value The number value to be parsed.
+     */
+    return (value: number) => new STPReal(value, options?.precision);
+  }
+
   protected validate(): void {
     if (!isValidNumber(this._value)) {
       throw new InvalidDataTypeException(this._value, STPReal.name);

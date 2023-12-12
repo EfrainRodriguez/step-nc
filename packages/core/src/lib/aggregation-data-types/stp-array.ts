@@ -56,6 +56,34 @@ export class STPArray<T> extends OrderedAggregation<T> {
     this.validate();
   }
 
+  /**
+   * This function returns a function for parsing an array to an instance of STPArray.
+   * @param parser A function for parsing an item to the type of the array.
+   * @param options Options for parsing the array. The options are:
+   * - lowerBound: The lower bound of the array.
+   * - upperBound: The upper bound of the array.
+   * - unique: Indicates whether the array can contain duplicate elements.
+   * - optional: Indicates whether the array can contain empty elements.
+   * @returns A function for parsing an array.
+   */
+  public static parse<T>(
+    parser: (value: T) => any,
+    options: { lowerBound: number; upperBound: number; unique?: boolean; optional?: boolean }
+  ) {
+    /**
+     * This function parses an array to an instance of STPArray.
+     * @param items The array to be parsed.
+     */
+    return (items: T[]) =>
+      new STPArray<T>(
+        items.map((item) => parser(item)),
+        options.lowerBound,
+        options.upperBound,
+        options.unique,
+        options.optional
+      );
+  }
+
   protected validate(): void {
     if (this._unique) {
       this._items = [...new Set(this._items)];

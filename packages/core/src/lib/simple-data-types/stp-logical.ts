@@ -22,6 +22,18 @@ export class STPLogical extends SimpleData<LogicalBase> {
     this.validate();
   }
 
+  /**
+   * This function returns a function for parsing a boolean or undefined value to an instance of STPLogical.
+   * @returns A function for parsing a boolean or undefined value.
+   */
+  public static parse() {
+    /**
+     * This function parses a boolean or undefined value to an instance of STPLogical.
+     * @param value The boolean or undefined value to be parsed.
+     */
+    return (value: LogicalBase) => new STPLogical(value);
+  }
+
   protected validate(): void {
     if (typeof this._value !== 'boolean' && this._value !== undefined) {
       throw new InvalidDataTypeException(this._value, STPLogical.name);
