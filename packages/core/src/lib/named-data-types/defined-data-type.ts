@@ -13,5 +13,5 @@
  *
  * is mapped to the following TypeScript code:
  *
- * type Volume = STPReal;
+ * type Volume = RealType;
  */

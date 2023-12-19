@@ -1,4 +1,12 @@
 /**
+ * This interface represents the properties of an aggregation data type.
+ * - values: The values of the aggregation data type.
+ */
+export interface AggregationTypeProps<T> {
+  values?: T[];
+}
+
+/**
  * This abstract class is used to represent the aggregation data types defined in ISO 10303-11.
  *
  * Aggregation data types have as their domains collections of values of a given base data type (see
@@ -35,23 +43,24 @@
  * EXAMPLE 5 One could define a LIST[1:3] OF ARRAY[5:10] OF INTEGER, which would in effect have
  * two dimensions
  *
- * @see ISO-10303-11:2004 8.2 Aggregation data types
+ * @see ISO-10303-11:2004 section 8.2 Aggregation data types
  */
-export abstract class Aggregation<T> {
-  protected _items: T[];
+abstract class AggregationType<T> {
+  protected _values: T[];
   protected readonly _size: number;
 
   /**
    * Creates an instance of aggregation.
-   * @param items The items of the aggregation.
+   * @param props The properties of the aggregation data type. The properties are:
+   * - values: The values of the aggregation data type.
    */
-  constructor(items: T[] = []) {
-    this._items = items;
-    this._size = this._items.length;
+  constructor(props: AggregationTypeProps<T>) {
+    this._values = props?.values ?? [];
+    this._size = this._values.length;
   }
 
   /**
-   * Returns the number of items in the aggregation.
+   * Returns the number of values in the aggregation.
    */
   public get size(): number {
     return this._size;
@@ -61,70 +70,72 @@ export abstract class Aggregation<T> {
    * Clears the aggregation.
    */
   public clear(): void {
-    this._items = [];
+    this._values = [];
   }
 
   /**
-   * Adds an item to the aggregation.
-   * @param item The item to add.
+   * Adds an value to the aggregation.
+   * @param value The value to add.
    */
-  public add(item: T): void {
-    this._items.push(item);
+  public add(value: T): void {
+    this._values.push(value);
     this.validate();
   }
 
   /**
-   * Returns the specified item in the aggregation.
-   * @param item The item to get.
+   * Returns the specified value in the aggregation.
+   * @param value The value to get.
    */
-  public get(item: T): T | undefined {
-    return this._items.find((i) => i === item);
+  public get(value: T): T | undefined {
+    return this._values.find((i) => i === value);
   }
 
   /**
-   * Removes the specified item from the aggregation.
-   * @param item The item to remove.
+   * Removes the specified value from the aggregation.
+   * @param value The value to remove.
    */
-  public remove(item: T): void {
-    const index = this._items.indexOf(item);
+  public remove(value: T): void {
+    const index = this._values.indexOf(value);
     if (index > -1) {
-      this._items.splice(index, 1);
+      this._values.splice(index, 1);
     }
     this.validate();
   }
 
   /**
-   * Returns true if the aggregation contains the specified item.
-   * @param item The item to check.
+   * Returns true if the aggregation contains the specified value.
+   * @param value The value to check.
    */
-  public has(item: T): boolean {
-    return this._items.includes(item);
+  public has(value: T): boolean {
+    return this._values.includes(value);
   }
 
   /**
-   * Iterates over the items of the aggregation.
+   * Iterates over the values of the aggregation.
    */
   public forEach(
     callbackfn: (value: T, index: number, array: T[]) => void
   ): void {
-    this._items.forEach(callbackfn);
+    this._values.forEach(callbackfn);
   }
 
   /**
-   * Returns the items of the aggregation.
+   * Returns the values of the aggregation.
    */
-  public getItems(): T[] {
-    return this._items;
+  public getValues(): T[] {
+    return this._values;
   }
 
   /**
-   * Sets the items of the aggregation.
-   * @param items The items to set.
+   * Sets the values of the aggregation.
+   * @param values The values to set.
    */
-  public setItems(items: T[]): void {
-    this._items = items;
+  public setValues(values: T[]): void {
+    this._values = values;
     this.validate();
   }
 
   protected abstract validate(): void;
 }
+
+export default AggregationType;

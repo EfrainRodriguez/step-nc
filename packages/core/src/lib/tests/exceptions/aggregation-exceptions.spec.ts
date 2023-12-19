@@ -1,37 +1,27 @@
 import {
-  AggregationBelowLowerBoundException,
-  AggregationExceededUpperBoundException,
-  AggregationInvalidBoundException,
-  AGGREGATION_BELOW_LOWER_BOUND_EXCEPTION,
-  AGGREGATION_EXCEEDED_UPPER_BOUND_EXCEPTION,
-  AGGREGATION_INVALID_BOUND_EXCEPTION
+  AggregationTypeLowerIndexMustBeLessThanUpperIndexException,
+  AggregationTypeInvalidBoundException,
+  AGGREGATION_TYPE_LOWER_INDEX_MUST_BE_LESS_THAN_UPPER_INDEX_EXCEPTION,
+  AGGREGATION_TYPE_INVALID_BOUND_EXCEPTION
 } from '../../exceptions';
 
-describe('AggregationBelowLowerBoundException', () => {
+describe('AggregationTypeLowerIndexMustBeLessThanUpperIndexException', () => {
   it('should create an instance with the correct message and code', () => {
-    const exception = new AggregationBelowLowerBoundException(5);
+    const exception =
+      new AggregationTypeLowerIndexMustBeLessThanUpperIndexException(5, 4);
     expect(exception.message).toBe(
-      'The aggregation is below the lower bound of 5.'
+      'The lower bound 5 must be less than the upper bound 4.'
     );
-    expect(exception.code).toBe(AGGREGATION_BELOW_LOWER_BOUND_EXCEPTION);
+    expect(exception.code).toBe(
+      AGGREGATION_TYPE_LOWER_INDEX_MUST_BE_LESS_THAN_UPPER_INDEX_EXCEPTION
+    );
   });
 });
 
-describe('AggregationExceededUpperBoundException', () => {
+describe('AggregationTypeInvalidBoundException', () => {
   it('should create an instance with the correct message and code', () => {
-    const exception = new AggregationExceededUpperBoundException(10);
-    expect(exception.message).toBe(
-      'The aggregation exceeds the upper bound of 10.'
-    );
-    expect(exception.code).toBe(AGGREGATION_EXCEEDED_UPPER_BOUND_EXCEPTION);
-  });
-});
-
-describe('AggregationInvalidBoundException', () => {
-  it('should create an instance with the correct message and code', () => {
-    const exception = new AggregationInvalidBoundException(5, true);
+    const exception = new AggregationTypeInvalidBoundException(5, true);
     expect(exception.message).toBe('The lower bound 5 is invalid.');
-    expect(exception.code).toBe(AGGREGATION_INVALID_BOUND_EXCEPTION);
+    expect(exception.code).toBe(AGGREGATION_TYPE_INVALID_BOUND_EXCEPTION);
   });
 });
-
