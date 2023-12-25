@@ -78,4 +78,32 @@ describe('ListType', () => {
     newListType.removeAt(1);
     expect(newListType.getValues()).toEqual([1, 2, 3]);
   });
+
+  test('should validate out of bounds', () => {
+    const newListType = new ListType<number>({
+      values: [1, 2, 3],
+      lowerIndex: 0,
+      upperIndex: 5
+    });
+    expect(() => newListType.getAt(-1)).toThrow(
+      AggregationTypeOutOfBoundsException
+    );
+    expect(() => newListType.getAt(6)).toThrow(
+      AggregationTypeOutOfBoundsException
+    );
+  });
+
+  test('should validate min and max length', () => {
+    const newListType = new ListType<number>({
+      values: [1, 2, 3],
+      lowerIndex: 3,
+      upperIndex: 5
+    });
+    expect(() => newListType.setValues([0, 1])).toThrow(
+      AggregationTypeInvalidBoundException
+    );
+    expect(() => newListType.setValues([0, 1, 2, 3, 4, 5])).toThrow(
+      AggregationTypeInvalidBoundException
+    );
+  });
 });

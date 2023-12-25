@@ -48,4 +48,18 @@ describe('BagType', () => {
     newBagType.remove(1);
     expect(newBagType.getValues()).toEqual([2]);
   });
+
+  test('should validate min and max length', () => {
+    const newBagType = new BagType<number>({
+      values: [1, 2, 3],
+      lowerIndex: 3,
+      upperIndex: 5
+    });
+    expect(() => newBagType.setValues([0, 1])).toThrow(
+      AggregationTypeInvalidBoundException
+    );
+    expect(() => newBagType.setValues([0, 1, 2, 3, 4, 5])).toThrow(
+      AggregationTypeInvalidBoundException
+    );
+  });
 });

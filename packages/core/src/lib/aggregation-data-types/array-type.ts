@@ -131,7 +131,8 @@ class ArrayType<T> extends AggregationType<T> {
    */
   public insertAt(index: number, value: T): void {
     this.validateOfBounds(index);
-    this._values.splice(index, 0, value);
+    const realIndex = this.getRealIndex(index);
+    this._values.splice(realIndex, 0, value);
     this.validate();
   }
 
@@ -141,7 +142,8 @@ class ArrayType<T> extends AggregationType<T> {
    */
   public removeAt(index: number): void {
     this.validateOfBounds(index);
-    this._values.splice(index, 1);
+    const realIndex = this.getRealIndex(index);
+    this._values.splice(realIndex, 1);
     this.validate();
   }
 
@@ -151,7 +153,8 @@ class ArrayType<T> extends AggregationType<T> {
    */
   public getAt(index: number): T {
     this.validateOfBounds(index);
-    return this._values[index];
+    const realIndex = this.getRealIndex(index);
+    return this._values[realIndex];
   }
 
   // /**
@@ -186,9 +189,13 @@ class ArrayType<T> extends AggregationType<T> {
   // }
 
   private validateOfBounds(index: number): void {
-    if (index < 0 || index >= this._values.length) {
+    if (index < this._lowerIndex || index > this._upperIndex) {
       throw new AggregationTypeOutOfBoundsException(index);
     }
+  }
+
+  private getRealIndex(index: number): number {
+    return index - this._lowerIndex;
   }
 
   protected validate(): void {
@@ -198,10 +205,10 @@ class ArrayType<T> extends AggregationType<T> {
     if (!this._optionalFlag) {
       this._values = this._values.filter((value) => value !== undefined);
     }
-    if (!isValidAggregationIndex(this._lowerIndex) || this._lowerIndex < 0) {
+    if (!isValidAggregationIndex(this._lowerIndex)) {
       throw new AggregationTypeInvalidBoundException(this._lowerIndex, true);
     }
-    if (!isValidAggregationIndex(this._upperIndex) || this._upperIndex < 0) {
+    if (!isValidAggregationIndex(this._upperIndex)) {
       throw new AggregationTypeInvalidBoundException(this._upperIndex, false);
     }
     if (this._lowerIndex > this._upperIndex) {
@@ -209,12 +216,6 @@ class ArrayType<T> extends AggregationType<T> {
         this._lowerIndex,
         this._upperIndex
       );
-    }
-    if (this._values.length < this._lowerIndex) {
-      throw new AggregationTypeInvalidBoundException(this._lowerIndex, true);
-    }
-    if (this._values.length > this._upperIndex) {
-      throw new AggregationTypeInvalidBoundException(this._upperIndex, false);
     }
   }
 }

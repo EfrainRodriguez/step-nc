@@ -48,4 +48,18 @@ describe('SetType', () => {
     newSetType.remove(1);
     expect(newSetType.getValues()).toEqual([2]);
   });
+
+  test('should validate min and max length', () => {
+    const newSetType = new SetType<number>({
+      values: [1, 2, 3],
+      lowerIndex: 3,
+      upperIndex: 5
+    });
+    expect(() => newSetType.setValues([0, 1])).toThrow(
+      AggregationTypeInvalidBoundException
+    );
+    expect(() => newSetType.setValues([0, 1, 2, 3, 4, 5])).toThrow(
+      AggregationTypeInvalidBoundException
+    );
+  });
 });

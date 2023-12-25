@@ -110,7 +110,7 @@ class ListType<T> extends VariableSizeAggregationType<T> {
   // }
 
   private validateOfBounds(index: number): void {
-    if (index < 0 || index >= this._values.length) {
+    if (index < 0 || index >= (this.upperIndex ?? this._values.length)) {
       throw new AggregationTypeOutOfBoundsException(index);
     }
   }

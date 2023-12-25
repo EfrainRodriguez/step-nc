@@ -1,3 +1,6 @@
+/* eslint-disable @nx/enforce-module-boundaries */
+import 'reflect-metadata';
+
 import { AttributeBase } from '../interfaces';
 import { generateUUID } from '../utils';
 

@@ -8,7 +8,7 @@ import {
 describe('ArrayType', () => {
   const newArrayType = new ArrayType<number>({
     values: [1, 2, 3],
-    lowerIndex: 2,
+    lowerIndex: 0,
     upperIndex: 5,
     uniqueFlag: false,
     optionalFlag: true
@@ -103,7 +103,7 @@ describe('ArrayType', () => {
   test('should insert and remove at index', () => {
     const newArrayType = new ArrayType<number>({
       values: [1, 2, 3],
-      lowerIndex: 2,
+      lowerIndex: 0,
       upperIndex: 5,
       uniqueFlag: false,
       optionalFlag: true
@@ -117,13 +117,27 @@ describe('ArrayType', () => {
   test('should validate out of bounds', () => {
     const newArrayType = new ArrayType<number>({
       values: [1, 2, 3],
-      lowerIndex: 2,
+      lowerIndex: 0,
       upperIndex: 5,
       uniqueFlag: false,
       optionalFlag: true
     });
-    expect(() => newArrayType.getAt(5)).toThrow(AggregationTypeOutOfBoundsException);
-    expect(() => newArrayType.insertAt(9, 1)).toThrow(AggregationTypeOutOfBoundsException);
-    expect(() => newArrayType.removeAt(5)).toThrow(AggregationTypeOutOfBoundsException);
+    expect(() => newArrayType.getAt(6)).toThrow(AggregationTypeOutOfBoundsException);
+    expect(() => newArrayType.insertAt(6, 1)).toThrow(AggregationTypeOutOfBoundsException);
+    expect(() => newArrayType.removeAt(6)).toThrow(AggregationTypeOutOfBoundsException);
+  });
+
+  test('should handle negative index', () => {
+    const newArrayType = new ArrayType<number>({
+      values: [1, 2, 3],
+      lowerIndex: -2,
+      upperIndex: 5,
+      uniqueFlag: false,
+      optionalFlag: true
+    });
+    expect(newArrayType.getAt(-2)).toEqual(1);
+    expect(newArrayType.getAt(0)).toEqual(3);
+    expect(() => newArrayType.getAt(-3)).toThrow(AggregationTypeOutOfBoundsException);
+    expect(() => newArrayType.getAt(6)).toThrow(AggregationTypeOutOfBoundsException);
   });
 });

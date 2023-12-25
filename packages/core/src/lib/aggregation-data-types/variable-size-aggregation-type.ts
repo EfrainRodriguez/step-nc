@@ -71,24 +71,36 @@ abstract class VariableSizeAggregationType<T> extends AggregationType<T> {
   }
 
   protected validate(): void {
-    if (this.lowerIndex !== undefined) {
-      if (!isValidAggregationIndex(this.lowerIndex)) {
-        throw new AggregationTypeInvalidBoundException(this.lowerIndex, true);
+    if (this._lowerIndex !== undefined) {
+      if (!isValidAggregationIndex(this._lowerIndex)) {
+        throw new AggregationTypeInvalidBoundException(this._lowerIndex, true);
       }
     }
 
-    if (this.upperIndex !== undefined) {
-      if (!isValidAggregationIndex(this.upperIndex)) {
-        throw new AggregationTypeInvalidBoundException(this.upperIndex, false);
+    if (this._upperIndex !== undefined) {
+      if (!isValidAggregationIndex(this._upperIndex)) {
+        throw new AggregationTypeInvalidBoundException(this._upperIndex, false);
       }
     }
 
-    if (this.lowerIndex !== undefined && this.upperIndex !== undefined) {
-      if (this.lowerIndex > this.upperIndex) {
+    if (this._lowerIndex !== undefined && this._upperIndex !== undefined) {
+      if (this._lowerIndex > this._upperIndex) {
         throw new AggregationTypeLowerIndexMustBeLessThanUpperIndexException(
-          this.lowerIndex,
-          this.upperIndex
+          this._lowerIndex,
+          this._upperIndex
         );
+      }
+    }
+
+    if (this._lowerIndex !== undefined) {
+      if (this._values.length < this._lowerIndex) {
+        throw new AggregationTypeInvalidBoundException(this._lowerIndex, true);
+      }
+    }
+
+    if (this._upperIndex !== undefined) {
+      if (this._values.length > this._upperIndex) {
+        throw new AggregationTypeInvalidBoundException(this._upperIndex, false);
       }
     }
   }
