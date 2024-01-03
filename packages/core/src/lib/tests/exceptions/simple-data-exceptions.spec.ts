@@ -1,35 +1,41 @@
 import {
-  SimpleDataInvalidValueException,
-  SimpleDataMaxLengthExceededException,
-  SimpleDataRealPrecisionNotAllowedException,
-  SimpleDataStringMaxLengthNotAllowedException,
-  SIMPLE_DATA_INVALID_VALUE_EXCEPTION,
-  SIMPLE_DATA_MAX_LENGTH_EXCEEDED_EXCEPTION,
+  InvalidDataTypeException,
+  SimpleTypeInvalidExpectedStringWidthException,
+  SimpleTypeRealPrecisionNotAllowedException,
+  SimpleTypeStringWidthNotAllowedException,
+  INVALID_DATA_TYPE_EXCEPTION,
+  SIMPLE_DATA_INVALID_EXPECTED_STRING_WIDTH_EXCEPTION,
   SIMPLE_DATA_REAL_PRECISION_NOT_ALLOWED_EXCEPTION,
-  SIMPLE_DATA_STRING_MAX_LENGTH_NOT_ALLOWED_EXCEPTION
+  SIMPLE_DATA_STRING_WIDTH_NOT_ALLOWED_EXCEPTION
 } from '../../exceptions';
 
-describe('SimpleDataInvalidValueException', () => {
+describe('InvalidDataTypeException', () => {
   it('should create an instance with the correct message and code', () => {
-    const exception = new SimpleDataInvalidValueException('invalid', 'Type');
+    const exception = new InvalidDataTypeException('invalid', 'Type');
     expect(exception.message).toBe('The value invalid is not a valid Type.');
-    expect(exception.code).toBe(SIMPLE_DATA_INVALID_VALUE_EXCEPTION);
+    expect(exception.code).toBe(INVALID_DATA_TYPE_EXCEPTION);
   });
 });
 
-describe('SimpleDataMaxLengthExceededException', () => {
+describe('SimpleTypeInvalidExpectedStringWidthException', () => {
   it('should create an instance with the correct message and code', () => {
-    const exception = new SimpleDataMaxLengthExceededException('value', 10);
-    expect(exception.message).toBe(
-      'The value value exceeds the maximum length of 10.'
+    const exception = new SimpleTypeInvalidExpectedStringWidthException(
+      'value',
+      10,
+      'type'
     );
-    expect(exception.code).toBe(SIMPLE_DATA_MAX_LENGTH_EXCEEDED_EXCEPTION);
+    expect(exception.message).toBe(
+      'The string width 5 does not match the expected width 10 of the current type type.'
+    );
+    expect(exception.code).toBe(
+      SIMPLE_DATA_INVALID_EXPECTED_STRING_WIDTH_EXCEPTION
+    );
   });
 });
 
-describe('SimpleDataRealPrecisionNotAllowedException', () => {
+describe('SimpleTypeRealPrecisionNotAllowedException', () => {
   it('should create an instance with the correct message and code', () => {
-    const exception = new SimpleDataRealPrecisionNotAllowedException(5);
+    const exception = new SimpleTypeRealPrecisionNotAllowedException(5);
     expect(exception.message).toBe('The precision 5 is not allowed.');
     expect(exception.code).toBe(
       SIMPLE_DATA_REAL_PRECISION_NOT_ALLOWED_EXCEPTION
@@ -37,12 +43,10 @@ describe('SimpleDataRealPrecisionNotAllowedException', () => {
   });
 });
 
-describe('SimpleDataStringMaxLengthNotAllowedException', () => {
+describe('SimpleTypeStringWidthNotAllowedException', () => {
   it('should create an instance with the correct message and code', () => {
-    const exception = new SimpleDataStringMaxLengthNotAllowedException(15);
+    const exception = new SimpleTypeStringWidthNotAllowedException(15);
     expect(exception.message).toBe('The maximum length 15 is not allowed.');
-    expect(exception.code).toBe(
-      SIMPLE_DATA_STRING_MAX_LENGTH_NOT_ALLOWED_EXCEPTION
-    );
+    expect(exception.code).toBe(SIMPLE_DATA_STRING_WIDTH_NOT_ALLOWED_EXCEPTION);
   });
 });

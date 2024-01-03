@@ -1,13 +1,12 @@
+import * as _ from 'lodash';
+
 export const isValidNumber = (value: number): boolean => {
-  if (typeof value !== 'number' || isNaN(value) || !isFinite(value)) {
-    return false;
-  }
-  return true;
+  return _.isNumber(value) && isFinite(value) && !isNaN(value);
 };
 
 export const isValidRealPrecision = (precision: number): boolean => {
   const minPrecision = 0;
-  const maxPrecision = 14;
+  const maxPrecision = 14; // max decimal digits in a number in JS
 
   return (
     isValidNumber(precision) &&
@@ -25,22 +24,6 @@ export const isValidStringMaxLength = (length: number): boolean => {
   );
 };
 
-export const isValidAggregationLowerBound = (lowerBound: number): boolean => {
-  const minLowerBound = 0;
-
-  return (
-    isValidNumber(lowerBound) &&
-    Number.isInteger(lowerBound) &&
-    lowerBound >= minLowerBound
-  );
-};
-
-export const isValidAggregationUpperBound = (upperBound: number): boolean => {
-  const minUpperBound = 1;
-
-  return (
-    isValidNumber(upperBound) &&
-    Number.isInteger(upperBound) &&
-    upperBound >= minUpperBound
-  );
+export const isValidAggregationIndex = (lowerBound: number): boolean => {
+  return isValidNumber(lowerBound) && Number.isInteger(lowerBound);
 };

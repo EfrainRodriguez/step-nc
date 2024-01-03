@@ -1,51 +1,36 @@
 import { ExceptionBase } from './base.exception';
 import {
-  SIMPLE_DATA_INVALID_VALUE_EXCEPTION,
-  SIMPLE_DATA_MAX_LENGTH_EXCEEDED_EXCEPTION,
+  SIMPLE_DATA_INVALID_EXPECTED_STRING_WIDTH_EXCEPTION,
   SIMPLE_DATA_REAL_PRECISION_NOT_ALLOWED_EXCEPTION,
-  SIMPLE_DATA_STRING_MAX_LENGTH_NOT_ALLOWED_EXCEPTION
+  SIMPLE_DATA_STRING_WIDTH_NOT_ALLOWED_EXCEPTION
 } from './codes.exception';
 
 /**
- * This exception is thrown when a value is invalid.
+ * This exception is thrown when a string value has a length that does not match the expected length.
  */
-export class SimpleDataInvalidValueException extends ExceptionBase {
-  code = SIMPLE_DATA_INVALID_VALUE_EXCEPTION;
+export class SimpleTypeInvalidExpectedStringWidthException extends ExceptionBase {
+  code = SIMPLE_DATA_INVALID_EXPECTED_STRING_WIDTH_EXCEPTION;
 
   /**
-   * Initializes a new instance of the class InvalidValueException.
-   * @param value The invalid value.
-   * @param type The type of the value.
-   */
-  constructor(value: unknown, type: string) {
-    super(`The value ${String(value)} is not a valid ${type}.`);
-  }
-}
-
-/**
- * This exception is thrown when a value exceeds the maximum length.
- */
-export class SimpleDataMaxLengthExceededException extends ExceptionBase {
-  code = SIMPLE_DATA_MAX_LENGTH_EXCEEDED_EXCEPTION;
-
-  /**
-   * Initializes a new instance of the class MaxLengthExceededException.
+   * Initializes a new instance of the class SimpleTypeInvalidExpectedStringWidthException.
    * @param value The value that exceeds the maximum length.
-   * @param maxLength The maximum length.
+   * @param width The maximum length of the string.
    */
-  constructor(value: string, maxLength: number) {
-    super(`The value ${value} exceeds the maximum length of ${maxLength}.`);
+  constructor(value: string, width: number, type: string) {
+    super(
+      `The string width ${value?.length} does not match the expected width ${width} of the current type ${type}.`
+    );
   }
 }
 
 /**
  * This exception is thrown when a real value has a precision that is not allowed.
  */
-export class SimpleDataRealPrecisionNotAllowedException extends ExceptionBase {
+export class SimpleTypeRealPrecisionNotAllowedException extends ExceptionBase {
   code = SIMPLE_DATA_REAL_PRECISION_NOT_ALLOWED_EXCEPTION;
 
   /**
-   * Initializes a new instance of the class RealPrecisionNotAllowedException.
+   * Initializes a new instance of the class SimpleTypeRealPrecisionNotAllowedException.
    * @param precision The precision value.
    */
   constructor(precision: number) {
@@ -54,16 +39,16 @@ export class SimpleDataRealPrecisionNotAllowedException extends ExceptionBase {
 }
 
 /**
- * This exception is thrown when a string value has a length that is not allowed.
+ * This exception is thrown when a string value has a width that is not allowed.
  */
-export class SimpleDataStringMaxLengthNotAllowedException extends ExceptionBase {
-  code = SIMPLE_DATA_STRING_MAX_LENGTH_NOT_ALLOWED_EXCEPTION;
+export class SimpleTypeStringWidthNotAllowedException extends ExceptionBase {
+  code = SIMPLE_DATA_STRING_WIDTH_NOT_ALLOWED_EXCEPTION;
 
   /**
-   * Initializes a new instance of the class StringMaxLengthNotAllowedException.
-   * @param maxLength The maximum length.
+   * Initializes a new instance of the class SimpleTypeStringWidthNotAllowedException.
+   * @param width The maximum length of the string.
    */
-  constructor(maxLength: number) {
-    super(`The maximum length ${maxLength} is not allowed.`);
+  constructor(width: number) {
+    super(`The maximum length ${width} is not allowed.`);
   }
 }
