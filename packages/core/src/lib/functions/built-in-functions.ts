@@ -242,7 +242,7 @@ export const loBound = <T>(v: AggregationType<T>): IntegerType => {
     return new IntegerType({ value: v.lowerIndex });
   } else if (v instanceof VariableSizeAggregationType) {
     return new IntegerType({
-      value: v.lowerIndex as number
+      value: v.lowerIndex === undefined ? 0 : v.lowerIndex
     });
   }
   throw new InvalidDataTypeException(
@@ -250,3 +250,75 @@ export const loBound = <T>(v: AggregationType<T>): IntegerType => {
     `Invalid data type for lobound function: ${v.constructor.name}`
   );
 };
+
+/**
+ * 15.14 Log - arithmetic function
+ * FUNCTION LOG ( V:NUMBER ) : REAL;
+ * The log function returns the natural logarithm of a number.
+ * Parameters : V is a number.
+ * Result : A real number which is the natural logarithm of V.
+ * Conditions : V > 0.0
+ * EXAMPLE LOG ( 4.5 ) --> 1.504077...E0
+ * @see ISO-10303-11:2004 section 15.14 Log - arithmetic function
+ */
+export const log = (v: NumberType): RealType =>
+  new RealType({ value: Math.log(v.value) });
+
+/**
+ * 15.15 Log2 - arithmetic function
+ * FUNCTION LOG2 ( V:NUMBER ) : REAL;
+ * The log2 function returns the base two logarithm of a number.
+ * Parameters : V is a number.
+ * Result : A real number which is the base two logarithm of V.
+ * Conditions : V > 0.0
+ * EXAMPLE LOG2 ( 8 ) --> 3.00...E0
+ * @see ISO-10303-11:2004 section 15.15 Log2 - arithmetic function
+ */
+export const log2 = (v: NumberType): RealType =>
+  new RealType({ value: Math.log2(v.value) });
+
+/**
+ * 15.16 Log10 - arithmetic function
+ * FUNCTION LOG10 ( V:NUMBER ) : REAL;
+ * The log10 function returns the base ten logarithm of a number.
+ * Parameters : V is a number.
+ * Result : A real number which is the base ten logarithm of V.
+ * Conditions : V > 0.0
+ * EXAMPLE LOG10 ( 10 ) --> 1.00...E0
+ * @see ISO-10303-11:2004 section 15.16 Log10 - arithmetic function
+ */
+export const log10 = (v: NumberType): RealType =>
+  new RealType({ value: Math.log10(v.value) });
+
+/**
+ * 15.17 LoIndex - arithmetic function
+ * FUNCTION LOINDEX ( V:AGGREGATE OF GENERIC ) : INTEGER;
+ * The loindex function returns the lower index of an aggregate value.
+ * Parameters : V is an aggregate value
+ * Result :
+ * a) When V is an array the returned value is the declared lower index.
+ * b) When V is a bag, list or set, the returned value is 1 (one).
+ * EXAMPLE Usage of loindex function on nested aggregate values.
+ * LOCAL
+ * a : ARRAY[-3:19] OF SET[2:4] OF LIST[0:?] OF INTEGER;
+ * h1, h2, h3 : INTEGER;
+ * END_LOCAL;
+ * ...
+ * h1 := LOINDEX(a); -- =-3 (lower bound of array)
+ * h2 := LOINDEX(a[-3]); -- = 1 (for set)
+ * h3 := LOINDEX(a[-3][1]); -- = 1 (for list)
+ * @see ISO-10303-11:2004 section 15.17 LoIndex - arithmetic function
+ */
+export const loIndex = <T>(v: AggregationType<T>): IntegerType => {
+  if (v instanceof ArrayType) {
+    return new IntegerType({ value: v.lowerIndex });
+  } else if (v instanceof VariableSizeAggregationType) {
+    return new IntegerType({
+      value: 1
+    });
+  }
+  throw new InvalidDataTypeException(
+    v,
+    `Invalid data type for loindex function: ${v.constructor.name}`
+  );
+}
