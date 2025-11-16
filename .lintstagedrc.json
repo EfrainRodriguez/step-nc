@@ -1,0 +1,3 @@
+{
+  "*.ts": ["eslint --fix", "pnpm typecheck --noEmit"]
+}

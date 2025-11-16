@@ -1,0 +1,57 @@
+{
+  "name": "step-nc",
+  "version": "0.1.0",
+  "description": "An open-source, extensible, and runtime-friendly Javascript/Typescript library for handling STEP and STEP-NC models.",
+  "author": "Efrain Rodriguez",
+  "license": "MIT",
+  "packageManager": "pnpm@10.18.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EfrainRodriguez/step-nc.git"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "clean": "pnpm -r clean",
+    "dev": "pnpm -r dev",
+    "lint": "eslint . --ext .ts --fix",
+    "format": "prettier --write .",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "prerelease": "pnpm run typecheck && pnpm run lint && pnpm run test",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish",
+    "prepare": "husky install"
+  },
+  "keywords": [
+    "STEP-NC",
+    "ISO 10303",
+    "AP 238",
+    "ISO 14649"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@types/node": "^24.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "@vitest/coverage-v8": "^4.0.9",
+    "changesets": "^1.0.2",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "husky": "^8.0.0",
+    "lint-staged": "^16.2.6",
+    "prettier": "^3.6.2",
+    "rimraf": "^6.1.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.9"
+  },
+  "engines": {
+    "node": ">= 20"
+  }
+}
