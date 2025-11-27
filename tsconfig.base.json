@@ -8,15 +8,17 @@
     "baseUrl": ".",
     "paths": {
       "@step-nc/core": ["packages/core/src"],
-      "@step-nc/core/*": ["packages/core/src/*"]
+      "@step-nc/core/*": ["packages/core/src/*"],
+      "@step-nc/express-parser": ["packages/express-parser/src"],
+      "@step-nc/express-parser/*": ["packages/express-parser/src/*"]
     },
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
+    "module": "esnext",
     "target": "esnext",
     // For nodejs:
-    // "lib": ["esnext"],
+    "lib": ["esnext"],
     "types": ["node"],
     // and npm install -D @types/node
 
@@ -45,7 +47,8 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "moduleResolution": "node"
   },
   "exclude": ["node_modules", "dist"]
 }
