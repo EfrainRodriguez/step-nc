@@ -7,8 +7,6 @@
     //
     "baseUrl": ".",
     "paths": {
-      "@step-nc/core": ["packages/core/src"],
-      "@step-nc/core/*": ["packages/core/src/*"],
       "@step-nc/express-parser": ["packages/express-parser/src"],
       "@step-nc/express-parser/*": ["packages/express-parser/src/*"]
     },
