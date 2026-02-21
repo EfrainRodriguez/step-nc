@@ -11,3 +11,5 @@ dist
 
 # Test coverage
 coverage
+
+/tmp/
