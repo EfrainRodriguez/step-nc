@@ -51,6 +51,7 @@ export type SyntaxKind =
   | 'UseClause'
   | 'ReferenceClause'
   | 'RenamedRef'
+  | 'SupertypeExpression'
 
   // ── Parameters ──────────────────────────────────────────────────
   | 'Parameter'

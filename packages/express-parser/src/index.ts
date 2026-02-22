@@ -70,3 +70,33 @@ export type {
   CompoundStatementNode,
   RepeatControlKind,
 } from './ast/statements';
+
+// Declaration nodes
+export type {
+  DeclarationNode,
+  DeclarationNodeBase,
+  SchemaDeclarationNode,
+  InterfaceClauseNode,
+  UseClauseNode,
+  ReferenceClauseNode,
+  RenamedRefNode,
+  EntityDeclarationNode,
+  SupertypeConstraintNode,
+  SubtypeOfNode,
+  ExplicitAttributeNode,
+  DerivedAttributeNode,
+  InverseAttributeNode,
+  UniqueRuleNode,
+  WhereRuleNode,
+  TypeDeclarationNode,
+  FunctionDeclarationNode,
+  ProcedureDeclarationNode,
+  ParameterNode,
+  RuleDeclarationNode,
+  SubtypeConstraintDeclarationNode,
+  ConstantDeclarationNode,
+  ConstantValueDeclarationNode,
+  LocalVariableNode,
+  SupertypeExpressionNode,
+  DeclarationKind,
+} from './ast/declarations';
