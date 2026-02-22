@@ -8,10 +8,11 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "scripts": {
-    "build": "tsup",
-    "clean": "rimraf dist"
-  },
+"scripts": {
+  "build": "tsup",
+  "clean": "rimraf dist",
+  "test": "vitest run"
+},
   "files": [
     "dist"
   ],
