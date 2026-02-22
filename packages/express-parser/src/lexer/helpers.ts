@@ -13,3 +13,7 @@ export function isIdentifierStart(ch: string): boolean {
 export function isIdentifierPart(ch: string): boolean {
   return isIdentifierStart(ch) || isDigit(ch);
 }
+
+export function isBinaryDigit(ch: string): boolean {
+  return ch === '0' || ch === '1';
+}

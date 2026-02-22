@@ -4,6 +4,7 @@ import {
   isDigit,
   isIdentifierStart,
   isIdentifierPart,
+  isBinaryDigit,
 } from './helpers';
 import type { BaseToken, TokenKind } from './types';
 import { KEYWORD_MAP, SYMBOLS_SORTED } from './tables';
@@ -126,6 +127,28 @@ export function scanQuestionBuiltin(ctx: LexerContext): boolean {
 
   ctx.advance();
   ctx.emit(QUESTION_MARK_TOKEN.name as TokenKind, '?', start, line, col);
+  return true;
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/*  Binary literal `%[01]+`                                        */
+/* ──────────────────────────────────────────────────────────────── */
+
+export function scanBinaryLiteral(ctx: LexerContext): boolean {
+  if (ctx.peek() !== '%') return false;
+  if (!isBinaryDigit(ctx.peek(1))) return false;
+
+  const start = ctx.index;
+  const line = ctx.line;
+  const col = ctx.column;
+
+  let text = ctx.advance(); // consume '%'
+
+  while (!ctx.eof() && isBinaryDigit(ctx.peek())) {
+    text += ctx.advance();
+  }
+
+  ctx.emit('LIT_BINARY', text, start, line, col);
   return true;
 }
 

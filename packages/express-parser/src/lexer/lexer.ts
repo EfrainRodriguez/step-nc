@@ -9,6 +9,7 @@ import {
   scanNumberLiteral,
   scanStringLiteral,
   scanIdentifierOrKeyword,
+  scanBinaryLiteral,
   scanSymbol,
 } from './scanner';
 
@@ -27,6 +28,7 @@ const HANDLERS: HandlerFn[] = [
   scanNumberLiteral,
   scanStringLiteral,
   scanIdentifierOrKeyword,
+  scanBinaryLiteral,
   scanSymbol,
 ];
 
