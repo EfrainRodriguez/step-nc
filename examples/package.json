@@ -1,0 +1,16 @@
+{
+  "name": "@step-nc/examples",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "express-parser:tokenize-file": "tsx express-parser/tokenize-file.ts"
+  },
+  "dependencies": {
+    "@step-nc/express-parser": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.3"
+  }
+}

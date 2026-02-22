@@ -23,7 +23,8 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "example:parse": "pnpm --filter @step-nc/examples express-parser:tokenize-file"
   },
   "keywords": [
     "STEP-NC",
