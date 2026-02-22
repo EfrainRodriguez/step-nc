@@ -1,0 +1,37 @@
+# EditorConfig is awesome: https://EditorConfig.org/
+root = true
+
+[*]
+# Most editors default to UTF-8
+charset = utf-8
+
+# Use Unix-style newlines
+end_of_line = lf
+
+# Ensure a newline is at the end of every file
+insert_final_newline = true
+
+# Set to "space" or "tab"
+indent_style = space
+
+# Set the number of spaces/tabs when indenting
+indent_size = 2
+
+# Trim trailing white space upon save
+trim_trailing_whitespace = true
+
+[*.md]
+# Markdown files can use tabs if desired, but spaces (indent_size = 2) is common
+# insert_final_newline = false # Example of an override
+
+[*.ts]
+# TypeScript files often use 2 spaces for indentation
+indent_size = 2
+
+[*.tsx]
+# TSX files also often use 2 spaces for indentation
+indent_size = 2
+
+[*.json]
+# JSON files typically use 2 spaces for indentation
+indent_size = 2
