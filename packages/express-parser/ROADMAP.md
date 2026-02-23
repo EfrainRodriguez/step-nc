@@ -43,7 +43,7 @@ source (string)
 ### Fase 2 — Definición del AST (tipos)
 **Prioridad: Alta | Esfuerzo: Medio**
 
-Crear `src/ast/nodes.ts` (o similar) con los nodos del árbol. La gramática EXPRESS (ISO 10303-11) tiene estas construcciones principales:
+- [x] Crear `src/ast/nodes.ts` (o similar) con los nodos del árbol. La gramática EXPRESS (ISO 10303-11) tiene estas construcciones principales:
 
 **Nodos de alto nivel:**
 ```
@@ -107,21 +107,21 @@ StatementNode
   └─ EscapeStatementNode       (ESCAPE)
 ```
 
-Cada nodo debería incluir información de posición (span/location) para reportar diagnósticos.
+- [x] Cada nodo debería incluir información de posición (span/location) para reportar diagnósticos.
 
 ### Fase 3 — Token stream / Parser context
 **Prioridad: Alta | Esfuerzo: Bajo-Medio**
 
-Crear `src/parser/token-stream.ts` o `ParserContext`, que:
-- Itere sobre el array de tokens del lexer
-- Filtre automáticamente los trivia (whitespace, comments)
-- Exponga `peek()`, `consume()`, `expect()`, `check()`, `skip()`
-- Acumule `ParseDiagnostic[]`
+- [x] Crear `src/parser/token-stream.ts` o `ParserContext`, que:
+  - Itere sobre el array de tokens del lexer
+  - Filtre automáticamente los trivia (whitespace, comments)
+  - Exponga `peek()`, `consume()`, `expect()`, `check()`, `skip()`
+  - Acumule `ParseDiagnostic[]`
 
 ### Fase 4 — Parser (Recursive Descent)
 **Prioridad: Alta | Esfuerzo: Alto**
 
-Crear `src/parser/parser.ts` con una función pública:
+- [x] Crear `src/parser/parser.ts` con una función pública:
 
 ```typescript
 export function parseExpress(source: string): ParseResult;
@@ -132,7 +132,7 @@ export interface ParseResult {
 }
 ```
 
-El parser debe implementar, en orden de dependencias (bottom-up en implementación):
+- [x] El parser debe implementar, en orden de dependencias (bottom-up en implementación):
 
 1. **Tipos simples y referencias** — `parseSimpleType()`, `parseNamedType()`, `parseAggregationType()`
 2. **Expresiones** — usando precedencia de operadores (Pratt parser o precedence climbing), dado que EXPRESS tiene operadores con 6+ niveles de precedencia
@@ -152,19 +152,18 @@ El parser debe implementar, en orden de dependencias (bottom-up en implementaci�
 - [x] Tests con archivos `.exp` reales (geometry.exp, SDAI)
 - [x] Tests de recuperación de errores
 
-Plan detallado: [plans/phase-5-parser-tests/plan.md](../../plans/phase-5-parser-tests/plan.md).
-
 ### Fase 6 — API pública y exports
 **Prioridad: Media | Esfuerzo: Bajo**
 
-Actualizar `src/index.ts` para exportar:
-- `parseExpress()` y `ParseResult`
-- Todos los nodos del AST como tipos
-- Visitor/walker utilities (opcional pero muy útil para consumidores del paquete)
+- [x] Actualizar `src/index.ts` para exportar:
+  - `parseExpress()` y `ParseResult`
+  - Todos los nodos del AST como tipos
+  - Visitor/walker utilities (opcional pero muy útil para consumidores del paquete)
 
 ### Fase 7 — Visitor / AST utilities (opcional pero recomendado)
 **Prioridad: Media | Esfuerzo: Medio**
 
+- [x] Crear logica de patrones 'visitor' y 'walk'.
 ```typescript
 // Visitor pattern
 visit(ast, {

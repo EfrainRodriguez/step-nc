@@ -2,6 +2,8 @@
 
 Parser de EXPRESS a AST tipado para uso en el ecosistema STEP-NC. Convierte texto EXPRESS en un árbol de sintaxis abstracta (AST) con tipos TypeScript y diagnósticos de lexer y parser.
 
+Para entender la **arquitectura** del parser (pipeline, lexer, parser, AST y visitor), véase [ARCHITECTURE.md](./ARCHITECTURE.md).
+
 ## Uso mínimo
 
 ```ts
