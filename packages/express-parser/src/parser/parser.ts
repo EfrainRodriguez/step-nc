@@ -4,15 +4,23 @@ import { ParserContext } from './context';
 import { parseSchema } from './schema';
 import type { ParseDiagnostic, ParseOptions } from './types';
 
+/**
+ * Result of parsing an EXPRESS source string.
+ * - `ast`: Root of the typed AST; a single schema declaration (SchemaDeclarationNode).
+ * - `diagnostics`: List of lexer and parser diagnostics (errors and warnings).
+ */
 export interface ParseResult {
   ast: SchemaDeclarationNode;
   diagnostics: ParseDiagnostic[];
 }
 
 /**
- * Parse an EXPRESS source string into a typed AST.
- * Runs the lexer, then the recursive-descent parser, and merges
- * diagnostics from both phases.
+ * Parses an EXPRESS source string into a typed AST.
+ * Runs the lexer, then the recursive-descent parser, and merges diagnostics from both phases.
+ *
+ * @param source - The EXPRESS schema source text.
+ * @param options - Optional parser options (e.g. maxExplicitAttributes, maxEntitySectionItems).
+ * @returns ParseResult with `ast` (SchemaDeclarationNode) and `diagnostics` (ParseDiagnostic[]).
  */
 export function parseExpress(
   source: string,
