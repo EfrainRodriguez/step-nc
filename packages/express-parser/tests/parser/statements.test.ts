@@ -1,0 +1,191 @@
+import { describe, expect, it } from 'vitest';
+import type {
+  RepeatControlNode,
+  StatementNode,
+} from '../../src/ast/statements';
+import { lexExpress } from '../../src/lexer/lexer';
+import { ParserContext } from '../../src/parser/context';
+import { parseStatement } from '../../src/parser/statements';
+
+function parseStmt(source: string): StatementNode {
+  const { tokens } = lexExpress(source);
+  const ctx = new ParserContext(tokens);
+  return parseStatement(ctx);
+}
+
+describe('Null statement', () => {
+  it('should parse ;', () => {
+    const stmt = parseStmt(';');
+    expect(stmt.type).toBe('NullStatement');
+  });
+});
+
+describe('Assignment statement', () => {
+  it('should parse x := 1;', () => {
+    const stmt = parseStmt('x := 1;');
+    expect(stmt.type).toBe('AssignmentStatement');
+    if (stmt.type === 'AssignmentStatement') {
+      expect(stmt.target.type).toBe('IdentifierRef');
+    }
+  });
+
+  it('should parse entity.attr := value;', () => {
+    const stmt = parseStmt('entity.attr := value;');
+    expect(stmt.type).toBe('AssignmentStatement');
+    if (stmt.type === 'AssignmentStatement') {
+      expect(stmt.target.type).toBe('QualifiedRef');
+    }
+  });
+
+  it('should parse list[1] := x;', () => {
+    const stmt = parseStmt('list[1] := x;');
+    expect(stmt.type).toBe('AssignmentStatement');
+  });
+
+  it('should parse SELF\\base.attr := y;', () => {
+    const stmt = parseStmt('SELF\\base.attr := y;');
+    expect(stmt.type).toBe('AssignmentStatement');
+    if (stmt.type === 'AssignmentStatement') {
+      expect(stmt.target.type).toBe('QualifiedRef');
+    }
+  });
+});
+
+describe('Procedure call statement', () => {
+  it('should parse do_something;', () => {
+    const stmt = parseStmt('do_something;');
+    expect(stmt.type).toBe('ProcedureCallStatement');
+    if (stmt.type === 'ProcedureCallStatement') {
+      expect(stmt.procedure).toBe('do_something');
+      expect(stmt.args).toHaveLength(0);
+    }
+  });
+
+  it('should parse INSERT(list, item);', () => {
+    const stmt = parseStmt('INSERT(list, item);');
+    expect(stmt.type).toBe('ProcedureCallStatement');
+    if (stmt.type === 'ProcedureCallStatement') {
+      expect(stmt.procedure).toBe('INSERT');
+      expect(stmt.args).toHaveLength(2);
+    }
+  });
+
+  it('should parse REMOVE(list, idx);', () => {
+    const stmt = parseStmt('REMOVE(list, idx);');
+    expect(stmt.type).toBe('ProcedureCallStatement');
+    if (stmt.type === 'ProcedureCallStatement') {
+      expect(stmt.procedure).toBe('REMOVE');
+    }
+  });
+});
+
+describe('IF statement', () => {
+  it('should parse IF x > 0 THEN y := x; END_IF;', () => {
+    const stmt = parseStmt('IF x > 0 THEN y := x; END_IF;');
+    expect(stmt.type).toBe('IfStatement');
+    if (stmt.type === 'IfStatement') {
+      expect(stmt.thenBranch).toHaveLength(1);
+      expect(stmt.elseBranch).toBeUndefined();
+    }
+  });
+
+  it('should parse IF with ELSE', () => {
+    const stmt = parseStmt('IF x > 0 THEN y := 1; ELSE y := 2; END_IF;');
+    expect(stmt.type).toBe('IfStatement');
+    if (stmt.type === 'IfStatement') {
+      expect(stmt.thenBranch).toHaveLength(1);
+      expect(stmt.elseBranch).toHaveLength(1);
+    }
+  });
+});
+
+describe('CASE statement', () => {
+  it('should parse CASE with actions', () => {
+    const stmt = parseStmt('CASE x OF 1 : y := 1; END_CASE;');
+    expect(stmt.type).toBe('CaseStatement');
+  });
+});
+
+describe('REPEAT statement', () => {
+  it('should parse REPEAT i := 1 TO 10;', () => {
+    const stmt = parseStmt('REPEAT i := 1 TO 10; x := x + 1; END_REPEAT;');
+    expect(stmt.type).toBe('RepeatStatement');
+    if (stmt.type === 'RepeatStatement') {
+      expect(stmt.control).toBeDefined();
+      if (stmt.control && stmt.control.type === 'RepeatControl') {
+        expect(stmt.control.kind).toBe('FOR');
+      }
+    }
+  });
+
+  it('should parse REPEAT WHILE cond;', () => {
+    const stmt = parseStmt('REPEAT WHILE x > 0; x := x - 1; END_REPEAT;');
+    expect(stmt.type).toBe('RepeatStatement');
+    if (stmt.type === 'RepeatStatement' && stmt.control) {
+      expect((stmt.control as RepeatControlNode).kind).toBe('WHILE');
+    }
+  });
+
+  it('should parse REPEAT UNTIL cond;', () => {
+    const stmt = parseStmt('REPEAT UNTIL x = 0; x := x - 1; END_REPEAT;');
+    expect(stmt.type).toBe('RepeatStatement');
+  });
+
+  it('should parse REPEAT with BY', () => {
+    const stmt = parseStmt('REPEAT i := 1 TO 10 BY 2; x := i; END_REPEAT;');
+    expect(stmt.type).toBe('RepeatStatement');
+    if (stmt.type === 'RepeatStatement' && stmt.control) {
+      expect((stmt.control as RepeatControlNode).increment).toBeDefined();
+    }
+  });
+});
+
+describe('ALIAS statement', () => {
+  it('should parse ALIAS v FOR entity.attr;', () => {
+    const stmt = parseStmt('ALIAS v FOR entity.attr; x := v; END_ALIAS;');
+    expect(stmt.type).toBe('AliasStatement');
+    if (stmt.type === 'AliasStatement') {
+      expect(stmt.variable).toBe('v');
+    }
+  });
+});
+
+describe('RETURN statement', () => {
+  it('should parse RETURN;', () => {
+    const stmt = parseStmt('RETURN;');
+    expect(stmt.type).toBe('ReturnStatement');
+    if (stmt.type === 'ReturnStatement') {
+      expect(stmt.value).toBeUndefined();
+    }
+  });
+
+  it('should parse RETURN (expr);', () => {
+    const stmt = parseStmt('RETURN (x + 1);');
+    expect(stmt.type).toBe('ReturnStatement');
+    if (stmt.type === 'ReturnStatement') {
+      expect(stmt.value).toBeDefined();
+    }
+  });
+});
+
+describe('SKIP and ESCAPE', () => {
+  it('should parse SKIP;', () => {
+    const stmt = parseStmt('SKIP;');
+    expect(stmt.type).toBe('SkipStatement');
+  });
+
+  it('should parse ESCAPE;', () => {
+    const stmt = parseStmt('ESCAPE;');
+    expect(stmt.type).toBe('EscapeStatement');
+  });
+});
+
+describe('Compound statement', () => {
+  it('should parse BEGIN stmts END;', () => {
+    const stmt = parseStmt('BEGIN x := 1; y := 2; END;');
+    expect(stmt.type).toBe('CompoundStatement');
+    if (stmt.type === 'CompoundStatement') {
+      expect(stmt.statements).toHaveLength(2);
+    }
+  });
+});

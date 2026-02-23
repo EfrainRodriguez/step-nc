@@ -152,6 +152,7 @@ export class ParserContext {
    * The current lexer does not emit trivia, so always returns false.
    * When the lexer emits trivia tokens, only the isTrivia method needs to be updated.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private isTrivia(_token: Token): boolean {
     return false;
   }

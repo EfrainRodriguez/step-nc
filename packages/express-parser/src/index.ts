@@ -102,7 +102,7 @@ export type {
 } from './ast/declarations';
 
 // Parser context
-export { ParserContext } from './parser/parser-context';
+export { ParserContext } from './parser/context';
 export {
   spanBetween,
   spanFromTokens,
@@ -111,3 +111,7 @@ export {
   tokenStart,
 } from './parser/types';
 export type { DiagnosticSeverity, ParseDiagnostic } from './parser/types';
+
+// Parser
+export { parseExpress } from './parser/parser';
+export type { ParseResult } from './parser/parser';

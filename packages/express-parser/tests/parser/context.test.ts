@@ -1,12 +1,12 @@
-import { describe, it, expect } from 'vitest';
-import { ParserContext } from '../src/parser/parser-context';
+import { describe, expect, it } from 'vitest';
+import type { Token, TokenKind } from '../../src/lexer/types';
+import { ParserContext } from '../../src/parser/context';
 import {
-  tokenStart,
-  tokenEnd,
-  spanOfToken,
   spanFromTokens,
-} from '../src/parser/types';
-import type { Token, TokenKind } from '../src/lexer/types';
+  spanOfToken,
+  tokenEnd,
+  tokenStart,
+} from '../../src/parser/types';
 
 // ── Test helpers ─────────────────────────────────────────────────
 
