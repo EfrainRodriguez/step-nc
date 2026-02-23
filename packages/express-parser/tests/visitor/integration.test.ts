@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseExpress } from '../../src/parser/parser';
-import { visit, walk } from '../../src/visitor';
+import { visit } from '../../src/visitor/visit';
+import { walk } from '../../src/visitor/walk';
 
 describe('visitor integration', () => {
   it('parseExpress + visit: collects entity names', () => {
