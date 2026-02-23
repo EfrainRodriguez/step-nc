@@ -24,7 +24,12 @@
     "version-packages": "changeset version",
     "release": "changeset publish",
     "prepare": "husky install",
-    "example:parse": "pnpm --filter @step-nc/examples express-parser:tokenize-file"
+    "example:tokenize": "pnpm --filter @step-nc/examples express-parser:tokenize-file",
+    "example:parse": "pnpm --filter @step-nc/examples express-parser:parse-file",
+    "example:visit": "pnpm --filter @step-nc/examples express-parser:visit-entities",
+    "example:walk": "pnpm --filter @step-nc/examples express-parser:walk-count",
+    "example:options": "pnpm --filter @step-nc/examples express-parser:parse-with-options",
+    "example:invalid": "pnpm --filter @step-nc/examples express-parser:parse-invalid"
   },
   "keywords": [
     "STEP-NC",

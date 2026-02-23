@@ -4,7 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "express-parser:tokenize-file": "tsx express-parser/tokenize-file.ts"
+    "express-parser:tokenize-file": "tsx express-parser/tokenize-file.ts",
+    "express-parser:parse-file": "tsx express-parser/parse-file.ts",
+    "express-parser:visit-entities": "tsx express-parser/visit-entities.ts",
+    "express-parser:walk-count": "tsx express-parser/walk-count.ts",
+    "express-parser:parse-invalid": "tsx express-parser/parse-invalid.ts",
+    "express-parser:parse-with-options": "tsx express-parser/parse-with-options.ts"
   },
   "dependencies": {
     "@step-nc/express-parser": "workspace:*"
