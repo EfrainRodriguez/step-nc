@@ -122,3 +122,7 @@ export type {
 // Parser
 export { parseExpress } from './parser/parser';
 export type { ParseResult } from './parser/parser';
+
+// Visitor / AST traversal
+export { visit, walk, getChildren } from './visitor';
+export type { ExpressVisitor, VisitorAction, WalkOptions } from './visitor';
