@@ -84,8 +84,17 @@ function visitNode(node: ASTNodeBase, visitor: ExpressVisitor): void {
 }
 
 /**
- * Visits the AST in pre-order. For each node, the corresponding visitor handler (if present) is called.
- * If a handler returns 'skip', that node's children are not visited.
+ * Visits the AST in pre-order. For each node, the corresponding visitor handler (e.g. `onEntityDeclaration`)
+ * is called if defined. If a handler returns `'skip'`, that node's children are not visited.
+ *
+ * @param ast - Root schema node (e.g. `parseExpress(source).ast`)
+ * @param visitor - Object with optional handlers per node type (onSchemaDeclaration, onEntityDeclaration, ...)
+ *
+ * @example
+ * visit(ast, {
+ *   onEntityDeclaration(node) { console.log('Entity:', node.name); },
+ *   onTypeDeclaration(node) { console.log('Type:', node.name); },
+ * });
  */
 export function visit(
   ast: SchemaDeclarationNode,

@@ -33,4 +33,32 @@ const diagnostics = result.diagnostics;
 - **Bases para narrowing** — `ASTNodeBase` (base de todos los nodos AST) y `TypeNodeBase` (base de nodos de tipo) para guards y helpers.
 - **Lexer y utilidades** — `lexExpress`, `ParserContext`, helpers de span (`spanBetween`, `spanOfToken`, etc.) y tipos de tokens/diagnósticos según necesidad.
 
-Visitor/walker y utilidades de recorrido del AST están planificados para una versión posterior (Fase 7).
+### Recorrido del AST
+
+- **`visit(ast, visitor)`** — Recorrido en pre-order con handlers opcionales por tipo de nodo (`onSchemaDeclaration`, `onEntityDeclaration`, etc.). Retornar `'skip'` desde un handler para no visitar los hijos de ese nodo.
+- **`walk(ast, callback, options?)`** — Recorrido de todos los nodos; orden `'pre'` (por defecto) o `'post'` según `options.order`.
+
+Ejemplo con `visit` (listar entidades):
+
+```ts
+import { parseExpress, visit } from '@step-nc/express-parser';
+
+const result = parseExpress(source);
+const names: string[] = [];
+visit(result.ast, {
+  onEntityDeclaration(node) {
+    names.push(node.name);
+  },
+});
+```
+
+Ejemplo con `walk` (contar nodos):
+
+```ts
+import { parseExpress, walk } from '@step-nc/express-parser';
+
+const result = parseExpress(source);
+let count = 0;
+walk(result.ast, () => count++);
+console.log('Total nodes:', count);
+```

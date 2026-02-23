@@ -7,8 +7,16 @@ export interface WalkOptions {
 }
 
 /**
- * Walks the entire AST, invoking the callback for each node.
- * Default order is pre-order; set options.order to 'post' for post-order.
+ * Walks the entire AST, invoking the callback once per node. Root and all descendants are visited.
+ *
+ * @param ast - Root schema node
+ * @param callback - Called for each node (pre-order or post-order depending on options)
+ * @param options.order - 'pre' (default): callback before children; 'post': callback after children
+ *
+ * @example
+ * let n = 0;
+ * walk(ast, () => n++);
+ * console.log('Total nodes:', n);
  */
 export function walk(
   ast: SchemaDeclarationNode,
