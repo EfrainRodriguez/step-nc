@@ -1,5 +1,6 @@
 import type { Position, Span } from '../ast/base';
 import type { Token, TokenKind } from '../lexer/types';
+import type { ParseDiagnostic, ParseOptions } from './types';
 import {
   DEFAULT_MAX_ENTITY_SECTION_ITEMS,
   DEFAULT_MAX_EXPLICIT_ATTRIBUTES,
@@ -8,7 +9,6 @@ import {
   tokenEnd,
   tokenStart,
 } from './types';
-import type { ParseDiagnostic, ParseOptions } from './types';
 
 /**
  * Mutable parser context that wraps a Token[] and provides navigation,
