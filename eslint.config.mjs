@@ -1,9 +1,14 @@
 import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
-import prettierPlugin from 'eslint-plugin-prettier';
 import prettierConfig from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
+
+ /* ignorarcualquies sub dist folder que se llama dist*/
 
 export default [
+  {
+    ignores: ['**/*/dist'],
+  },
   {
     files: ['**/*.ts'],
 
