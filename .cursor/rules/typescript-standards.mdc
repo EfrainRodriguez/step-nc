@@ -1,0 +1,82 @@
+---
+description: Buenas prácticas TypeScript para el toolkit STEP-NC (tipos, API, errores, inmutabilidad)
+globs: "**/*.ts"
+alwaysApply: false
+---
+
+# Estándares TypeScript (toolkit STEP-NC)
+
+Reglas de desarrollo TypeScript orientadas a una biblioteca reutilizable para STEP (ISO 10303) y STEP-NC (ISO 14649). Complementan la regla de comentarios (`typescript-comments.mdc`).
+
+## 1. Tipado estricto y tipos explícitos
+
+- Preferir tipos explícitos en la **API pública** (parámetros y retorno de funciones exportadas).
+- Usar `interface` para objetos con forma conocida; `type` para uniones, intersecciones o alias.
+- Evitar `any`; usar `unknown` y narrowing cuando el tipo no se conoce de antemano.
+
+```typescript
+// ✅ GOOD — API clara para consumidores del toolkit
+export function parseSchema(source: string, options?: ParseOptions): ParseResult { ... }
+
+// ❌ BAD — retorno implícito y any
+export function parseSchema(source: string, options?: any) { ... }
+```
+
+## 2. Imports de tipos
+
+- Usar `import type` para importar solo tipos/interfaces; reduce tamaño del bundle y deja claro que no hay valor en runtime.
+
+```typescript
+import type { Token, TokenKind } from '../lexer/types';
+import type { ParseOptions, ParseDiagnostic } from './types';
+```
+
+## 3. Inmutabilidad y readonly
+
+- En estructuras expuestas (AST, opciones, resultados): preferir `readonly` en arrays y propiedades que no deben mutarse.
+- Constantes de configuración o mapas estáticos: `const` y `readonly` (o `as const` cuando aplique).
+
+```typescript
+// ✅ GOOD
+readonly diagnostics: ParseDiagnostic[] = [];
+private readonly tokens: Token[];
+const HANDLER_MAP: Partial<Record<ASTNodeBase['type'], keyof ExpressVisitor>> = { ... };
+```
+
+## 4. Manejo de errores y diagnósticos
+
+- En un toolkit, evitar `throw` genérico para errores recuperables; preferir **diagnósticos** (lista de errores/advertencias) y permitir que el llamante decida.
+- Para fallos irrecuperables, usar errores con nombre y mensaje claro.
+
+```typescript
+// ✅ GOOD — diagnóstico recuperable
+ctx.diagnostics.push({ severity: 'error', message: 'Expected TYPE', span });
+
+// ✅ GOOD — fallo irrecuperable
+throw new Error(`Lexer not initialized: missing token array`);
+```
+
+## 5. Nombrado consistente
+
+- **Tipos/Interfaces**: PascalCase. Nodos del AST y tipos de dominio (e.g. `SchemaDeclarationNode`, `ParseOptions`).
+- **Funciones/variables**: camelCase. Constantes de módulo en UPPER_SNAKE solo si son verdaderamente constantes globales (ej. nombres de tokens).
+- **Archivos**: kebab-case o camelCase según el paquete (ej. `visit.ts`, `context.ts`).
+
+## 6. API pública mínima y barriles
+
+- Exportar solo lo necesario para el usuario del toolkit; el resto puede ser interno al paquete.
+- Usar `index.ts` como barril con re-exports ordenados (agrupar por categoría; ver regla de comentarios).
+
+## 7. Tests y tipos
+
+- En tests, seguir los mismos estándares de tipos; evitar `as any` para “saltarse” comprobaciones. Usar tipos de fixture o helpers tipados.
+
+---
+
+| Área            | Práctica principal                                      |
+|-----------------|--------------------------------------------------------|
+| API pública     | Tipos explícitos, JSDoc (ver `typescript-comments.mdc`) |
+| Imports         | `import type` para tipos                               |
+| Datos expuestos | `readonly` donde no debe haber mutación                 |
+| Errores         | Diagnósticos para recuperables; Error para irrecuperables |
+| Nombrado        | PascalCase tipos; camelCase funciones/variables        |
