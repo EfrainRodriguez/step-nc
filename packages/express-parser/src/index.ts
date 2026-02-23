@@ -9,7 +9,7 @@ export type {
 } from './lexer/types';
 
 // AST types
-export type { Position, Span, SyntaxKind } from './ast/base';
+export type { ASTNodeBase, Position, Span, SyntaxKind } from './ast/base';
 
 export type {
   AggregateTypeNode,
@@ -23,6 +23,7 @@ export type {
   SimpleTypeKind,
   SimpleTypeNode,
   TypeNode,
+  TypeNodeBase,
 } from './ast/types';
 
 export type {
@@ -104,6 +105,8 @@ export type {
 // Parser context
 export { ParserContext } from './parser/context';
 export {
+  DEFAULT_MAX_ENTITY_SECTION_ITEMS,
+  DEFAULT_MAX_EXPLICIT_ATTRIBUTES,
   spanBetween,
   spanFromTokens,
   spanOfToken,
