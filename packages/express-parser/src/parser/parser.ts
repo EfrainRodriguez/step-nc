@@ -2,7 +2,7 @@ import type { SchemaDeclarationNode } from '../ast/declarations';
 import { lexExpress } from '../lexer/lexer';
 import { ParserContext } from './context';
 import { parseSchema } from './schema';
-import type { ParseDiagnostic } from './types';
+import type { ParseDiagnostic, ParseOptions } from './types';
 
 export interface ParseResult {
   ast: SchemaDeclarationNode;
@@ -14,9 +14,12 @@ export interface ParseResult {
  * Runs the lexer, then the recursive-descent parser, and merges
  * diagnostics from both phases.
  */
-export function parseExpress(source: string): ParseResult {
+export function parseExpress(
+  source: string,
+  options?: ParseOptions,
+): ParseResult {
   const lexResult = lexExpress(source);
-  const ctx = new ParserContext(lexResult.tokens);
+  const ctx = new ParserContext(lexResult.tokens, options);
 
   const ast = parseSchema(ctx);
 

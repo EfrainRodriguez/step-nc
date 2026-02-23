@@ -3,6 +3,7 @@ import type { DeclarationNode } from '../../src/ast/declarations';
 import { lexExpress } from '../../src/lexer/lexer';
 import { ParserContext } from '../../src/parser/context';
 import { parseDeclaration } from '../../src/parser/declarations';
+import { parseExpress } from '../../src/parser/parser';
 
 function parseDecl(source: string): DeclarationNode {
   const { tokens } = lexExpress(source);
@@ -89,6 +90,63 @@ describe('Entity declarations', () => {
       expect(decl.whereRules).toHaveLength(1);
     }
   });
+
+  it('should stop explicit attributes loop at WHERE', () => {
+    const decl = parseDecl(
+      'ENTITY e; a : INTEGER; b : REAL; WHERE wr1 : a > 0; END_ENTITY;',
+    );
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.attributes).toHaveLength(2);
+      expect(decl.whereRules).toBeDefined();
+      expect(decl.whereRules).toHaveLength(1);
+    }
+  });
+
+  it('should parse entity with OPTIONAL attribute', () => {
+    const decl = parseDecl('ENTITY e; OPTIONAL x : REAL; END_ENTITY;');
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.attributes).toHaveLength(1);
+      expect(decl.attributes[0]!.optional).toBe(true);
+      expect(decl.attributes[0]!.names).toEqual(['x']);
+    }
+  });
+
+  it('should parse entity with multiple names in one attribute', () => {
+    const decl = parseDecl('ENTITY e; a, b : INTEGER; END_ENTITY;');
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.attributes).toHaveLength(1);
+      expect(decl.attributes[0]!.names).toEqual(['a', 'b']);
+      expect(decl.attributes[0]!.attributeType.type).toBe('SimpleType');
+    }
+  });
+
+  it('should emit PAR090 when explicit attributes exceed limit', () => {
+    const source =
+      'SCHEMA s; ENTITY e; a : INTEGER; b : REAL; END_ENTITY; END_SCHEMA;';
+    const { diagnostics } = parseExpress(source, { maxExplicitAttributes: 1 });
+    const par090 = diagnostics.filter((d) => d.code === 'PAR090');
+    expect(par090).toHaveLength(1);
+    expect(par090[0]!.message).toBe('Too many explicit attributes in entity');
+  });
+
+  it('should emit PAR091 when DERIVE/INVERSE section items exceed limit', () => {
+    const source = `SCHEMA s;
+      ENTITY e;
+        DERIVE
+          d1 : REAL := 1.0;
+          d2 : REAL := 2.0;
+        END_ENTITY;
+      END_SCHEMA;`;
+    const { diagnostics } = parseExpress(source, { maxEntitySectionItems: 1 });
+    const par091 = diagnostics.filter((d) => d.code === 'PAR091');
+    expect(par091).toHaveLength(1);
+    expect(par091[0]!.message).toBe(
+      'Too many section items (DERIVE/INVERSE) in entity',
+    );
+  });
 });
 
 describe('Type declarations', () => {
@@ -129,6 +187,18 @@ describe('Type declarations', () => {
       expect(decl.underlyingType.type).toBe('SelectType');
     }
   });
+
+  it('should parse TYPE with LIST OF aggregation', () => {
+    const decl = parseDecl('TYPE list_real = LIST OF REAL; END_TYPE;');
+    expect(decl.type).toBe('TypeDeclaration');
+    if (decl.type === 'TypeDeclaration') {
+      expect(decl.underlyingType.type).toBe('AggregationType');
+      if (decl.underlyingType.type === 'AggregationType') {
+        expect(decl.underlyingType.kind).toBe('LIST');
+        expect(decl.underlyingType.baseType.type).toBe('SimpleType');
+      }
+    }
+  });
 });
 
 describe('Function declarations', () => {
@@ -145,6 +215,34 @@ describe('Function declarations', () => {
       expect(decl.name).toBe('distance');
       expect(decl.parameters).toHaveLength(2);
       expect(decl.declarations).toBeDefined();
+      expect(decl.body.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('should parse FUNCTION with several params sharing same type (a, b : point)', () => {
+    const src = `FUNCTION mid(a, b : point) : point;
+      RETURN (point(0.0, 0.0));
+    END_FUNCTION;`;
+    const decl = parseDecl(src);
+    expect(decl.type).toBe('FunctionDeclaration');
+    if (decl.type === 'FunctionDeclaration') {
+      expect(decl.parameters).toHaveLength(1);
+      expect(decl.parameters[0]!.names).toEqual(['a', 'b']);
+      expect(decl.parameters[0]!.parameterType.type).toBe('NamedType');
+      if (decl.parameters[0]!.parameterType.type === 'NamedType') {
+        expect(decl.parameters[0]!.parameterType.name).toBe('point');
+      }
+    }
+  });
+
+  it('should parse FUNCTION with only RETURN without LOCALS', () => {
+    const src = `FUNCTION one() : INTEGER; RETURN (1); END_FUNCTION;`;
+    const decl = parseDecl(src);
+    expect(decl.type).toBe('FunctionDeclaration');
+    if (decl.type === 'FunctionDeclaration') {
+      expect(decl.name).toBe('one');
+      expect(decl.parameters).toHaveLength(0);
+      expect(decl.declarations).toBeUndefined();
       expect(decl.body.length).toBeGreaterThan(0);
     }
   });
@@ -173,6 +271,19 @@ describe('Procedure declarations', () => {
       expect(decl.parameters).toHaveLength(0);
     }
   });
+
+  it('should parse PROCEDURE with several params and mix of VAR and non-VAR', () => {
+    const src = `PROCEDURE mix_params(x : INTEGER; VAR out : REAL);
+      out := 0.0;
+    END_PROCEDURE;`;
+    const decl = parseDecl(src);
+    expect(decl.type).toBe('ProcedureDeclaration');
+    if (decl.type === 'ProcedureDeclaration') {
+      expect(decl.parameters).toHaveLength(2);
+      expect(decl.parameters[0]!.isVar).toBeUndefined();
+      expect(decl.parameters[1]!.isVar).toBe(true);
+    }
+  });
 });
 
 describe('Rule declarations', () => {
@@ -186,6 +297,19 @@ describe('Rule declarations', () => {
       expect(decl.name).toBe('check');
       expect(decl.entities).toEqual(['item']);
       expect(decl.whereRules).toBeDefined();
+    }
+  });
+
+  it('should parse RULE with several WHERE rules', () => {
+    const src = `RULE check FOR (item);
+      WHERE wr1 : item.value > 0;
+      WHERE wr2 : item.name <> '';
+    END_RULE;`;
+    const decl = parseDecl(src);
+    expect(decl.type).toBe('RuleDeclaration');
+    if (decl.type === 'RuleDeclaration') {
+      expect(decl.whereRules).toBeDefined();
+      expect(decl.whereRules!.length).toBeGreaterThanOrEqual(2);
     }
   });
 });
@@ -202,6 +326,18 @@ describe('Subtype constraint declarations', () => {
       expect(decl.abstractSupertype).toBe(true);
     }
   });
+
+  it('should parse SUBTYPE_CONSTRAINT without ABSTRACT (only ONEOF)', () => {
+    const src = `SUBTYPE_CONSTRAINT sc FOR shape;
+      ONEOF(circle, rectangle);
+    END_SUBTYPE_CONSTRAINT;`;
+    const decl = parseDecl(src);
+    expect(decl.type).toBe('SubtypeConstraintDeclaration');
+    if (decl.type === 'SubtypeConstraintDeclaration') {
+      expect(decl.abstractSupertype).toBeFalsy();
+      expect(decl.name).toBe('sc');
+    }
+  });
 });
 
 describe('Constant declarations', () => {
@@ -214,6 +350,18 @@ describe('Constant declarations', () => {
     expect(decl.type).toBe('ConstantDeclaration');
     if (decl.type === 'ConstantDeclaration') {
       expect(decl.constants).toHaveLength(2);
+    }
+  });
+
+  it('should parse CONSTANT with expression involving function call', () => {
+    const src = `CONSTANT
+      zero : REAL := abs(-1.0);
+    END_CONSTANT;`;
+    const decl = parseDecl(src);
+    expect(decl.type).toBe('ConstantDeclaration');
+    if (decl.type === 'ConstantDeclaration') {
+      expect(decl.constants).toHaveLength(1);
+      expect(decl.constants[0]!.expression.type).toBe('FunctionCallExpression');
     }
   });
 });

@@ -104,6 +104,18 @@ describe('CASE statement', () => {
     const stmt = parseStmt('CASE x OF 1 : y := 1; END_CASE;');
     expect(stmt.type).toBe('CaseStatement');
   });
+
+  it('should parse CASE with several branches and OTHERWISE', () => {
+    const stmt = parseStmt(
+      'CASE n OF 1 : a := 1; 2 : a := 2; 3 : a := 3; OTHERWISE : a := 0; END_CASE;',
+    );
+    expect(stmt.type).toBe('CaseStatement');
+    if (stmt.type === 'CaseStatement') {
+      expect(stmt.actions.length).toBeGreaterThanOrEqual(3);
+      expect(stmt.otherwise).toBeDefined();
+      expect(stmt.otherwise!.length).toBeGreaterThanOrEqual(1);
+    }
+  });
 });
 
 describe('REPEAT statement', () => {
@@ -136,6 +148,15 @@ describe('REPEAT statement', () => {
     expect(stmt.type).toBe('RepeatStatement');
     if (stmt.type === 'RepeatStatement' && stmt.control) {
       expect((stmt.control as RepeatControlNode).increment).toBeDefined();
+    }
+  });
+
+  it('should parse REPEAT without control (body only)', () => {
+    const stmt = parseStmt('REPEAT; x := x + 1; END_REPEAT;');
+    expect(stmt.type).toBe('RepeatStatement');
+    if (stmt.type === 'RepeatStatement') {
+      expect(stmt.control).toBeUndefined();
+      expect(stmt.statements.length).toBeGreaterThanOrEqual(1);
     }
   });
 });

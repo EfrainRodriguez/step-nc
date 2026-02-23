@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { parseExpress } from '../../src/parser/parser';
 
 describe('parseExpress — end-to-end integration', () => {

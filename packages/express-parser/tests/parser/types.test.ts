@@ -31,8 +31,20 @@ describe('Simple types', () => {
     if (t.type === 'SimpleType') expect(t.kind).toBe('STRING');
   });
 
+  it('should parse STRING without width', () => {
+    const t = parseT('STRING');
+    expect(t.type).toBe('SimpleType');
+    if (t.type === 'SimpleType') expect(t.kind).toBe('STRING');
+  });
+
   it('should parse BINARY(32) FIXED', () => {
     const t = parseT('BINARY(32) FIXED');
+    expect(t.type).toBe('SimpleType');
+    if (t.type === 'SimpleType') expect(t.kind).toBe('BINARY');
+  });
+
+  it('should parse BINARY VARIABLE (if supported)', () => {
+    const t = parseT('BINARY VARIABLE');
     expect(t.type).toBe('SimpleType');
     if (t.type === 'SimpleType') expect(t.kind).toBe('BINARY');
   });

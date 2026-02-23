@@ -143,13 +143,16 @@ El parser debe implementar, en orden de dependencias (bottom-up en implementaci�
 7. **Rules y Subtype Constraints** — `parseRuleDeclaration()`, `parseSubtypeConstraintDeclaration()`
 8. **Schema** — `parseSchema()` como punto de entrada
 9. **Error recovery** — estrategia de resincronización (ej: sincronizar en `END_ENTITY`, `END_TYPE`, `END_SCHEMA`, `;`)
+10. **Entity section limits** — límites configurables (`ParseOptions.maxExplicitAttributes`, `maxEntitySectionItems`) con diagnósticos PAR090/PAR091 al superarlos.
 
 ### Fase 5 — Tests del parser
 **Prioridad: Alta | Esfuerzo: Medio**
 
-- Tests unitarios por construcción (entity, type, function, etc.)
-- Tests con archivos `.exp` reales de la norma (STEP-NC, AP203, AP214)
-- Tests de recuperación de errores
+- [x] Tests unitarios por construcción (entity, type, function, etc.)
+- [x] Tests con archivos `.exp` reales (geometry.exp, SDAI)
+- [x] Tests de recuperación de errores
+
+Plan detallado: [plans/phase-5-parser-tests/plan.md](../../plans/phase-5-parser-tests/plan.md).
 
 ### Fase 6 — API pública y exports
 **Prioridad: Media | Esfuerzo: Bajo**

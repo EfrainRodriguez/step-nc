@@ -7,6 +7,8 @@ import type {
 import type { TokenKind } from '../lexer/types';
 import {
   isBuiltinProcedure,
+  isEndKeyword,
+  isStartOfDeclaration,
   parseCommaSeparatedList,
   parseIdentifier,
   parseSemicolon,
@@ -81,14 +83,18 @@ export function parseStatement(ctx: ParserContext): StatementNode {
   }
 }
 
-/** Parse statements until one of the endTokens is reached. */
+/** Parse statements until one of the endTokens is reached, a declaration starts, or an outer END_* is seen (error recovery). */
 export function parseStatementList(
   ctx: ParserContext,
   ...endTokens: TokenKind[]
 ): StatementNode[] {
   const endSet = new Set<TokenKind>(endTokens);
   const statements: StatementNode[] = [];
-  while (!ctx.isEOF() && !endSet.has(ctx.current().kind)) {
+  while (!ctx.isEOF()) {
+    const kind = ctx.current().kind;
+    if (endSet.has(kind)) break;
+    if (isStartOfDeclaration(kind)) break;
+    if (isEndKeyword(kind) && !endSet.has(kind)) break;
     statements.push(parseStatement(ctx));
   }
   return statements;

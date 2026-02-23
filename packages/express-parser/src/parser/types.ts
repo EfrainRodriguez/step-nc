@@ -6,6 +6,21 @@ import { parseCommaSeparatedList, parseIdentifier } from './common';
 import { ParserContext } from './context';
 import { parseExpression } from './expressions';
 
+// ── Parse options and defaults ───────────────────────────────────────
+
+/** Default max explicit attributes per entity (safety limit). */
+export const DEFAULT_MAX_EXPLICIT_ATTRIBUTES = 10000;
+
+/** Default max items in DERIVE/INVERSE sections per entity (safety limit). */
+export const DEFAULT_MAX_ENTITY_SECTION_ITEMS = 10000;
+
+export interface ParseOptions {
+  /** Max explicit attributes in an entity (default: DEFAULT_MAX_EXPLICIT_ATTRIBUTES). */
+  maxExplicitAttributes?: number;
+  /** Max items in DERIVE/INVERSE sections per entity (default: DEFAULT_MAX_ENTITY_SECTION_ITEMS). */
+  maxEntitySectionItems?: number;
+}
+
 // ── Types of diagnosis ────────────────────────────────────────
 
 export type DiagnosticSeverity = 'error' | 'warning';
@@ -101,11 +116,19 @@ export function parseType(ctx: ParserContext): TypeNode {
     case 'KW_AGGREGATE':
       return parseAggregateType(ctx);
 
-    // Named type (user-defined)
+    // Named type (user-defined) — IDENT or built-in names used as type (e.g. "length" → BF_LENGTH)
     case 'IDENT':
       return parseNamedType(ctx);
-
     default:
+      if (
+        token.kind.startsWith('BF_') ||
+        token.kind.startsWith('BP_') ||
+        token.kind.startsWith('BC_')
+      ) {
+        const start = ctx.startPos();
+        const name = ctx.consume().text;
+        return { type: 'NamedType', name, span: ctx.spanFrom(start) };
+      }
       ctx.error(
         'PAR020',
         `Expected type, found '${token.kind}'`,

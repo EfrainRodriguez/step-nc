@@ -27,6 +27,25 @@ describe('parseSchema', () => {
     expect(ast.versionId).toBe('v1.0');
   });
 
+  it('should parse schema without interfaces but with version_id and several declarations', () => {
+    const { ast, diagnostics } = parse(`
+      SCHEMA with_version '1.0';
+        TYPE t1 = INTEGER;
+        END_TYPE;
+        TYPE t2 = REAL;
+        END_TYPE;
+        ENTITY e;
+          x : t1;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+    expect(diagnostics).toHaveLength(0);
+    expect(ast.name).toBe('with_version');
+    expect(ast.versionId).toBe('1.0');
+    expect(ast.interfaces).toHaveLength(0);
+    expect(ast.declarations).toHaveLength(3);
+  });
+
   it('should parse USE clause without items', () => {
     const { ast, diagnostics } = parse(
       'SCHEMA s; USE FROM other_schema; END_SCHEMA;',

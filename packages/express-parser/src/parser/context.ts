@@ -1,7 +1,14 @@
 import type { Position, Span } from '../ast/base';
 import type { Token, TokenKind } from '../lexer/types';
-import type { ParseDiagnostic } from './types';
-import { spanBetween, spanOfToken, tokenEnd, tokenStart } from './types';
+import {
+  DEFAULT_MAX_ENTITY_SECTION_ITEMS,
+  DEFAULT_MAX_EXPLICIT_ATTRIBUTES,
+  spanBetween,
+  spanOfToken,
+  tokenEnd,
+  tokenStart,
+} from './types';
+import type { ParseDiagnostic, ParseOptions } from './types';
 
 /**
  * Mutable parser context that wraps a Token[] and provides navigation,
@@ -14,11 +21,13 @@ export class ParserContext {
   private readonly tokens: Token[];
   private pos = 0;
   private previous: Token | undefined;
+  private readonly options: ParseOptions | undefined;
 
   readonly diagnostics: ParseDiagnostic[] = [];
 
-  constructor(tokens: Token[]) {
+  constructor(tokens: Token[], options?: ParseOptions) {
     this.tokens = tokens;
+    this.options = options;
   }
 
   // ── Navigation ────────────────────────────────────────────────
@@ -114,6 +123,11 @@ export class ParserContext {
     return this.peek();
   }
 
+  /** Current token index (for loop progress checks / error recovery). */
+  position(): number {
+    return this.pos;
+  }
+
   // ── Diagnostics ──────────────────────────────────────────────
 
   /** Register a parsing error with span. */
@@ -143,6 +157,20 @@ export class ParserContext {
       ? tokenEnd(this.previous)
       : tokenStart(this.peek());
     return spanBetween(start, end);
+  }
+
+  /** Effective max explicit attributes for entity parsing. */
+  getMaxExplicitAttributes(): number {
+    return (
+      this.options?.maxExplicitAttributes ?? DEFAULT_MAX_EXPLICIT_ATTRIBUTES
+    );
+  }
+
+  /** Effective max DERIVE/INVERSE section items per entity. */
+  getMaxEntitySectionItems(): number {
+    return (
+      this.options?.maxEntitySectionItems ?? DEFAULT_MAX_ENTITY_SECTION_ITEMS
+    );
   }
 
   // ── Internals ─────────────────────────────────────────────────

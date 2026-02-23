@@ -122,24 +122,72 @@ function parseEntityDeclaration(ctx: ParserContext): EntityDeclarationNode {
 
   parseSemicolon(ctx);
 
+  // Exit at loop body start when we see a section keyword or EOF, so that
+  // error recovery that does not advance the cursor cannot cause infinite loops.
+  // Configurable limits with PAR090/PAR091 protect against malformed or huge input.
   const attributes: ExplicitAttributeNode[] = [];
-  while (!ctx.isEOF() && !isEntitySection(ctx.current().kind)) {
+  const maxExplicitAttributes = ctx.getMaxExplicitAttributes();
+  while (
+    !ctx.isEOF() &&
+    !isEntitySection(ctx.current().kind) &&
+    attributes.length < maxExplicitAttributes
+  ) {
+    if (isEntitySection(ctx.current().kind) || ctx.isEOF()) break;
+    const posBefore = ctx.position();
     attributes.push(...parseExplicitAttribute(ctx));
+    if (attributes.length >= maxExplicitAttributes) {
+      ctx.error(
+        'PAR090',
+        'Too many explicit attributes in entity',
+        spanOfToken(ctx.current()),
+      );
+      break;
+    }
+    if (ctx.position() === posBefore && !ctx.isEOF()) {
+      ctx.consume();
+    }
   }
 
+  const maxEntitySectionItems = ctx.getMaxEntitySectionItems();
   let derivedAttributes: DerivedAttributeNode[] | undefined;
   if (ctx.skip('KW_DERIVE')) {
     derivedAttributes = [];
-    while (!ctx.isEOF() && !isEntitySection(ctx.current().kind)) {
+    while (
+      !ctx.isEOF() &&
+      !isEntitySection(ctx.current().kind) &&
+      derivedAttributes.length < maxEntitySectionItems
+    ) {
+      if (isEntitySection(ctx.current().kind) || ctx.isEOF()) break;
       derivedAttributes.push(parseDerivedAttribute(ctx));
+      if (derivedAttributes.length >= maxEntitySectionItems) {
+        ctx.error(
+          'PAR091',
+          'Too many section items (DERIVE/INVERSE) in entity',
+          spanOfToken(ctx.current()),
+        );
+        break;
+      }
     }
   }
 
   let inverseAttributes: InverseAttributeNode[] | undefined;
   if (ctx.skip('KW_INVERSE')) {
     inverseAttributes = [];
-    while (!ctx.isEOF() && !isEntitySection(ctx.current().kind)) {
+    while (
+      !ctx.isEOF() &&
+      !isEntitySection(ctx.current().kind) &&
+      inverseAttributes.length < maxEntitySectionItems
+    ) {
+      if (isEntitySection(ctx.current().kind) || ctx.isEOF()) break;
       inverseAttributes.push(parseInverseAttribute(ctx));
+      if (inverseAttributes.length >= maxEntitySectionItems) {
+        ctx.error(
+          'PAR091',
+          'Too many section items (DERIVE/INVERSE) in entity',
+          spanOfToken(ctx.current()),
+        );
+        break;
+      }
     }
   }
 
@@ -266,16 +314,18 @@ function parseOneOf(ctx: ParserContext): ExpressionNode {
 
 function parseExplicitAttribute(ctx: ParserContext): ExplicitAttributeNode[] {
   const start = ctx.startPos();
+  const optionalBeforeNames = ctx.skip('KW_OPTIONAL') || undefined;
   const names = [parseIdentifier(ctx)];
   while (ctx.skip('SYM_COMMA')) {
     names.push(parseIdentifier(ctx));
   }
   ctx.expect('SYM_COLON');
 
-  const optional = ctx.skip('KW_OPTIONAL') || undefined;
+  const optionalBeforeType = ctx.skip('KW_OPTIONAL') || undefined;
   const attributeType = parseType(ctx);
   parseSemicolon(ctx);
 
+  const optional = optionalBeforeNames ?? optionalBeforeType;
   return [
     {
       type: 'ExplicitAttribute',
@@ -359,6 +409,7 @@ export function parseWhereClause(ctx: ParserContext): WhereRuleNode[] {
     !isStartOfDeclaration(ctx.current().kind)
   ) {
     const start = ctx.startPos();
+    ctx.skip('KW_WHERE');
     let label: string | undefined;
 
     if (ctx.check('IDENT') && ctx.peek(1).kind === 'SYM_COLON') {
@@ -681,8 +732,14 @@ function parseConstantDeclaration(ctx: ParserContext): ConstantDeclarationNode {
 
   const constants: ConstantValueDeclarationNode[] = [];
   while (!ctx.isEOF() && !ctx.check('KW_END_CONSTANT')) {
+    if (
+      ctx.current().kind === 'IDENT' &&
+      ctx.current().text.toUpperCase() === 'END_CONSTANT'
+    ) {
+      break;
+    }
     const cStart = ctx.startPos();
-    const name = parseIdentifier(ctx);
+    const name = parseIdentifierOrBuiltin(ctx);
     ctx.expect('SYM_COLON');
     const constantType = parseType(ctx);
     ctx.expect('SYM_ASSIGN');

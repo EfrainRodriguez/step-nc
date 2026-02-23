@@ -112,6 +112,15 @@ describe('Function calls', () => {
       expect(expr.args).toHaveLength(3);
     }
   });
+
+  it('should parse entity constructor as FunctionCallExpression (point(1.0, 2.0, 3.0))', () => {
+    const expr = parseExpr('point(1.0, 2.0, 3.0)');
+    expect(expr.type).toBe('FunctionCallExpression');
+    if (expr.type === 'FunctionCallExpression') {
+      expect(expr.name).toBe('point');
+      expect(expr.args).toHaveLength(3);
+    }
+  });
 });
 
 describe('Built-in functions', () => {
@@ -205,6 +214,46 @@ describe('Binary operators — associativity', () => {
     expect(expr.type).toBe('BinaryExpression');
     if (expr.type === 'BinaryExpression') {
       expect(expr.operator).toBe('=');
+    }
+  });
+
+  it('should parse instance equality :=: (a :=: b)', () => {
+    const expr = parseExpr('a :=: b');
+    expect(expr.type).toBe('BinaryExpression');
+    if (expr.type === 'BinaryExpression') {
+      expect(expr.operator).toBe(':=:');
+    }
+  });
+
+  it('should parse instance inequality :<>: (x :<>: y)', () => {
+    const expr = parseExpr('x :<>: y');
+    expect(expr.type).toBe('BinaryExpression');
+    if (expr.type === 'BinaryExpression') {
+      expect(expr.operator).toBe(':<>:');
+    }
+  });
+
+  it('should parse IN (elem IN set)', () => {
+    const expr = parseExpr('elem IN set');
+    expect(expr.type).toBe('BinaryExpression');
+    if (expr.type === 'BinaryExpression') {
+      expect(expr.operator).toBe('IN');
+    }
+  });
+
+  it('should parse LIKE (str LIKE pattern)', () => {
+    const expr = parseExpr("str LIKE '%x%'");
+    expect(expr.type).toBe('BinaryExpression');
+    if (expr.type === 'BinaryExpression') {
+      expect(expr.operator).toBe('LIKE');
+    }
+  });
+
+  it('should parse concatenation || (a || b)', () => {
+    const expr = parseExpr('a || b');
+    expect(expr.type).toBe('BinaryExpression');
+    if (expr.type === 'BinaryExpression') {
+      expect(expr.operator).toBe('||');
     }
   });
 });
@@ -347,6 +396,32 @@ describe('Qualifiers', () => {
       expect(expr.root.type).toBe('SelfRef');
       expect(expr.qualifiers).toHaveLength(2);
     }
+  });
+});
+
+describe('Binary operators — DIV, MOD, XOR, ANDOR', () => {
+  it('should parse DIV', () => {
+    const expr = parseExpr('a DIV b');
+    expect(expr.type).toBe('BinaryExpression');
+    if (expr.type === 'BinaryExpression') expect(expr.operator).toBe('DIV');
+  });
+
+  it('should parse MOD', () => {
+    const expr = parseExpr('a MOD b');
+    expect(expr.type).toBe('BinaryExpression');
+    if (expr.type === 'BinaryExpression') expect(expr.operator).toBe('MOD');
+  });
+
+  it('should parse XOR', () => {
+    const expr = parseExpr('a XOR b');
+    expect(expr.type).toBe('BinaryExpression');
+    if (expr.type === 'BinaryExpression') expect(expr.operator).toBe('XOR');
+  });
+
+  it('should parse ANDOR', () => {
+    const expr = parseExpr('a ANDOR b');
+    expect(expr.type).toBe('BinaryExpression');
+    if (expr.type === 'BinaryExpression') expect(expr.operator).toBe('ANDOR');
   });
 });
 

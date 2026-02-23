@@ -47,6 +47,48 @@ describe('Error recovery', () => {
       expect(diagnostics.length).toBeGreaterThan(0);
       expect(ast.declarations.length).toBeGreaterThanOrEqual(1);
     });
+
+    it('should recover from missing END_FUNCTION with next declaration', () => {
+      const source = `
+        SCHEMA s;
+          FUNCTION f(x : INTEGER) : INTEGER; RETURN (x);
+          ENTITY e;
+            a : INTEGER;
+          END_ENTITY;
+        END_SCHEMA;
+      `;
+      const { ast, diagnostics } = parseExpress(source);
+      expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+      expect(ast.declarations.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should recover from missing END_PROCEDURE with next declaration', () => {
+      const source = `
+        SCHEMA s;
+          PROCEDURE p(x : INTEGER); x := 1;
+          ENTITY e;
+            a : INTEGER;
+          END_ENTITY;
+        END_SCHEMA;
+      `;
+      const { ast, diagnostics } = parseExpress(source);
+      expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+      expect(ast.declarations.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should recover from missing END_RULE with next declaration', () => {
+      const source = `
+        SCHEMA s;
+          RULE r FOR (e); WHERE wr1 : TRUE;
+          ENTITY e;
+            a : INTEGER;
+          END_ENTITY;
+        END_SCHEMA;
+      `;
+      const { ast, diagnostics } = parseExpress(source);
+      expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+      expect(ast.declarations.length).toBeGreaterThanOrEqual(1);
+    });
   });
 
   describe('Unexpected tokens in schema body', () => {
@@ -136,6 +178,32 @@ describe('Error recovery', () => {
       const { diagnostics } = parseExpress(source);
       expect(diagnostics.length).toBeGreaterThan(0);
     });
+
+    it('should recover from binary operator without right operand (x := a + ;)', () => {
+      const source = `
+        SCHEMA s;
+          FUNCTION f() : INTEGER;
+            x := a + ;
+            RETURN (0);
+          END_FUNCTION;
+        END_SCHEMA;
+      `;
+      const { diagnostics } = parseExpress(source);
+      expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should recover from unclosed parenthesis in expression (x := (1 + 2;)', () => {
+      const source = `
+        SCHEMA s;
+          FUNCTION f() : INTEGER;
+            x := (1 + 2;
+            RETURN (0);
+          END_FUNCTION;
+        END_SCHEMA;
+      `;
+      const { diagnostics } = parseExpress(source);
+      expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+    });
   });
 
   describe('Type error recovery', () => {
@@ -163,6 +231,64 @@ describe('Error recovery', () => {
       `;
       const { diagnostics } = parseExpress(source);
       expect(diagnostics.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Statement malformed', () => {
+    it('should recover from IF without THEN or END_IF', () => {
+      const source = `
+        SCHEMA s;
+          FUNCTION f() : INTEGER;
+            IF x > 0
+            RETURN (0);
+          END_FUNCTION;
+        END_SCHEMA;
+      `;
+      const { diagnostics } = parseExpress(source);
+      expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('should recover from REPEAT without END_REPEAT with next declaration', () => {
+      const source = `
+        SCHEMA s;
+          FUNCTION f() : INTEGER;
+            REPEAT i := 1 TO 10; x := 1;
+          END_FUNCTION;
+        END_SCHEMA;
+      `;
+      const { diagnostics } = parseExpress(source);
+      expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('Invalid type in aggregation', () => {
+    it('should recover from LIST OF ; (missing element type)', () => {
+      const source = `
+        SCHEMA s;
+          ENTITY foo;
+            x : LIST OF ;
+          END_ENTITY;
+        END_SCHEMA;
+      `;
+      const { diagnostics } = parseExpress(source);
+      expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('Multiple errors in one entity', () => {
+    it('should accumulate diagnostics for multiple missing semicolons in one entity', () => {
+      const source = `
+        SCHEMA s;
+          ENTITY foo;
+            a : INTEGER
+            b : REAL
+            c : STRING;
+          END_ENTITY;
+        END_SCHEMA;
+      `;
+      const { ast, diagnostics } = parseExpress(source);
+      expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+      expect(ast.declarations.length).toBeGreaterThanOrEqual(1);
     });
   });
 });

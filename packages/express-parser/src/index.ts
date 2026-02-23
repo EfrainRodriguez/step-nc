@@ -110,7 +110,11 @@ export {
   tokenEnd,
   tokenStart,
 } from './parser/types';
-export type { DiagnosticSeverity, ParseDiagnostic } from './parser/types';
+export type {
+  DiagnosticSeverity,
+  ParseDiagnostic,
+  ParseOptions,
+} from './parser/types';
 
 // Parser
 export { parseExpress } from './parser/parser';
