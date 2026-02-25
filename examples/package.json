@@ -20,7 +20,11 @@
     "step-factory:attributes-aggregations": "tsx step-factory/attributes-aggregations.ts",
     "step-factory:references": "tsx step-factory/references.ts",
     "step-factory:validate-model": "tsx step-factory/validate-model.ts",
-    "step-factory:diagnostics-record-clone": "tsx step-factory/diagnostics-record-clone.ts"
+    "step-factory:diagnostics-record-clone": "tsx step-factory/diagnostics-record-clone.ts",
+    "step-factory:expression-interpreter": "tsx step-factory/expression-interpreter.ts",
+    "step-factory:derived-and-where": "tsx step-factory/derived-and-where.ts",
+    "step-factory:unique-rules": "tsx step-factory/unique-rules.ts",
+    "step-factory:multi-schema": "tsx step-factory/multi-schema.ts"
   },
   "dependencies": {
     "@step-nc/express-parser": "workspace:*",

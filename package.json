@@ -34,7 +34,11 @@
     "example:query-entities": "pnpm --filter @step-nc/examples express-dictionary:query-entities",
     "example:query-types": "pnpm --filter @step-nc/examples express-dictionary:query-types",
     "example:registry": "pnpm --filter @step-nc/examples express-dictionary:registry",
-    "example:diagnostics": "pnpm --filter @step-nc/examples express-dictionary:diagnostics"
+    "example:diagnostics": "pnpm --filter @step-nc/examples express-dictionary:diagnostics",
+    "example:expression-interpreter": "pnpm --filter @step-nc/examples step-factory:expression-interpreter",
+    "example:derived-and-where": "pnpm --filter @step-nc/examples step-factory:derived-and-where",
+    "example:unique-rules": "pnpm --filter @step-nc/examples step-factory:unique-rules",
+    "example:multi-schema": "pnpm --filter @step-nc/examples step-factory:multi-schema"
   },
   "keywords": [
     "STEP-NC",
