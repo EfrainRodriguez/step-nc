@@ -14,11 +14,18 @@
     "express-dictionary:query-entities": "tsx express-dictionary/query-entities.ts",
     "express-dictionary:query-types": "tsx express-dictionary/query-types.ts",
     "express-dictionary:registry": "tsx express-dictionary/registry.ts",
-    "express-dictionary:diagnostics": "tsx express-dictionary/diagnostics.ts"
+    "express-dictionary:diagnostics": "tsx express-dictionary/diagnostics.ts",
+    "step-factory:build-model": "tsx step-factory/build-model.ts",
+    "step-factory:create-instances": "tsx step-factory/create-instances.ts",
+    "step-factory:attributes-aggregations": "tsx step-factory/attributes-aggregations.ts",
+    "step-factory:references": "tsx step-factory/references.ts",
+    "step-factory:validate-model": "tsx step-factory/validate-model.ts",
+    "step-factory:diagnostics-record-clone": "tsx step-factory/diagnostics-record-clone.ts"
   },
   "dependencies": {
     "@step-nc/express-parser": "workspace:*",
-    "@step-nc/express-dictionary": "workspace:*"
+    "@step-nc/express-dictionary": "workspace:*",
+    "@step-nc/step-factory": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.19.0",
