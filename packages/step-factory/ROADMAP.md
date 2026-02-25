@@ -1,6 +1,6 @@
 # step-factory — Roadmap
 
-## v0.1 (current)
+## v0.1
 - [x] Package scaffold, build config, type system
 - [x] InstanceId branded type, InstanceRef, SelectValue, StepAggregation types
 - [x] FactoryDiagnostic system (error, warning, info) with helpers
@@ -19,11 +19,21 @@
 - [x] High-level helpers: createAndPopulate, cloneInstance, instanceToRecord
 - [x] Integration tests with test-geometry.exp and SDAI-dictionary_schema.exp
 
-## v0.2 (future)
-- [ ] Multi-schema support (USE/REFERENCE between schemas)
-- [ ] Unique rules validation across instances
-- [ ] WHERE rules evaluation with expression interpreter
-- [ ] DERIVED attribute computation
+## v0.2 (current)
+- [x] Expression interpreter (arithmetic, comparisons, logical, built-in functions, QUERY)
+- [x] DERIVED attribute computation (lazy evaluation, sin cache)
+- [x] WHERE rules evaluation with expression interpreter
+- [x] Unique rules validation across instances (hash-map approach)
+- [x] Multi-schema support (USE/REFERENCE via SchemaRegistry, single StepModel)
+
+## v0.2.1 (next)
+- [ ] User-defined function evaluation in expression interpreter
+- [ ] DERIVED attribute caching with invalidation
+- [ ] EntityConstructor support in expressions
+
+## v0.2.2 (future)
+- [ ] Cross-schema inverse attribute resolution
+- [ ] LIKE operator pattern matching (full regex support)
 
 ## v0.3 (future)
 - [ ] Transactions (batch create/rollback)

@@ -12,7 +12,11 @@ export type FactoryDiagnosticCode =
   | 'INVALID_ENUM_VALUE'
   | 'INVALID_SELECT_PATH'
   | 'DUPLICATE_INSTANCE_ID'
-  | 'DANGLING_REFERENCE';
+  | 'DANGLING_REFERENCE'
+  | 'UNIQUE_VIOLATION'
+  | 'WHERE_RULE_VIOLATION'
+  | 'DERIVED_COMPUTATION_ERROR'
+  | 'EXPRESSION_EVAL_ERROR';
 
 export interface FactoryDiagnostic {
   readonly severity: FactoryDiagnosticSeverity;

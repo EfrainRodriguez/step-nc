@@ -57,6 +57,14 @@ export {
   isValueCompatible,
 } from './attributes/type-mapping';
 
+// ── DERIVED attributes ───────────────────────────────────────────────
+export {
+  getDerivedAttribute,
+  getDerivedAttributeNames,
+  hasDerivedAttribute,
+} from './attributes/derived-access';
+export type { DerivedAttributeResult } from './attributes/derived-access';
+
 // ── Aggregations ──────────────────────────────────────────────────────
 export {
   addToAggregation,
@@ -86,12 +94,19 @@ export {
   validateReferences,
 } from './references/reference-resolver';
 
+// ── Interpreter ──────────────────────────────────────────────────────
+export { evaluate } from './interpreter/evaluate';
+export { EVAL_INDETERMINATE, EvalError } from './interpreter/types';
+export type { EvalContext, EvalValue } from './interpreter/types';
+
 // ── Validation ────────────────────────────────────────────────────────
 export {
   isInstanceComplete,
   validateInstance,
 } from './validation/validate-instance';
 export { validateModel } from './validation/validate-model';
+export { validateUniqueRules } from './validation/validate-unique-rules';
+export { validateWhereRules } from './validation/validate-where-rules';
 
 // ── Helpers ───────────────────────────────────────────────────────────
 export {

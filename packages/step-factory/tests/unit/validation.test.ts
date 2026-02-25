@@ -106,7 +106,7 @@ describe('Validation', () => {
       expect(errors.every((d) => d.instanceId === ptBad!.id)).toBe(true);
     });
 
-    it('should return only info diagnostic for all-valid model', () => {
+    it('should return no error diagnostics for all-valid model', () => {
       const { instance: pt } = model.createInstance('cartesian_point');
       setAttribute(pt!, 'name', 'P1');
       setAttribute(pt!, 'coordinates', createList([0, 0, 0]));
@@ -114,9 +114,6 @@ describe('Validation', () => {
       const diags = validateModel(model);
       const errors = diags.filter((d) => d.severity === 'error');
       expect(errors).toHaveLength(0);
-
-      const infos = diags.filter((d) => d.severity === 'info');
-      expect(infos.length).toBeGreaterThanOrEqual(1);
     });
   });
 

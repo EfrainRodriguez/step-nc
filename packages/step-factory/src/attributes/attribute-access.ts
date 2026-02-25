@@ -1,4 +1,5 @@
 import type { ExpressSchema } from '@step-nc/express-dictionary';
+import { getAllDerivedAttributes } from '@step-nc/express-dictionary';
 import type { FactoryDiagnostic } from '../diagnostics';
 import { errorDiag } from '../diagnostics';
 import type { EntityInstance } from '../types/instance';
@@ -16,7 +17,11 @@ export function hasAttribute(
   instance: EntityInstance,
   attrName: string,
 ): boolean {
-  return instance.attributes.has(attrName.toUpperCase());
+  const key = attrName.toUpperCase();
+  if (instance.attributes.has(key)) return true;
+
+  const allDerived = getAllDerivedAttributes(instance.definition);
+  return allDerived.some((d) => d.name.toUpperCase() === key);
 }
 
 export function setAttribute(
@@ -27,6 +32,23 @@ export function setAttribute(
 ): FactoryDiagnostic[] {
   const key = attrName.toUpperCase();
   const diagnostics: FactoryDiagnostic[] = [];
+
+  const allDerived = getAllDerivedAttributes(instance.definition);
+  const isDerived = allDerived.some((d) => d.name.toUpperCase() === key);
+  if (isDerived) {
+    diagnostics.push(
+      errorDiag(
+        'UNKNOWN_ATTRIBUTE',
+        `Attribute '${attrName}' is a DERIVED attribute on entity '${instance.typeName}' and cannot be set directly`,
+        {
+          instanceId: instance.id,
+          entityName: instance.typeName,
+          attributeName: key,
+        },
+      ),
+    );
+    return diagnostics;
+  }
 
   if (!instance.attributes.has(key)) {
     diagnostics.push(

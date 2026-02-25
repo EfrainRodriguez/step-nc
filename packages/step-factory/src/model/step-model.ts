@@ -1,6 +1,7 @@
 import type {
   EntityDefinition,
   ExpressSchema,
+  SchemaRegistry,
 } from '@step-nc/express-dictionary';
 import {
   getAllAttributes,
@@ -20,6 +21,7 @@ export interface CreateInstanceResult {
 
 export class StepModel {
   readonly schema: ExpressSchema;
+  readonly registry?: SchemaRegistry;
 
   private _nextId: number;
   private readonly _instances = new Map<InstanceId, EntityInstance>();
@@ -27,6 +29,9 @@ export class StepModel {
 
   constructor(schema: ExpressSchema, options?: StepModelOptions) {
     this.schema = schema;
+    if (options?.registry !== undefined) {
+      this.registry = options.registry;
+    }
     this._nextId = options?.initialId ?? 1;
   }
 
@@ -36,6 +41,10 @@ export class StepModel {
 
   getEntityDefinition(entityName: string): EntityDefinition | undefined {
     return this._resolveEntity(entityName);
+  }
+
+  getEntityOriginSchema(instance: EntityInstance): string {
+    return instance.definition.schema.name;
   }
 
   createInstance(entityName: string): CreateInstanceResult {

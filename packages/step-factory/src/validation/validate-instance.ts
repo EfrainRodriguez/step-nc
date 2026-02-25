@@ -18,6 +18,7 @@ import {
   isSelectValue,
   isStepAggregation,
 } from '../types/values';
+import { validateWhereRules } from './validate-where-rules';
 
 export function validateInstance(
   instance: EntityInstance,
@@ -115,6 +116,9 @@ export function validateInstance(
       }
     }
   }
+
+  const whereRuleDiags = validateWhereRules(instance, model);
+  diagnostics.push(...whereRuleDiags);
 
   return diagnostics;
 }

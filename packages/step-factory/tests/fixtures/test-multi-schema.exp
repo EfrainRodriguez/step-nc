@@ -1,0 +1,20 @@
+SCHEMA GEOMETRY_BASE;
+
+  ENTITY base_point;
+    x, y, z : REAL;
+  END_ENTITY;
+
+  TYPE label = STRING;
+  END_TYPE;
+
+END_SCHEMA;
+
+SCHEMA GEOMETRY_EXTENDED;
+
+  USE FROM GEOMETRY_BASE;
+
+  ENTITY colored_point SUBTYPE OF (base_point);
+    color_name : label;
+  END_ENTITY;
+
+END_SCHEMA;

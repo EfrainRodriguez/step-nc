@@ -1,8 +1,8 @@
 import type { FactoryDiagnostic } from '../diagnostics';
-import { infoDiag } from '../diagnostics';
 import type { StepModel } from '../model/step-model';
 import { validateReferences } from '../references/reference-resolver';
 import { validateInstance } from './validate-instance';
+import { validateUniqueRules } from './validate-unique-rules';
 
 export function validateModel(model: StepModel): FactoryDiagnostic[] {
   const diagnostics: FactoryDiagnostic[] = [];
@@ -24,12 +24,8 @@ export function validateModel(model: StepModel): FactoryDiagnostic[] {
     }
   }
 
-  diagnostics.push(
-    infoDiag(
-      'BOUNDS_VIOLATION',
-      'Unique rules validation is not yet implemented (planned for v0.2)',
-    ),
-  );
+  const uniqueDiags = validateUniqueRules(model);
+  diagnostics.push(...uniqueDiags);
 
   return diagnostics;
 }

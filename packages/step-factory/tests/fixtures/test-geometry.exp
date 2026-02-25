@@ -15,6 +15,9 @@ SCHEMA TEST_GEOMETRY;
   TYPE label = STRING;
   END_TYPE;
 
+  TYPE value = REAL;
+  END_TYPE;
+
   -- Abstract root entity (to test ABSTRACT_INSTANTIATION)
   ENTITY geometric_representation_item ABSTRACT SUPERTYPE OF (ONEOF(point, direction, curve));
     name : label;
@@ -58,6 +61,48 @@ SCHEMA TEST_GEOMETRY;
   ENTITY styled_item;
     item   : geometric_select;
     colour : OPTIONAL colour_rgb;
+  END_ENTITY;
+
+  -- Entity with UNIQUE rule
+  ENTITY named_unit;
+    name   : STRING;
+    symbol : STRING;
+  UNIQUE
+    ur1 : name;
+  END_ENTITY;
+
+  -- Entity with WHERE rule
+  ENTITY positive_length_measure SUBTYPE OF (geometric_representation_item);
+    value : value;
+  WHERE
+    wr1 : value > 0.0;
+  END_ENTITY;
+
+  -- Entity with multiple WHERE rules
+  ENTITY normalized_vector SUBTYPE OF (geometric_representation_item);
+    components : LIST [2:3] OF REAL;
+  WHERE
+    wr1 : SIZEOF(components) >= 2;
+    wr2 : SIZEOF(components) <= 3;
+  END_ENTITY;
+
+  -- Entity with DERIVED attribute and WHERE rule
+  ENTITY vector SUBTYPE OF (geometric_representation_item);
+    orientation : direction;
+    magnitude   : REAL;
+  DERIVE
+    dim : INTEGER := SIZEOF(orientation.direction_ratios);
+  WHERE
+    wr1 : magnitude >= 0.0;
+  END_ENTITY;
+
+  -- Entity with compound UNIQUE rule (multi-attribute)
+  ENTITY property_value;
+    property_name : STRING;
+    unit          : named_unit;
+    value         : value;
+  UNIQUE
+    ur1 : property_name, unit;
   END_ENTITY;
 
 END_SCHEMA;
