@@ -11,39 +11,47 @@ export type { BuildResult } from './registry/schema-registry';
 
 // ── Semantic Model Types ──────────────────────────────────────────────
 export type {
-  AggregationBounds,
-  AggregationKind,
-  AggregationTypeDescriptor,
-  ConstantDefinition,
-  DefinedTypeDescriptor,
   DerivedAttribute,
-  EntityDefinition,
-  EntityTypeDescriptor,
-  EnumerationTypeDescriptor,
   ExplicitAttribute,
-  ExpressSchema,
-  FunctionDefinition,
-  GenericEntityTypeDescriptor,
-  GenericTypeDescriptor,
-  InterfaceItemSpec,
-  InterfaceSpec,
   InverseAttribute,
-  NamedTypeReference,
+} from './types/attribute';
+export type {
+  ConstantDefinition,
+  FunctionDefinition,
   ParameterDefinition,
   ProcedureDefinition,
   RuleDefinition,
+} from './types/callable';
+export type {
+  InterfaceItemSpec,
+  InterfaceSpec,
+  NamedTypeReference,
+} from './types/common';
+export type {
+  SubtypeConstraintDefinition,
+  SupertypeExpressionInfo,
+  UniqueRuleDefinition,
+  WhereRuleDefinition,
+} from './types/constraint';
+export type { EntityDefinition } from './types/entity';
+export type { ExpressSchema } from './types/schema';
+export type { TypeDefinition } from './types/type-definition';
+export type {
+  AggregationBounds,
+  AggregationKind,
+  AggregationTypeDescriptor,
+  DefinedTypeDescriptor,
+  EntityTypeDescriptor,
+  EnumerationTypeDescriptor,
+  GenericEntityTypeDescriptor,
+  GenericTypeDescriptor,
   SelectionItem,
   SelectTypeDescriptor,
   SimpleTypeDescriptor,
   SimpleTypeName,
-  SubtypeConstraintDefinition,
-  SupertypeExpressionInfo,
-  TypeDefinition,
   TypeDescriptor,
-  UniqueRuleDefinition,
   UnresolvedTypeDescriptor,
-  WhereRuleDefinition,
-} from './types';
+} from './types/type-descriptor';
 
 // ── Diagnostics ───────────────────────────────────────────────────────
 export {
@@ -63,15 +71,6 @@ export type {
 
 // ── Query API ─────────────────────────────────────────────────────────
 export {
-  getAllEntities,
-  getAllTypes,
-  getEntity,
-  getInstantiableEntities,
-  getNamedType,
-  getType,
-} from './query/schema-query';
-
-export {
   getAllAttributes,
   getAllDerivedAttributes,
   getAllInverseAttributes,
@@ -83,7 +82,14 @@ export {
   isInstantiable,
   isSubtypeOf,
 } from './query/entity-query';
-
+export {
+  getAllEntities,
+  getAllTypes,
+  getEntity,
+  getInstantiableEntities,
+  getNamedType,
+  getType,
+} from './query/schema-query';
 export {
   getSelectOptions,
   isAggregationType,
