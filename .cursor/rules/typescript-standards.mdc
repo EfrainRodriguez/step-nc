@@ -66,6 +66,7 @@ throw new Error(`Lexer not initialized: missing token array`);
 
 - Exportar solo lo necesario para el usuario del toolkit; el resto puede ser interno al paquete.
 - Usar `index.ts` como barril con re-exports ordenados (agrupar por categoría; ver regla de comentarios).
+- Usar barril solo en el punto de entrada del paquete no en las subcarpetas.
 
 ## 7. Tests y tipos
 

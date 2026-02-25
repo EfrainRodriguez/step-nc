@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@step-nc/express-parser": ["../express-parser/dist"],
+      "@step-nc/express-dictionary": ["../express-dictionary/dist"]
+    }
+  },
+  "include": ["src", "tests"],
+  "exclude": ["dist", "node_modules"]
+}

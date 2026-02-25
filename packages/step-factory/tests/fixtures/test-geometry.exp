@@ -1,0 +1,63 @@
+SCHEMA TEST_GEOMETRY;
+
+  -- Enumeration
+  TYPE axis_placement_type = ENUMERATION OF (axis2_2d, axis2_3d);
+  END_TYPE;
+
+  -- SELECT type
+  TYPE geometric_select = SELECT (point, line, direction);
+  END_TYPE;
+
+  -- Defined type (alias)
+  TYPE length_measure = REAL;
+  END_TYPE;
+
+  TYPE label = STRING;
+  END_TYPE;
+
+  -- Abstract root entity (to test ABSTRACT_INSTANTIATION)
+  ENTITY geometric_representation_item ABSTRACT SUPERTYPE OF (ONEOF(point, direction, curve));
+    name : label;
+  END_ENTITY;
+
+  -- Entity with inheritance and LIST aggregation
+  ENTITY point SUPERTYPE OF (cartesian_point) SUBTYPE OF (geometric_representation_item);
+  END_ENTITY;
+
+  ENTITY cartesian_point SUBTYPE OF (point);
+    coordinates : LIST [1:3] OF length_measure;
+  END_ENTITY;
+
+  ENTITY direction SUBTYPE OF (geometric_representation_item);
+    direction_ratios : LIST [2:3] OF REAL;
+  END_ENTITY;
+
+  -- Abstract intermediate entity
+  ENTITY curve ABSTRACT SUPERTYPE OF (ONEOF(line)) SUBTYPE OF (geometric_representation_item);
+  END_ENTITY;
+
+  -- Entity with entity reference and optional attribute
+  ENTITY line SUBTYPE OF (curve);
+    pnt       : cartesian_point;
+    dir       : direction;
+    magnitude : OPTIONAL length_measure;
+  END_ENTITY;
+
+  -- Entity with SET aggregation
+  ENTITY geometric_set SUBTYPE OF (geometric_representation_item);
+    elements : SET [1:?] OF geometric_select;
+  END_ENTITY;
+
+  -- Standalone entity (no inheritance)
+  ENTITY colour_rgb;
+    red   : REAL;
+    green : REAL;
+    blue  : REAL;
+  END_ENTITY;
+
+  ENTITY styled_item;
+    item   : geometric_select;
+    colour : OPTIONAL colour_rgb;
+  END_ENTITY;
+
+END_SCHEMA;
