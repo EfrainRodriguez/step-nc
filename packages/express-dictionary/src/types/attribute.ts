@@ -1,0 +1,32 @@
+import type { ExpressionNode } from '@step-nc/express-parser';
+import type { TypeDescriptor } from './type-descriptor';
+
+/** Forward reference to EntityDefinition to break circular deps */
+export interface EntityDefinitionHost {
+  readonly name: string;
+}
+
+export interface ExplicitAttribute {
+  readonly name: string;
+  parentEntity: EntityDefinitionHost;
+  type: TypeDescriptor;
+  readonly optional: boolean;
+  redeclaring?: ExplicitAttribute;
+}
+
+export interface DerivedAttribute {
+  readonly name: string;
+  parentEntity: EntityDefinitionHost;
+  type: TypeDescriptor;
+  readonly expression: ExpressionNode;
+}
+
+export interface InverseAttribute {
+  readonly name: string;
+  parentEntity: EntityDefinitionHost;
+  type: TypeDescriptor;
+  invertedEntity?: EntityDefinitionHost;
+  invertedAttribute?: ExplicitAttribute;
+  readonly invertedEntityName: string;
+  readonly invertedAttributeName: string;
+}

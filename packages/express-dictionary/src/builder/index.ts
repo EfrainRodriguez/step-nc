@@ -1,0 +1,10 @@
+export { buildInheritance } from './build-inheritance';
+export { buildSchema } from './build-schema';
+export type { BuildSchemaOptions, BuildSchemaResult } from './build-schema';
+export { collectDeclarations } from './collect-declarations';
+export type { CollectionResult } from './collect-declarations';
+export { resolveConstraints } from './resolve-constraints';
+export { resolveInverse } from './resolve-inverse';
+export { buildSymbolTable, resolveTypes } from './resolve-types';
+export type { SymbolTable } from './resolve-types';
+export { buildTypeDescriptor } from './type-descriptor-builder';

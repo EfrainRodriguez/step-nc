@@ -1,0 +1,84 @@
+import { resolveTypes } from '../builder/resolve-types';
+import type { SchemaDiagnostic } from '../diagnostics';
+import { errorDiagnostic } from '../diagnostics';
+import type { ExpressSchema } from '../types/schema';
+
+export function resolveInterfaces(
+  schemas: Map<string, ExpressSchema>,
+): SchemaDiagnostic[] {
+  const diagnostics: SchemaDiagnostic[] = [];
+
+  for (const schema of schemas.values()) {
+    for (const iface of schema.interfaces) {
+      const sourceKey = iface.schemaName.toUpperCase();
+      const sourceSchema = schemas.get(sourceKey);
+
+      if (!sourceSchema) {
+        diagnostics.push(
+          errorDiagnostic(
+            'UNRESOLVED_SCHEMA_REF',
+            `Schema "${iface.schemaName}" not found (referenced by "${schema.name}")`,
+            { schemaName: schema.name },
+          ),
+        );
+        continue;
+      }
+
+      if (!iface.items || iface.items.length === 0) {
+        // Import everything from source schema
+        importAll(schema, sourceSchema, iface.kind);
+      } else {
+        for (const item of iface.items) {
+          const itemKey = item.name.toUpperCase();
+          const localName = item.alias ?? item.name;
+          const localKey = localName.toUpperCase();
+
+          const entity = sourceSchema.entities.get(itemKey);
+          const typeDef = sourceSchema.types.get(itemKey);
+
+          if (entity) {
+            schema.entities.set(localKey, entity);
+          } else if (typeDef) {
+            schema.types.set(localKey, typeDef);
+          } else {
+            diagnostics.push(
+              errorDiagnostic(
+                'UNRESOLVED_INTERFACE_ITEM',
+                `Item "${item.name}" not found in schema "${sourceSchema.name}"`,
+                { schemaName: schema.name },
+              ),
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // Re-resolve types for all schemas that had interfaces
+  for (const schema of schemas.values()) {
+    if (schema.interfaces.length > 0) {
+      const resolveDiags = resolveTypes(schema);
+      diagnostics.push(...resolveDiags);
+    }
+  }
+
+  return diagnostics;
+}
+
+function importAll(
+  target: ExpressSchema,
+  source: ExpressSchema,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _kind: 'use' | 'reference',
+): void {
+  for (const [key, entity] of source.entities) {
+    if (!target.entities.has(key)) {
+      target.entities.set(key, entity);
+    }
+  }
+  for (const [key, typeDef] of source.types) {
+    if (!target.types.has(key)) {
+      target.types.set(key, typeDef);
+    }
+  }
+}
