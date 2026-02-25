@@ -87,6 +87,8 @@ export function setAttribute(
     key,
     value,
   );
+  // Invalidate derived-attribute cache on any explicit attribute change
+  instance._derivedCache.clear();
   return diagnostics;
 }
 

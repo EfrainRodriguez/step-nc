@@ -19,21 +19,22 @@
 - [x] High-level helpers: createAndPopulate, cloneInstance, instanceToRecord
 - [x] Integration tests with test-geometry.exp and SDAI-dictionary_schema.exp
 
-## v0.2 (current)
+## v0.2
 - [x] Expression interpreter (arithmetic, comparisons, logical, built-in functions, QUERY)
 - [x] DERIVED attribute computation (lazy evaluation, sin cache)
 - [x] WHERE rules evaluation with expression interpreter
 - [x] Unique rules validation across instances (hash-map approach)
 - [x] Multi-schema support (USE/REFERENCE via SchemaRegistry, single StepModel)
 
-## v0.2.1 (next)
-- [ ] User-defined function evaluation in expression interpreter
-- [ ] DERIVED attribute caching with invalidation
-- [ ] EntityConstructor support in expressions
+## v0.2.1
+- [x] User-defined function evaluation in expression interpreter
+- [x] DERIVED attribute caching with invalidation
+- [x] EntityConstructor support in expressions
 
 ## v0.2.2 (future)
 - [ ] Cross-schema inverse attribute resolution
 - [ ] LIKE operator pattern matching (full regex support)
+- [ ] User-defined function recursion depth limit (currently unbounded)
 
 ## v0.3 (future)
 - [ ] Transactions (batch create/rollback)

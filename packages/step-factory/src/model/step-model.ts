@@ -168,6 +168,7 @@ export class StepModel {
       typeName: definition.name.toUpperCase(),
       attributes,
       attributeDefinitions,
+      _derivedCache: new Map(),
     };
 
     this._instances.set(id, instance);

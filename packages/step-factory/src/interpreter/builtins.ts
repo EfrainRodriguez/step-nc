@@ -1,7 +1,11 @@
 import { getSupertypeChain } from '@step-nc/express-dictionary';
 import { findReferencesTo } from '../references/reference-resolver';
 import type { EntityInstance } from '../types/instance';
-import type { InstanceId, StepAggregation } from '../types/values';
+import type {
+  AttributeValue,
+  InstanceId,
+  StepAggregation,
+} from '../types/values';
 import { isInstanceRef, isStepAggregation } from '../types/values';
 import { EVAL_INDETERMINATE, type EvalContext, type EvalValue } from './types';
 
@@ -9,7 +13,7 @@ type BuiltinFn = (args: EvalValue[], ctx: EvalContext) => EvalValue;
 
 function getAggregateElements(val: EvalValue): EvalValue[] | undefined {
   if (Array.isArray(val)) return val;
-  if (isStepAggregation(val as import('../types/values').AttributeValue)) {
+  if (isStepAggregation(val as AttributeValue)) {
     return [...(val as unknown as StepAggregation).elements] as EvalValue[];
   }
   return undefined;
@@ -126,7 +130,7 @@ const builtinSizeof: BuiltinFn = (args) => {
 const builtinHiindex: BuiltinFn = (args) => {
   const agg = args[0];
   if (Array.isArray(agg)) return agg.length;
-  if (isStepAggregation(agg as import('../types/values').AttributeValue)) {
+  if (isStepAggregation(agg as AttributeValue)) {
     const a = agg as unknown as StepAggregation;
     if (a.kind === 'array') {
       return (a as { lowerIndex: number }).lowerIndex + a.elements.length - 1;
@@ -139,7 +143,7 @@ const builtinHiindex: BuiltinFn = (args) => {
 const builtinLoindex: BuiltinFn = (args) => {
   const agg = args[0];
   if (Array.isArray(agg)) return 1;
-  if (isStepAggregation(agg as import('../types/values').AttributeValue)) {
+  if (isStepAggregation(agg as AttributeValue)) {
     const a = agg as unknown as StepAggregation;
     if (a.kind === 'array') {
       return (a as { lowerIndex: number }).lowerIndex;
@@ -161,7 +165,7 @@ const builtinLobound: BuiltinFn = (args) => {
   const agg = args[0];
   if (agg === undefined) return EVAL_INDETERMINATE;
   if (Array.isArray(agg)) return 0;
-  if (isStepAggregation(agg as import('../types/values').AttributeValue)) {
+  if (isStepAggregation(agg as AttributeValue)) {
     const a = agg as unknown as StepAggregation;
     if (a.kind === 'array') {
       return (a as { lowerIndex: number }).lowerIndex;
@@ -185,7 +189,7 @@ const builtinTypeof: BuiltinFn = (args, ctx) => {
     for (const sup of chain) {
       result.push(`${schemaName}.${sup.name.toUpperCase()}`);
     }
-  } else if (isInstanceRef(v as import('../types/values').AttributeValue)) {
+  } else if (isInstanceRef(v as AttributeValue)) {
     const ref = v as unknown as { entityName: string };
     const schemaName = ctx.schema.name.toUpperCase();
     result.push(`${schemaName}.${ref.entityName.toUpperCase()}`);

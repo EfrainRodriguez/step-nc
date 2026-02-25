@@ -235,6 +235,11 @@ function collectFunction(
     schema,
     parameters: params,
     returnType: buildTypeDescriptor(node.returnType),
+    ...(node.body.length > 0 && { body: node.body }),
+    ...(node.declarations &&
+      node.declarations.length > 0 && {
+        localDeclarations: node.declarations,
+      }),
   };
 
   registerWithDuplicateCheck(

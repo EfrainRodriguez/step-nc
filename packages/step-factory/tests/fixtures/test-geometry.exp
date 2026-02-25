@@ -105,4 +105,42 @@ SCHEMA TEST_GEOMETRY;
     ur1 : property_name, unit;
   END_ENTITY;
 
+  -- User-defined functions for interpreter tests
+
+  FUNCTION circle_area(r : REAL) : REAL;
+    RETURN(3.14159265358979 * r * r);
+  END_FUNCTION;
+
+  FUNCTION clamp(val : REAL; lo : REAL; hi : REAL) : REAL;
+    IF val < lo THEN
+      RETURN(lo);
+    ELSE
+      IF val > hi THEN
+        RETURN(hi);
+      ELSE
+        RETURN(val);
+      END_IF;
+    END_IF;
+  END_FUNCTION;
+
+  FUNCTION factorial(n : INTEGER) : INTEGER;
+  LOCAL
+    result : INTEGER := 1;
+    i : INTEGER := 2;
+  END_LOCAL;
+    REPEAT WHILE i <= n;
+      result := result * i;
+      i := i + 1;
+    END_REPEAT;
+    RETURN(result);
+  END_FUNCTION;
+
+  FUNCTION grade(score : INTEGER) : STRING;
+    CASE score OF
+      10 : RETURN('A');
+      9  : RETURN('B');
+      OTHERWISE : RETURN('C');
+    END_CASE;
+  END_FUNCTION;
+
 END_SCHEMA;

@@ -1,12 +1,18 @@
-import { getAllDerivedAttributes } from '@step-nc/express-dictionary';
+import {
+  getAllAttributes,
+  getAllDerivedAttributes,
+} from '@step-nc/express-dictionary';
 import type { ExpressionNode } from '@step-nc/express-parser';
 import { resolveRef } from '../references/reference-resolver';
 import type { EntityInstance } from '../types/instance';
+import type { AttributeValue, InstanceId, InstanceRef } from '../types/values';
 import { isInstanceRef } from '../types/values';
 import { builtins } from './builtins';
+import { executeStatements } from './execute-statements';
 import { applyBinaryOperator, applyUnaryOperator } from './operators';
 import {
   EVAL_INDETERMINATE,
+  EXEC_RETURN,
   EvalError,
   type EvalContext,
   type EvalValue,
@@ -70,7 +76,7 @@ export function evaluate(expr: ExpressionNode, ctx: EvalContext): EvalValue {
       return evaluateInterval(expr, ctx);
 
     case 'EntityConstructor':
-      return EVAL_INDETERMINATE;
+      return evaluateEntityConstructor(expr, ctx);
 
     default:
       throw new EvalError(
@@ -146,14 +152,8 @@ function evaluateQualifiedRef(
       case 'AttributeRef': {
         const attrName = qualifier.name.toUpperCase();
         // Resolve InstanceRef to EntityInstance when model is available
-        if (
-          ctx.model &&
-          isInstanceRef(current as import('../types/values').AttributeValue)
-        ) {
-          const resolved = resolveRef(
-            ctx.model,
-            current as import('../types/values').InstanceRef,
-          );
+        if (ctx.model && isInstanceRef(current as AttributeValue)) {
+          const resolved = resolveRef(ctx.model, current as InstanceRef);
           if (resolved) current = resolved as unknown as EvalValue;
         }
         const instance = toEntityInstance(current);
@@ -238,6 +238,43 @@ function evaluateFunctionCall(
   }
 
   if (ctx.schema.functions.has(fnName)) {
+    const funcDef = ctx.schema.functions.get(fnName)!;
+
+    if (!funcDef.body || funcDef.body.length === 0) {
+      // No body available (e.g. imported function without AST)
+      return EVAL_INDETERMINATE;
+    }
+
+    // Build local variable frame: bind parameters
+    const localVars = new Map<string, EvalValue>();
+    funcDef.parameters.forEach((param, index) => {
+      localVars.set(
+        param.name.toUpperCase(),
+        args[index] ?? EVAL_INDETERMINATE,
+      );
+    });
+
+    // Initialize local variables declared in the function header
+    if (funcDef.localDeclarations) {
+      for (const decl of funcDef.localDeclarations) {
+        if (decl.type === 'LocalVariable') {
+          // Each LocalVariableNode declares exactly one variable
+          const initVal = decl.initialValue
+            ? evaluate(decl.initialValue, { ...ctx, variables: localVars })
+            : EVAL_INDETERMINATE;
+          localVars.set(decl.name.toUpperCase(), initVal);
+        }
+      }
+    }
+
+    const funcCtx: EvalContext = { ...ctx, variables: localVars };
+    const signal = executeStatements(funcDef.body, funcCtx);
+
+    if (signal !== undefined && signal.kind === EXEC_RETURN) {
+      return signal.value;
+    }
+
+    // Function body completed without RETURN — indeterminate result
     return EVAL_INDETERMINATE;
   }
 
@@ -357,6 +394,51 @@ function isAggregation(val: EvalValue): boolean {
     'kind' in val &&
     'elements' in val
   );
+}
+
+function evaluateEntityConstructor(
+  expr: ExpressionNode & { type: 'EntityConstructor' },
+  ctx: EvalContext,
+): EvalValue {
+  const entityName = expr.entity.toUpperCase();
+  const entityDef = ctx.schema.entities.get(entityName);
+
+  if (!entityDef) {
+    throw new EvalError(
+      `EntityConstructor: unknown entity '${expr.entity}'`,
+      expr,
+    );
+  }
+
+  // getAllAttributes returns only ExplicitAttribute[] (no derived/inverse)
+  const explicitAttrs = getAllAttributes(entityDef);
+  const args = expr.args.map((a) => evaluate(a, ctx));
+
+  if (args.length !== explicitAttrs.length) {
+    throw new EvalError(
+      `EntityConstructor '${expr.entity}': expected ${explicitAttrs.length} arguments, got ${args.length}`,
+      expr,
+    );
+  }
+
+  // Build temporary EntityInstance (id=0, not registered in any StepModel)
+  const attributes = new Map<string, AttributeValue | undefined>();
+  explicitAttrs.forEach((attr, index) => {
+    attributes.set(attr.name.toUpperCase(), args[index] as AttributeValue);
+  });
+
+  const tempInstance: EntityInstance = {
+    id: 0 as InstanceId,
+    definition: entityDef,
+    typeName: entityDef.name.toUpperCase(),
+    attributes,
+    attributeDefinitions: new Map(
+      explicitAttrs.map((a) => [a.name.toUpperCase(), a]),
+    ),
+    _derivedCache: new Map(),
+  };
+
+  return tempInstance as unknown as EvalValue;
 }
 
 function getBuiltinFunction(

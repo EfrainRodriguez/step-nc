@@ -21,6 +21,12 @@ export function getDerivedAttribute(
   model: StepModel,
 ): DerivedAttributeResult {
   const key = attrName.toUpperCase();
+
+  // Return cached value if present (cache is invalidated on setAttribute)
+  if (instance._derivedCache.has(key)) {
+    return { value: instance._derivedCache.get(key), diagnostics: [] };
+  }
+
   const allDerived = getAllDerivedAttributes(instance.definition);
   const derivedAttr = allDerived.find((d) => d.name.toUpperCase() === key);
 
@@ -36,6 +42,7 @@ export function getDerivedAttribute(
 
   try {
     const value = evaluate(derivedAttr.expression, ctx);
+    instance._derivedCache.set(key, value);
     return { value, diagnostics: [] };
   } catch (err) {
     const message =
