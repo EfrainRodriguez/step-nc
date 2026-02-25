@@ -9,10 +9,16 @@
     "express-parser:visit-entities": "tsx express-parser/visit-entities.ts",
     "express-parser:walk-count": "tsx express-parser/walk-count.ts",
     "express-parser:parse-invalid": "tsx express-parser/parse-invalid.ts",
-    "express-parser:parse-with-options": "tsx express-parser/parse-with-options.ts"
+    "express-parser:parse-with-options": "tsx express-parser/parse-with-options.ts",
+    "express-dictionary:build-schema": "tsx express-dictionary/build-schema.ts",
+    "express-dictionary:query-entities": "tsx express-dictionary/query-entities.ts",
+    "express-dictionary:query-types": "tsx express-dictionary/query-types.ts",
+    "express-dictionary:registry": "tsx express-dictionary/registry.ts",
+    "express-dictionary:diagnostics": "tsx express-dictionary/diagnostics.ts"
   },
   "dependencies": {
-    "@step-nc/express-parser": "workspace:*"
+    "@step-nc/express-parser": "workspace:*",
+    "@step-nc/express-dictionary": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.19.0",

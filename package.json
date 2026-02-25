@@ -29,7 +29,12 @@
     "example:visit": "pnpm --filter @step-nc/examples express-parser:visit-entities",
     "example:walk": "pnpm --filter @step-nc/examples express-parser:walk-count",
     "example:options": "pnpm --filter @step-nc/examples express-parser:parse-with-options",
-    "example:invalid": "pnpm --filter @step-nc/examples express-parser:parse-invalid"
+    "example:invalid": "pnpm --filter @step-nc/examples express-parser:parse-invalid",
+    "example:build-schema": "pnpm --filter @step-nc/examples express-dictionary:build-schema",
+    "example:query-entities": "pnpm --filter @step-nc/examples express-dictionary:query-entities",
+    "example:query-types": "pnpm --filter @step-nc/examples express-dictionary:query-types",
+    "example:registry": "pnpm --filter @step-nc/examples express-dictionary:registry",
+    "example:diagnostics": "pnpm --filter @step-nc/examples express-dictionary:diagnostics"
   },
   "keywords": [
     "STEP-NC",
