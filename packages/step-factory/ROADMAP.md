@@ -32,9 +32,9 @@
 - [x] EntityConstructor support in expressions
 
 ## v0.2.2 (future)
-- [ ] Cross-schema inverse attribute resolution
-- [ ] LIKE operator pattern matching (full regex support)
-- [ ] User-defined function recursion depth limit (currently unbounded)
+- [x] Cross-schema inverse attribute resolution
+- [x] LIKE operator pattern matching (full regex support)
+- [x] User-defined function recursion depth limit (currently unbounded)
 
 ## v0.3 (future)
 - [ ] Transactions (batch create/rollback)

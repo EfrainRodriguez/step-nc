@@ -155,3 +155,44 @@ describe('User-Defined Function Evaluation', () => {
     expect(result).toBe(10.0);
   });
 });
+
+describe('Recursion depth limit', () => {
+  it('recursive_factorial(5) should return 120', () => {
+    const schema = buildTestSchema();
+    const ctx: EvalContext = { schema };
+    const result = evaluate(callExpr('recursive_factorial', [intLit(5)]), ctx);
+    expect(result).toBe(120);
+  });
+
+  it('recursive_factorial(0) should return 1', () => {
+    const schema = buildTestSchema();
+    const ctx: EvalContext = { schema };
+    const result = evaluate(callExpr('recursive_factorial', [intLit(0)]), ctx);
+    expect(result).toBe(1);
+  });
+
+  it('should throw EvalError when recursion exceeds MAX_CALL_DEPTH', () => {
+    const source = `
+      SCHEMA INFINITE_RECURSE;
+        FUNCTION inf_loop(x : INTEGER) : INTEGER;
+          RETURN(inf_loop(x));
+        END_FUNCTION;
+      END_SCHEMA;
+    `;
+    const { ast } = parseExpress(source);
+    if (ast.type !== 'SchemaDeclaration') throw new Error('parse failed');
+    const { schema } = buildSchema(ast);
+    const ctx: EvalContext = { schema };
+    expect(() => evaluate(callExpr('inf_loop', [intLit(1)]), ctx)).toThrow(
+      /Maximum call depth.*exceeded/,
+    );
+  });
+
+  it('callDepth should reset between independent calls', () => {
+    const schema = buildTestSchema();
+    const ctx: EvalContext = { schema };
+    evaluate(callExpr('recursive_factorial', [intLit(10)]), ctx);
+    const result = evaluate(callExpr('recursive_factorial', [intLit(10)]), ctx);
+    expect(result).toBe(3628800);
+  });
+});

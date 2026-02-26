@@ -19,7 +19,6 @@ const MAX_REPEAT_ITERATIONS = 100_000;
 /**
  * Executes a list of statements in the given context.
  * Returns undefined on normal completion, or an ExecSignal for RETURN/ESCAPE/SKIP.
- * NOTE: Recursive function calls are not depth-limited in v0.2.1.
  */
 export function executeStatements(
   statements: readonly StatementNode[],

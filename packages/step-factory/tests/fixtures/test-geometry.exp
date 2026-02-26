@@ -143,4 +143,12 @@ SCHEMA TEST_GEOMETRY;
     END_CASE;
   END_FUNCTION;
 
+  FUNCTION recursive_factorial(n : INTEGER) : INTEGER;
+    IF n <= 1 THEN
+      RETURN(1);
+    ELSE
+      RETURN(n * recursive_factorial(n - 1));
+    END_IF;
+  END_FUNCTION;
+
 END_SCHEMA;

@@ -52,4 +52,18 @@ describe('Integration: Multi-schema instances', () => {
     const allBP = model.getInstancesOf('BASE_POINT', true);
     expect(allBP).toHaveLength(2);
   });
+
+  it('should create instances with cross-schema INVERSE attributes resolved', () => {
+    const { registry, extendedSchema } = buildMultiSchemaFixture();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const model = new StepModel(extendedSchema, { registry });
+
+    const annotatedDef = extendedSchema.entities.get('ANNOTATED_POINT')!;
+    const invAttr = annotatedDef.inverseAttributes.find(
+      (a) => a.name === 'annotations',
+    );
+    expect(invAttr).toBeDefined();
+    expect(invAttr!.invertedEntity).toBeDefined();
+    expect(invAttr!.invertedAttribute).toBeDefined();
+  });
 });

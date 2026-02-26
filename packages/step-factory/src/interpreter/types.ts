@@ -24,6 +24,7 @@ export interface EvalContext {
   model?: StepModel;
   schema: ExpressSchema;
   variables?: Map<string, EvalValue>;
+  callDepth?: number;
 }
 
 export class EvalError extends Error {

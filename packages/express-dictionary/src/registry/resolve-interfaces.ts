@@ -1,3 +1,4 @@
+import { resolveUnresolvedInverses } from '../builder/resolve-inverse';
 import { resolveTypes } from '../builder/resolve-types';
 import type { SchemaDiagnostic } from '../diagnostics';
 import { errorDiagnostic } from '../diagnostics';
@@ -60,6 +61,14 @@ export function resolveInterfaces(
       const resolveDiags = resolveTypes(schema);
       diagnostics.push(...resolveDiags);
     }
+  }
+
+  // Re-resolve inverse attributes that couldn't be resolved during initial build
+  // because the target entity was in a different schema (now imported).
+  // Run for all schemas so we also emit INVALID_INVERSE for still-unresolved inverses.
+  for (const schema of schemas.values()) {
+    const inverseDiags = resolveUnresolvedInverses(schema);
+    diagnostics.push(...inverseDiags);
   }
 
   return diagnostics;

@@ -18,6 +18,8 @@ import {
   type EvalValue,
 } from './types';
 
+const MAX_CALL_DEPTH = 256;
+
 export function evaluate(expr: ExpressionNode, ctx: EvalContext): EvalValue {
   switch (expr.type) {
     case 'IntegerLiteral':
@@ -241,11 +243,17 @@ function evaluateFunctionCall(
     const funcDef = ctx.schema.functions.get(fnName)!;
 
     if (!funcDef.body || funcDef.body.length === 0) {
-      // No body available (e.g. imported function without AST)
       return EVAL_INDETERMINATE;
     }
 
-    // Build local variable frame: bind parameters
+    const depth = (ctx.callDepth ?? 0) + 1;
+    if (depth > MAX_CALL_DEPTH) {
+      throw new EvalError(
+        `Maximum call depth (${MAX_CALL_DEPTH}) exceeded in function '${expr.name}'`,
+        expr,
+      );
+    }
+
     const localVars = new Map<string, EvalValue>();
     funcDef.parameters.forEach((param, index) => {
       localVars.set(
@@ -254,11 +262,9 @@ function evaluateFunctionCall(
       );
     });
 
-    // Initialize local variables declared in the function header
     if (funcDef.localDeclarations) {
       for (const decl of funcDef.localDeclarations) {
         if (decl.type === 'LocalVariable') {
-          // Each LocalVariableNode declares exactly one variable
           const initVal = decl.initialValue
             ? evaluate(decl.initialValue, { ...ctx, variables: localVars })
             : EVAL_INDETERMINATE;
@@ -267,14 +273,17 @@ function evaluateFunctionCall(
       }
     }
 
-    const funcCtx: EvalContext = { ...ctx, variables: localVars };
+    const funcCtx: EvalContext = {
+      ...ctx,
+      variables: localVars,
+      callDepth: depth,
+    };
     const signal = executeStatements(funcDef.body, funcCtx);
 
     if (signal !== undefined && signal.kind === EXEC_RETURN) {
       return signal.value;
     }
 
-    // Function body completed without RETURN — indeterminate result
     return EVAL_INDETERMINATE;
   }
 

@@ -146,4 +146,80 @@ describe('Multi-schema USE/REFERENCE resolution', () => {
     const consumer = registry.get('consumer')!;
     expect(consumer.entities.has('SHARED_ENTITY')).toBe(true);
   });
+
+  it('should resolve INVERSE attributes that reference cross-schema entities', () => {
+    const registry = new SchemaRegistry();
+
+    registry.buildAndRegister(
+      parseSchema(`
+        SCHEMA provider;
+          ENTITY owner;
+            name : STRING;
+          END_ENTITY;
+          ENTITY pet;
+            name  : STRING;
+            owner : owner;
+          END_ENTITY;
+        END_SCHEMA;
+      `),
+    );
+
+    registry.buildAndRegister(
+      parseSchema(`
+        SCHEMA consumer;
+          USE FROM provider (owner, pet);
+          ENTITY tracked_owner SUBTYPE OF (owner);
+            tracking_id : INTEGER;
+          INVERSE
+            pets : SET [0:?] OF pet FOR owner;
+          END_ENTITY;
+        END_SCHEMA;
+      `),
+    );
+
+    const diags = registry.resolveInterfaces();
+    const errors = diags.filter((d) => d.severity === 'error');
+    expect(errors).toHaveLength(0);
+
+    const consumer = registry.get('consumer')!;
+    const trackedOwner = consumer.entities.get('TRACKED_OWNER')!;
+    const petsInv = trackedOwner.inverseAttributes.find(
+      (a) => a.name === 'pets',
+    )!;
+    expect(petsInv.invertedEntity).toBeDefined();
+    expect(petsInv.invertedEntity!.name).toBe('pet');
+    expect(petsInv.invertedAttribute).toBeDefined();
+    expect(petsInv.invertedAttribute!.name).toBe('owner');
+  });
+
+  it('should emit INVALID_INVERSE when cross-schema entity is not imported', () => {
+    const registry = new SchemaRegistry();
+
+    registry.buildAndRegister(
+      parseSchema(`
+        SCHEMA provider;
+          ENTITY target_entity;
+            val : REAL;
+          END_ENTITY;
+        END_SCHEMA;
+      `),
+    );
+
+    registry.buildAndRegister(
+      parseSchema(`
+        SCHEMA consumer;
+          -- Intentionally NOT importing target_entity
+          ENTITY local_entity;
+            x : REAL;
+          INVERSE
+            refs : SET [0:?] OF target_entity FOR x;
+          END_ENTITY;
+        END_SCHEMA;
+      `),
+    );
+
+    const diags = registry.resolveInterfaces();
+    const inverseErrors = diags.filter((d) => d.code === 'INVALID_INVERSE');
+    expect(inverseErrors.length).toBeGreaterThanOrEqual(1);
+  });
 });

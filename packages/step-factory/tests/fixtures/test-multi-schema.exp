@@ -7,6 +7,11 @@ SCHEMA GEOMETRY_BASE;
   TYPE label = STRING;
   END_TYPE;
 
+  ENTITY annotation;
+    target : base_point;
+    text   : label;
+  END_ENTITY;
+
 END_SCHEMA;
 
 SCHEMA GEOMETRY_EXTENDED;
@@ -15,6 +20,12 @@ SCHEMA GEOMETRY_EXTENDED;
 
   ENTITY colored_point SUBTYPE OF (base_point);
     color_name : label;
+  END_ENTITY;
+
+  ENTITY annotated_point SUBTYPE OF (base_point);
+    label_text : label;
+  INVERSE
+    annotations : SET [0:?] OF annotation FOR target;
   END_ENTITY;
 
 END_SCHEMA;

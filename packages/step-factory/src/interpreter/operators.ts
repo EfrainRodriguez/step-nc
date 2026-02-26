@@ -2,6 +2,7 @@ import type { BinaryOperator, UnaryOperator } from '@step-nc/express-parser';
 import type { EntityInstance } from '../types/instance';
 import type { InstanceRef } from '../types/values';
 import { isInstanceRef } from '../types/values';
+import { expressLikeToRegex } from './like-pattern';
 import { EVAL_INDETERMINATE, type EvalValue } from './types';
 
 export function applyBinaryOperator(
@@ -86,8 +87,11 @@ export function applyBinaryOperator(
       if (typeof left === 'string' && typeof right === 'string')
         return left + right;
       return EVAL_INDETERMINATE;
-    case 'LIKE':
-      return EVAL_INDETERMINATE;
+    case 'LIKE': {
+      if (typeof left !== 'string' || typeof right !== 'string')
+        return EVAL_INDETERMINATE;
+      return expressLikeToRegex(right).test(left);
+    }
     case 'ANDOR':
       return applyLogicalOr(left, right);
   }
