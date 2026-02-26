@@ -12,7 +12,9 @@
       "@step-nc/express-dictionary": ["packages/express-dictionary/src"],
       "@step-nc/express-dictionary/*": ["packages/express-dictionary/src/*"],
       "@step-nc/step-factory": ["packages/step-factory/src"],
-      "@step-nc/step-factory/*": ["packages/step-factory/src/*"]
+      "@step-nc/step-factory/*": ["packages/step-factory/src/*"],
+      "@step-nc/p21-writer": ["packages/p21-writer/src"],
+      "@step-nc/p21-writer/*": ["packages/p21-writer/src/*"]
     },
 
     // Environment Settings
