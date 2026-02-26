@@ -39,5 +39,3 @@
 ## v0.3 (future)
 - [ ] Transactions (batch create/rollback)
 - [ ] Observers/events (on instance created/deleted)
-- [ ] Incremental serialization/deserialization
-- [ ] Integration with p21-writer
