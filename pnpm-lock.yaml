@@ -71,6 +71,9 @@ importers:
       '@step-nc/express-parser':
         specifier: workspace:*
         version: link:../packages/express-parser
+      '@step-nc/p21-writer':
+        specifier: workspace:*
+        version: link:../packages/p21-writer
       '@step-nc/step-factory':
         specifier: workspace:*
         version: link:../packages/step-factory

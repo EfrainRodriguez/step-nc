@@ -24,12 +24,14 @@
     "step-factory:expression-interpreter": "tsx step-factory/expression-interpreter.ts",
     "step-factory:derived-and-where": "tsx step-factory/derived-and-where.ts",
     "step-factory:unique-rules": "tsx step-factory/unique-rules.ts",
-    "step-factory:multi-schema": "tsx step-factory/multi-schema.ts"
+    "step-factory:multi-schema": "tsx step-factory/multi-schema.ts",
+    "p21-writer:basic": "tsx p21-writer/basic.ts"
   },
   "dependencies": {
     "@step-nc/express-parser": "workspace:*",
     "@step-nc/express-dictionary": "workspace:*",
-    "@step-nc/step-factory": "workspace:*"
+    "@step-nc/step-factory": "workspace:*",
+    "@step-nc/p21-writer": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.19.0",

@@ -38,7 +38,8 @@
     "example:expression-interpreter": "pnpm --filter @step-nc/examples step-factory:expression-interpreter",
     "example:derived-and-where": "pnpm --filter @step-nc/examples step-factory:derived-and-where",
     "example:unique-rules": "pnpm --filter @step-nc/examples step-factory:unique-rules",
-    "example:multi-schema": "pnpm --filter @step-nc/examples step-factory:multi-schema"
+    "example:multi-schema": "pnpm --filter @step-nc/examples step-factory:multi-schema",
+    "example:p21-writer": "pnpm --filter @step-nc/examples p21-writer:basic"
   },
   "keywords": [
     "STEP-NC",
