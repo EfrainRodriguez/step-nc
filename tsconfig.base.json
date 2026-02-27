@@ -14,7 +14,9 @@
       "@step-nc/step-factory": ["packages/step-factory/src"],
       "@step-nc/step-factory/*": ["packages/step-factory/src/*"],
       "@step-nc/p21-writer": ["packages/p21-writer/src"],
-      "@step-nc/p21-writer/*": ["packages/p21-writer/src/*"]
+      "@step-nc/p21-writer/*": ["packages/p21-writer/src/*"],
+      "@step-nc/p21-parser": ["packages/p21-parser/src"],
+      "@step-nc/p21-parser/*": ["packages/p21-parser/src/*"]
     },
 
     // Environment Settings
