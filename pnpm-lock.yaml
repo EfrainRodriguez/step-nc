@@ -74,6 +74,9 @@ importers:
       '@step-nc/p21-parser':
         specifier: workspace:*
         version: link:../packages/p21-parser
+      '@step-nc/p21-reader':
+        specifier: workspace:*
+        version: link:../packages/p21-reader
       '@step-nc/p21-writer':
         specifier: workspace:*
         version: link:../packages/p21-writer
