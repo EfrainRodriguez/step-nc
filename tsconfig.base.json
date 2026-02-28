@@ -16,7 +16,9 @@
       "@step-nc/p21-writer": ["packages/p21-writer/src"],
       "@step-nc/p21-writer/*": ["packages/p21-writer/src/*"],
       "@step-nc/p21-parser": ["packages/p21-parser/src"],
-      "@step-nc/p21-parser/*": ["packages/p21-parser/src/*"]
+      "@step-nc/p21-parser/*": ["packages/p21-parser/src/*"],
+      "@step-nc/p21-reader": ["packages/p21-reader/src"],
+      "@step-nc/p21-reader/*": ["packages/p21-reader/src/*"]
     },
 
     // Environment Settings
