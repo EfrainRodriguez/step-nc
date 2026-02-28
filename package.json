@@ -39,7 +39,15 @@
     "example:derived-and-where": "pnpm --filter @step-nc/examples step-factory:derived-and-where",
     "example:unique-rules": "pnpm --filter @step-nc/examples step-factory:unique-rules",
     "example:multi-schema": "pnpm --filter @step-nc/examples step-factory:multi-schema",
-    "example:p21-writer": "pnpm --filter @step-nc/examples p21-writer:basic"
+    "example:p21-writer": "pnpm --filter @step-nc/examples p21-writer:basic",
+    "example:p21-writer-header-options": "pnpm --filter @step-nc/examples p21-writer:header-options",
+    "example:p21-writer-formatting": "pnpm --filter @step-nc/examples p21-writer:formatting",
+    "example:p21-writer-diagnostics": "pnpm --filter @step-nc/examples p21-writer:diagnostics",
+    "example:p21-writer-write-to-file": "pnpm --filter @step-nc/examples p21-writer:write-to-file",
+    "example:p21-writer-references": "pnpm --filter @step-nc/examples p21-writer:references",
+    "example:p21-writer-enums-aggregations": "pnpm --filter @step-nc/examples p21-writer:enums-aggregations",
+    "example:p21-writer-select-complex": "pnpm --filter @step-nc/examples p21-writer:select-complex",
+    "example:p21-writer-low-level": "pnpm --filter @step-nc/examples p21-writer:low-level"
   },
   "keywords": [
     "STEP-NC",

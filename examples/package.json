@@ -25,7 +25,15 @@
     "step-factory:derived-and-where": "tsx step-factory/derived-and-where.ts",
     "step-factory:unique-rules": "tsx step-factory/unique-rules.ts",
     "step-factory:multi-schema": "tsx step-factory/multi-schema.ts",
-    "p21-writer:basic": "tsx p21-writer/basic.ts"
+    "p21-writer:basic": "tsx p21-writer/basic.ts",
+    "p21-writer:header-options": "tsx p21-writer/header-options.ts",
+    "p21-writer:formatting": "tsx p21-writer/formatting-options.ts",
+    "p21-writer:diagnostics": "tsx p21-writer/diagnostics.ts",
+    "p21-writer:write-to-file": "tsx p21-writer/write-to-file.ts",
+    "p21-writer:references": "tsx p21-writer/references.ts",
+    "p21-writer:enums-aggregations": "tsx p21-writer/enums-and-aggregations.ts",
+    "p21-writer:select-complex": "tsx p21-writer/select-and-complex.ts",
+    "p21-writer:low-level": "tsx p21-writer/low-level-api.ts"
   },
   "dependencies": {
     "@step-nc/express-parser": "workspace:*",
