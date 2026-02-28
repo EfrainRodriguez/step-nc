@@ -33,13 +33,20 @@
     "p21-writer:references": "tsx p21-writer/references.ts",
     "p21-writer:enums-aggregations": "tsx p21-writer/enums-and-aggregations.ts",
     "p21-writer:select-complex": "tsx p21-writer/select-and-complex.ts",
-    "p21-writer:low-level": "tsx p21-writer/low-level-api.ts"
+    "p21-writer:low-level": "tsx p21-writer/low-level-api.ts",
+    "p21-parser:parse-file": "tsx p21-parser/parse-file.ts",
+    "p21-parser:parse-invalid": "tsx p21-parser/parse-invalid.ts",
+    "p21-parser:parse-with-options": "tsx p21-parser/parse-with-options.ts",
+    "p21-parser:visit-entities": "tsx p21-parser/visit-entities.ts",
+    "p21-parser:walk-count": "tsx p21-parser/walk-count.ts",
+    "p21-parser:tokenize-file": "tsx p21-parser/tokenize-file.ts"
   },
   "dependencies": {
     "@step-nc/express-parser": "workspace:*",
     "@step-nc/express-dictionary": "workspace:*",
     "@step-nc/step-factory": "workspace:*",
-    "@step-nc/p21-writer": "workspace:*"
+    "@step-nc/p21-writer": "workspace:*",
+    "@step-nc/p21-parser": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.19.0",
