@@ -19,7 +19,11 @@ import type {
   UniqueRuleNode,
   WhereRuleNode,
 } from '../ast/declarations';
-import type { BinaryExpressionNode, ExpressionNode } from '../ast/expressions';
+import type {
+  BinaryExpressionNode,
+  ExpressionNode,
+  QualifiedRefNode,
+} from '../ast/expressions';
 import type { TypeNode } from '../ast/types';
 import type { TokenKind } from '../lexer/types';
 import {
@@ -33,7 +37,7 @@ import {
   synchronize,
 } from './common';
 import { ParserContext } from './context';
-import { parseExpression } from './expressions';
+import { parseExpression, parsePrimary } from './expressions';
 import { parseStatementList } from './statements';
 import { parseType, spanOfToken } from './types';
 
@@ -165,7 +169,6 @@ function parseEntityDeclaration(ctx: ParserContext): EntityDeclarationNode {
       !isEntitySection(ctx.current().kind) &&
       derivedAttributes.length < maxEntitySectionItems
     ) {
-      console.log('derivedAttributes.length', derivedAttributes.length);
       if (isEntitySection(ctx.current().kind) || ctx.isEOF()) break;
       const posBefore = ctx.position();
       derivedAttributes.push(parseDerivedAttribute(ctx));
@@ -366,15 +369,33 @@ function parseExplicitAttribute(ctx: ParserContext): ExplicitAttributeNode[] {
 
 function parseDerivedAttribute(ctx: ParserContext): DerivedAttributeNode {
   const start = ctx.startPos();
-  const name = parseIdentifier(ctx);
+
+  let name: string;
+  let redeclaredAttr: QualifiedRefNode | undefined;
+
+  if (ctx.current().kind === 'BC_SELF') {
+    const expr = parsePrimary(ctx);
+    if (expr.type === 'QualifiedRef') {
+      redeclaredAttr = expr;
+      const lastQ = expr.qualifiers[expr.qualifiers.length - 1];
+      name = lastQ && lastQ.type === 'AttributeRef' ? lastQ.name : '<error>';
+    } else {
+      name = '<error>';
+    }
+  } else {
+    name = parseIdentifier(ctx);
+  }
+
   ctx.expect('SYM_COLON');
   const attributeType = parseType(ctx);
   ctx.expect('SYM_ASSIGN');
   const expression = parseExpression(ctx, 0);
   parseSemicolon(ctx);
+
   return {
     type: 'DerivedAttribute',
     name,
+    ...(redeclaredAttr ? { redeclaredAttr } : {}),
     attributeType,
     expression,
     span: ctx.spanFrom(start),

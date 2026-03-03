@@ -11,7 +11,6 @@ function parseDecl(source: string): DeclarationNode {
   return parseDeclaration(ctx);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function parseDeclWithDiag(source: string) {
   const { tokens } = lexExpress(source);
   const ctx = new ParserContext(tokens);
@@ -185,6 +184,73 @@ describe('Entity declarations', () => {
     expect(par091[0]!.message).toBe(
       'Too many section items (DERIVE/INVERSE) in entity',
     );
+  });
+
+  it('should parse DERIVE with SELF\\supertype.attribute redeclaration', () => {
+    const decl = parseDecl(`ENTITY oriented_edge SUBTYPE OF (edge);
+      edge_element : edge;
+      orientation : BOOLEAN;
+    DERIVE
+      SELF\\edge.edge_start : vertex := conditional_reverse(SELF.orientation, SELF.edge_element.edge_start);
+    END_ENTITY;`);
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.derivedAttributes).toHaveLength(1);
+      const derived = decl.derivedAttributes![0]!;
+      expect(derived.name).toBe('edge_start');
+      expect(derived.redeclaredAttr).toBeDefined();
+      expect(derived.redeclaredAttr!.type).toBe('QualifiedRef');
+      expect(derived.redeclaredAttr!.root.type).toBe('SelfRef');
+      expect(derived.redeclaredAttr!.qualifiers).toHaveLength(2);
+      expect(derived.redeclaredAttr!.qualifiers[0]!.type).toBe('GroupRef');
+      if (derived.redeclaredAttr!.qualifiers[0]!.type === 'GroupRef') {
+        expect(derived.redeclaredAttr!.qualifiers[0]!.name).toBe('edge');
+      }
+      expect(derived.redeclaredAttr!.qualifiers[1]!.type).toBe('AttributeRef');
+      if (derived.redeclaredAttr!.qualifiers[1]!.type === 'AttributeRef') {
+        expect(derived.redeclaredAttr!.qualifiers[1]!.name).toBe('edge_start');
+      }
+    }
+  });
+
+  it('should parse DERIVE with mix of simple and redeclared attributes', () => {
+    const decl = parseDecl(`ENTITY foo SUBTYPE OF (bar);
+    DERIVE
+      simple_attr : REAL := 1.0;
+      SELF\\bar.inherited_attr : INTEGER := 42;
+    END_ENTITY;`);
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.derivedAttributes).toHaveLength(2);
+      const first = decl.derivedAttributes![0]!;
+      expect(first.name).toBe('simple_attr');
+      expect(first.redeclaredAttr).toBeUndefined();
+      const second = decl.derivedAttributes![1]!;
+      expect(second.name).toBe('inherited_attr');
+      expect(second.redeclaredAttr).toBeDefined();
+      expect(second.redeclaredAttr!.root.type).toBe('SelfRef');
+    }
+  });
+
+  it('should parse ap203-style entity with SELF\\ in DERIVE and WHERE', () => {
+    const { decl, diagnostics } =
+      parseDeclWithDiag(`ENTITY oriented_closed_shell SUBTYPE OF (closed_shell);
+      closed_shell_element : closed_shell;
+      orientation : BOOLEAN;
+    DERIVE
+      SELF\\connected_face_set.cfs_faces : SET [1:?] OF face :=
+        conditional_reverse(SELF.orientation, SELF.closed_shell_element.cfs_faces);
+    WHERE
+      wr1 : NOT ('CONFIG_CONTROL_DESIGN.ORIENTED_CLOSED_SHELL' IN TYPEOF(SELF.closed_shell_element));
+    END_ENTITY;`);
+    expect(diagnostics).toHaveLength(0);
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.derivedAttributes).toHaveLength(1);
+      expect(decl.derivedAttributes![0]!.name).toBe('cfs_faces');
+      expect(decl.derivedAttributes![0]!.redeclaredAttr).toBeDefined();
+      expect(decl.whereRules).toHaveLength(1);
+    }
   });
 });
 

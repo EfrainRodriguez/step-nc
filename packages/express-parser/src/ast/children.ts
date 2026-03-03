@@ -82,7 +82,9 @@ export function getChildren(node: ASTNodeBase): readonly ASTNodeBase[] {
       return [(node as ExplicitAttributeNode).attributeType];
     case 'DerivedAttribute': {
       const n = node as DerivedAttributeNode;
-      return [n.attributeType, n.expression];
+      return n.redeclaredAttr
+        ? [n.redeclaredAttr, n.attributeType, n.expression]
+        : [n.attributeType, n.expression];
     }
     case 'InverseAttribute':
       return [(node as InverseAttributeNode).attributeType];

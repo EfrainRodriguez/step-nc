@@ -1,5 +1,5 @@
 import type { ASTNodeBase } from './base';
-import type { ExpressionNode } from './expressions';
+import type { ExpressionNode, QualifiedRefNode } from './expressions';
 import type { StatementNode } from './statements';
 import type { TypeNode } from './types';
 
@@ -77,6 +77,7 @@ export interface ExplicitAttributeNode extends ASTNodeBase {
 export interface DerivedAttributeNode extends ASTNodeBase {
   readonly type: 'DerivedAttribute';
   readonly name: string;
+  readonly redeclaredAttr?: QualifiedRefNode;
   readonly attributeType: TypeNode;
   readonly expression: ExpressionNode;
 }
