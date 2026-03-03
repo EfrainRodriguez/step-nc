@@ -57,7 +57,7 @@ export interface EntityDeclarationNode extends DeclarationNodeBase {
 
 export interface SupertypeConstraintNode extends ASTNodeBase {
   readonly type: 'SupertypeConstraint';
-  readonly expression: SupertypeExpressionNode;
+  readonly expression?: SupertypeExpressionNode;
 }
 
 export interface SubtypeOfNode extends ASTNodeBase {

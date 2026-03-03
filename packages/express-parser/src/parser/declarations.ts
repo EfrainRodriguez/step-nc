@@ -103,7 +103,15 @@ function parseEntityDeclaration(ctx: ParserContext): EntityDeclarationNode {
 
   let supertypeConstraint: SupertypeConstraintNode | undefined;
   if (ctx.check('KW_SUPERTYPE')) {
-    supertypeConstraint = parseSupertypeConstraint(ctx);
+    supertypeConstraint = parseSupertypeConstraint(ctx, !abstract);
+  }
+  // Consume semicolon after SUPERTYPE only when SUBTYPE OF follows (e.g. "ABSTRACT SUPERTYPE; SUBTYPE OF (bar);")
+  if (
+    supertypeConstraint &&
+    ctx.check('SYM_SEMICOLON') &&
+    ctx.peek(1).kind === 'KW_SUBTYPE'
+  ) {
+    parseSemicolon(ctx);
   }
 
   let subtypeOf: SubtypeOfNode | undefined;
@@ -221,14 +229,26 @@ function parseEntityDeclaration(ctx: ParserContext): EntityDeclarationNode {
 
 // ── Supertype Constraint ────────────────────────────────────────────
 
-function parseSupertypeConstraint(ctx: ParserContext): SupertypeConstraintNode {
+function parseSupertypeConstraint(
+  ctx: ParserContext,
+  ofRequired: boolean,
+): SupertypeConstraintNode {
   const start = ctx.startPos();
   ctx.expect('KW_SUPERTYPE');
-  ctx.expect('KW_OF');
-  ctx.expect('SYM_LPAREN');
-  const expression = parseSupertypeExpression(ctx);
-  ctx.expect('SYM_RPAREN');
-  return { type: 'SupertypeConstraint', expression, span: ctx.spanFrom(start) };
+
+  let expression: SupertypeExpressionNode | undefined;
+  if (ofRequired || ctx.check('KW_OF')) {
+    ctx.expect('KW_OF');
+    ctx.expect('SYM_LPAREN');
+    expression = parseSupertypeExpression(ctx);
+    ctx.expect('SYM_RPAREN');
+  }
+
+  return {
+    type: 'SupertypeConstraint',
+    ...(expression ? { expression } : {}),
+    span: ctx.spanFrom(start),
+  };
 }
 
 export function parseSupertypeExpression(

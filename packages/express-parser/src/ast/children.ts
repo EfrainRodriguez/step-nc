@@ -74,8 +74,10 @@ export function getChildren(node: ASTNodeBase): readonly ASTNodeBase[] {
       return (node as UseClauseNode).items ?? EMPTY;
     case 'ReferenceClause':
       return (node as ReferenceClauseNode).items ?? EMPTY;
-    case 'SupertypeConstraint':
-      return [(node as SupertypeConstraintNode).expression];
+    case 'SupertypeConstraint': {
+      const expr = (node as SupertypeConstraintNode).expression;
+      return expr ? [expr] : EMPTY;
+    }
     case 'ExplicitAttribute':
       return [(node as ExplicitAttributeNode).attributeType];
     case 'DerivedAttribute': {

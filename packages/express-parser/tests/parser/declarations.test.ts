@@ -48,6 +48,45 @@ describe('Entity declarations', () => {
     if (decl.type === 'EntityDeclaration') {
       expect(decl.abstract).toBe(true);
       expect(decl.supertypeConstraint).toBeDefined();
+      expect(decl.supertypeConstraint!.expression).toBeDefined();
+    }
+  });
+
+  it('should parse ABSTRACT SUPERTYPE without OF (expression optional)', () => {
+    const decl = parseDecl(
+      'ENTITY foo ABSTRACT SUPERTYPE; attr : INTEGER; END_ENTITY;',
+    );
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.abstract).toBe(true);
+      expect(decl.supertypeConstraint).toBeDefined();
+      expect(decl.supertypeConstraint!.expression).toBeUndefined();
+      expect(decl.attributes).toHaveLength(1);
+    }
+  });
+
+  it('should parse ABSTRACT SUPERTYPE without OF combined with SUBTYPE OF', () => {
+    const decl = parseDecl(
+      'ENTITY foo ABSTRACT SUPERTYPE; SUBTYPE OF (bar); attr : INTEGER; END_ENTITY;',
+    );
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.abstract).toBe(true);
+      expect(decl.supertypeConstraint).toBeDefined();
+      expect(decl.supertypeConstraint!.expression).toBeUndefined();
+      expect(decl.subtypeOf).toBeDefined();
+      expect(decl.subtypeOf!.entities).toEqual(['bar']);
+      expect(decl.attributes).toHaveLength(1);
+    }
+  });
+
+  it('should parse entity with ABSTRACT only (no SUPERTYPE)', () => {
+    const decl = parseDecl('ENTITY foo ABSTRACT; attr : INTEGER; END_ENTITY;');
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.abstract).toBe(true);
+      expect(decl.supertypeConstraint).toBeUndefined();
+      expect(decl.attributes).toHaveLength(1);
     }
   });
 
