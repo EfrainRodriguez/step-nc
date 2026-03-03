@@ -165,8 +165,13 @@ function parseEntityDeclaration(ctx: ParserContext): EntityDeclarationNode {
       !isEntitySection(ctx.current().kind) &&
       derivedAttributes.length < maxEntitySectionItems
     ) {
+      console.log('derivedAttributes.length', derivedAttributes.length);
       if (isEntitySection(ctx.current().kind) || ctx.isEOF()) break;
+      const posBefore = ctx.position();
       derivedAttributes.push(parseDerivedAttribute(ctx));
+      if (ctx.position() === posBefore && !ctx.isEOF()) {
+        ctx.consume();
+      }
       if (derivedAttributes.length >= maxEntitySectionItems) {
         ctx.error(
           'PAR091',
