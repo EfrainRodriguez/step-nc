@@ -4,7 +4,7 @@ import type {
   ExpressSchema,
 } from '@step-nc/express-dictionary';
 import {
-  getAllAttributes,
+  getAllAttributeSlots,
   getAllDerivedAttributes,
   getOwnAttributes,
 } from '@step-nc/express-dictionary';
@@ -83,10 +83,10 @@ function serializeSimpleInstance(
   schema?: ExpressSchema,
 ): SerializeInstanceResult {
   const diagnostics: WriterDiagnostic[] = [];
-  const allAttrs = getAllAttributes(instance.definition);
+  const slots = getAllAttributeSlots(instance.definition);
   const params: string[] = [];
 
-  for (const attr of allAttrs) {
+  for (const attr of slots) {
     const attrKey = attr.name.toUpperCase();
 
     if (isDerivedInContext(attrKey, instance.definition)) {
@@ -98,11 +98,6 @@ function serializeSimpleInstance(
     const result = serializeAttributeValue(value, attr.type, schema);
     params.push(result.text);
     diagnostics.push(...result.diagnostics);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  for (const _d of getAllDerivedAttributes(instance.definition)) {
-    params.push('*');
   }
 
   const text = `#${instance.id}=${instance.typeName}(${params.join(',')});`;

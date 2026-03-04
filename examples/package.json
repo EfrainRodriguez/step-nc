@@ -40,11 +40,11 @@
     "p21-parser:visit-entities": "tsx p21-parser/visit-entities.ts",
     "p21-parser:walk-count": "tsx p21-parser/walk-count.ts",
     "p21-parser:tokenize-file": "tsx p21-parser/tokenize-file.ts",
-  "p21-reader:read-file": "tsx p21-reader/read-file.ts",
-  "p21-reader:read-with-options": "tsx p21-reader/read-with-options.ts",
-  "p21-reader:diagnostics": "tsx p21-reader/diagnostics.ts",
-  "p21-reader:visit-instances": "tsx p21-reader/visit-instances.ts",
-  "p21-reader:read-invalid": "tsx p21-reader/read-invalid.ts"
+    "p21-reader:read-file": "tsx p21-reader/read-file.ts",
+    "p21-reader:read-with-options": "tsx p21-reader/read-with-options.ts",
+    "p21-reader:diagnostics": "tsx p21-reader/diagnostics.ts",
+    "p21-reader:visit-instances": "tsx p21-reader/visit-instances.ts",
+    "p21-reader:read-invalid": "tsx p21-reader/read-invalid.ts"
   },
   "dependencies": {
     "@step-nc/express-parser": "workspace:*",
@@ -52,7 +52,7 @@
     "@step-nc/step-factory": "workspace:*",
     "@step-nc/p21-writer": "workspace:*",
     "@step-nc/p21-parser": "workspace:*",
-  "@step-nc/p21-reader": "workspace:*"
+    "@step-nc/p21-reader": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.19.0",

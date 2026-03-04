@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@step-nc/express-parser": "workspace:*",
+    "@step-nc/p21-writer": "workspace:*",
     "rimraf": "^6.0.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",

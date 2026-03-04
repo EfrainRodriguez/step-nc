@@ -50,6 +50,21 @@ const COMPLEX_SCHEMA = buildSchemaFromSource(`
   END_SCHEMA;
 `);
 
+const ORIENTED_EDGE_COMPLEX_SCHEMA = buildSchemaFromSource(`
+  SCHEMA ORIENTED_COMPLEX;
+    ENTITY edge;
+      edge_start : INTEGER;
+      edge_end   : INTEGER;
+    END_ENTITY;
+
+    ENTITY oriented_edge SUBTYPE OF (edge);
+      orientation : BOOLEAN;
+    DERIVE
+      SELF\\edge.edge_start : INTEGER := 100;
+    END_ENTITY;
+  END_SCHEMA;
+`);
+
 describe('entity-loader (complex entities)', () => {
   it('should load a complex entity with multiple records', () => {
     const p21 = `ISO-10303-21;
@@ -107,5 +122,38 @@ END-ISO-10303-21;`;
     const prefix = getAttribute(instance!, 'prefix');
     expect(prefix === null || prefix === undefined).toBe(true);
     expect(getAttribute(instance!, 'unit_name')).toBe('KILOGRAM');
+  });
+
+  it('should load oriented_edge as complex entity with derived slot in EDGE record', () => {
+    const p21 = `ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((),'2;1');
+FILE_NAME('test','2025-01-01',(''),(''),'','','');
+FILE_SCHEMA(('ORIENTED_COMPLEX'));
+ENDSEC;
+DATA;
+#1=(EDGE(*,42) ORIENTED_EDGE(.T.));
+ENDSEC;
+END-ISO-10303-21;`;
+
+    const { ast } = parseP21(p21);
+    const model = new StepModel(ORIENTED_EDGE_COMPLEX_SCHEMA);
+    const { diagnostics } = loadEntities(
+      ast.data,
+      ORIENTED_EDGE_COMPLEX_SCHEMA,
+      model,
+      true,
+    );
+
+    const errors = diagnostics.filter((d) => d.severity === 'error');
+    expect(errors).toHaveLength(0);
+    expect(model.size).toBe(1);
+
+    const instance = model.getInstance(asInstanceId(1));
+    expect(instance).toBeDefined();
+    expect(instance!.typeName).toBe('ORIENTED_EDGE');
+    expect(getAttribute(instance!, 'EDGE_END')).toBe(42);
+    expect(getAttribute(instance!, 'ORIENTATION')).toBe(true);
+    expect(instance!.attributes.has('EDGE_START')).toBe(false);
   });
 });

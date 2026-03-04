@@ -209,7 +209,7 @@ describe('serializeInstance', () => {
       END_SCHEMA;
     `;
 
-    it('should emit * for DERIVED attributes in simple entity', () => {
+    it('should NOT emit * for native DERIVED attributes (non-redeclaring)', () => {
       const schema = buildSchemaFromSource(DERIVED_SCHEMA_SOURCE);
       const model = new StepModel(schema);
 
@@ -231,10 +231,68 @@ describe('serializeInstance', () => {
       setAttribute(vec!, 'magnitude', 5.0, schema);
 
       const { text } = serializeInstance(vec!, schema);
-      // dim is DERIVED, should not appear as explicit param
-      // vector has: orientation, magnitude (explicit) + dim (derived)
-      // getAllAttributes only returns explicit attrs, but isDerivedInContext checks derived
-      expect(text).toBe('#2=VECTOR(#1,5.,*);');
+      // dim is native DERIVED (not redeclaring an explicit) — no * in P21
+      expect(text).toBe('#2=VECTOR(#1,5.);');
+    });
+  });
+
+  describe('DERIVE redeclarations (oriented_edge)', () => {
+    const REDECLARE_SCHEMA_SOURCE = `
+      SCHEMA TEST_REDECLARE;
+        ENTITY edge;
+          edge_start : INTEGER;
+          edge_end   : INTEGER;
+        END_ENTITY;
+
+        ENTITY oriented_edge SUBTYPE OF (edge);
+          orientation : BOOLEAN;
+        DERIVE
+          SELF\\edge.edge_start : INTEGER := 100;
+        END_ENTITY;
+      END_SCHEMA;
+    `;
+
+    const SIMPLE_POINT_SCHEMA = `
+      SCHEMA TEST_SIMPLE;
+        TYPE length_measure = REAL;
+        END_TYPE;
+        TYPE label = STRING;
+        END_TYPE;
+        ENTITY representation_item;
+          name : label;
+        END_ENTITY;
+        ENTITY point SUBTYPE OF (representation_item);
+          x : length_measure;
+          y : length_measure;
+          z : length_measure;
+        END_ENTITY;
+      END_SCHEMA;
+    `;
+
+    it('should emit * in correct position for redeclared derived attribute', () => {
+      const schema = buildSchemaFromSource(REDECLARE_SCHEMA_SOURCE);
+      const model = new StepModel(schema);
+
+      const { instance } = model.createInstance('oriented_edge');
+      setAttribute(instance!, 'edge_end', 42, schema);
+      setAttribute(instance!, 'orientation', true, schema);
+
+      const { text, diagnostics } = serializeInstance(instance!, schema);
+      expect(diagnostics).toHaveLength(0);
+      expect(text).toBe('#1=ORIENTED_EDGE(*,42,.T.);');
+    });
+
+    it('should not change output for entities without redeclarations', () => {
+      const schema = buildSchemaFromSource(SIMPLE_POINT_SCHEMA);
+      const model = new StepModel(schema);
+      const { instance } = model.createInstance('point');
+      setAttribute(instance!, 'name', 'P1');
+      setAttribute(instance!, 'x', 1.0, schema);
+      setAttribute(instance!, 'y', 2.0, schema);
+      setAttribute(instance!, 'z', 3.0, schema);
+
+      const { text } = serializeInstance(instance!, schema);
+      expect(text).toBe("#1=POINT('P1',1.,2.,3.);");
     });
   });
 

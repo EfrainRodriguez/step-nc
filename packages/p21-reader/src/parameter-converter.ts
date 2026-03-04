@@ -68,6 +68,24 @@ export function convertParameter(
       const stripped = raw.startsWith('.') ? raw.slice(1, -1) : raw;
       if (typeDescriptor) {
         const resolved = resolveToBaseType(typeDescriptor);
+        if (resolved.kind === 'simple') {
+          // P21 .T./.F. for BOOLEAN/LOGICAL
+          if (
+            resolved.simpleType === 'BOOLEAN' ||
+            resolved.simpleType === 'LOGICAL'
+          ) {
+            const upper = stripped.toUpperCase();
+            if (upper === 'T' || upper === 'TRUE') {
+              return { value: true, diagnostics };
+            }
+            if (upper === 'F' || upper === 'FALSE') {
+              return { value: false, diagnostics };
+            }
+            if (upper === 'U' || upper === 'UNKNOWN') {
+              return { value: null, diagnostics };
+            }
+          }
+        }
         if (resolved.kind === 'enumeration') {
           const upper = stripped.toUpperCase();
           if (!resolved.values.some((v) => v.toUpperCase() === upper)) {

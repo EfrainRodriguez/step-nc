@@ -62,6 +62,43 @@ function collectAttributes(
   }
 }
 
+/**
+ * Returns ALL explicit attributes in inheritance order, including those
+ * whose names match a derived redeclaration. This gives the complete
+ * "parameter slot" list needed for P21 serialization/deserialization.
+ *
+ * Unlike `getAllAttributes`, this does NOT exclude attributes that are
+ * redeclared as derived — they keep their positional slot (emitted as `*` in P21).
+ */
+export function getAllAttributeSlots(
+  entity: EntityDefinition,
+): ExplicitAttribute[] {
+  const result: ExplicitAttribute[] = [];
+  const seen = new Set<string>();
+
+  collectAllSlots(entity, result, seen);
+
+  return result;
+}
+
+function collectAllSlots(
+  entity: EntityDefinition,
+  result: ExplicitAttribute[],
+  seen: Set<string>,
+): void {
+  for (const supertype of entity.supertypes) {
+    collectAllSlots(supertype, result, seen);
+  }
+
+  for (const attr of entity.explicitAttributes) {
+    const key = attr.name.toUpperCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(attr);
+    }
+  }
+}
+
 export function getOwnAttributes(
   entity: EntityDefinition,
 ): ExplicitAttribute[] {

@@ -54,6 +54,21 @@ const SCHEMA = buildSchemaFromSource(`
   END_SCHEMA;
 `);
 
+const ORIENTED_EDGE_SCHEMA = buildSchemaFromSource(`
+  SCHEMA ORIENTED_TEST;
+    ENTITY edge;
+      edge_start : INTEGER;
+      edge_end   : INTEGER;
+    END_ENTITY;
+
+    ENTITY oriented_edge SUBTYPE OF (edge);
+      orientation : BOOLEAN;
+    DERIVE
+      SELF\\edge.edge_start : INTEGER := 100;
+    END_ENTITY;
+  END_SCHEMA;
+`);
+
 describe('entity-loader (simple entities)', () => {
   it('should load a simple entity with all attributes', () => {
     const p21 = `ISO-10303-21;
@@ -207,5 +222,60 @@ END-ISO-10303-21;`;
       (d) => d.code === 'DANGLING_ENTITY_REF',
     );
     expect(danglingDiags.length).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe('entity-loader (simple entities with derived redeclarations)', () => {
+  it('should load oriented_edge with * in derived slot position', () => {
+    const p21 = `ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((),'2;1');
+FILE_NAME('test','2025-01-01',(''),(''),'','','');
+FILE_SCHEMA(('ORIENTED_TEST'));
+ENDSEC;
+DATA;
+#1=ORIENTED_EDGE(*,42,.T.);
+ENDSEC;
+END-ISO-10303-21;`;
+
+    const { ast } = parseP21(p21);
+    const model = new StepModel(ORIENTED_EDGE_SCHEMA);
+    const { diagnostics } = loadEntities(
+      ast.data,
+      ORIENTED_EDGE_SCHEMA,
+      model,
+      true,
+    );
+
+    expect(diagnostics.filter((d) => d.severity === 'error')).toHaveLength(0);
+    expect(model.size).toBe(1);
+
+    const instance = model.getInstance(asInstanceId(1));
+    expect(instance).toBeDefined();
+    expect(instance!.typeName).toBe('ORIENTED_EDGE');
+    expect(getAttribute(instance!, 'EDGE_END')).toBe(42);
+    expect(getAttribute(instance!, 'ORIENTATION')).toBe(true);
+    // EDGE_START is derived, should not be in attributes
+    expect(instance!.attributes.has('EDGE_START')).toBe(false);
+  });
+
+  it('should not change mapping for entities without redeclarations', () => {
+    const p21 = `ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((),'2;1');
+FILE_NAME('test','2025-01-01',(''),(''),'','','');
+FILE_SCHEMA(('LOADER_TEST'));
+ENDSEC;
+DATA;
+#1=POINT('Origin',0.0,0.0,0.0);
+ENDSEC;
+END-ISO-10303-21;`;
+
+    const { ast } = parseP21(p21);
+    const model = new StepModel(SCHEMA);
+    const { diagnostics } = loadEntities(ast.data, SCHEMA, model, true);
+
+    expect(diagnostics.filter((d) => d.severity === 'error')).toHaveLength(0);
+    expect(getAttribute(model.getInstance(asInstanceId(1))!, 'x')).toBe(0.0);
   });
 });

@@ -11,6 +11,7 @@ import { resolveInverse } from '../../src/builder/resolve-inverse';
 import { resolveTypes } from '../../src/builder/resolve-types';
 import {
   getAllAttributes,
+  getAllAttributeSlots,
   getAllDerivedAttributes,
   getAllSubtypes,
   getDirectSubtypes,
@@ -242,5 +243,97 @@ describe('Entity queries', () => {
     expect(names).not.toContain('X');
     expect(names).toContain('Y');
     expect(names).toContain('Z');
+  });
+
+  describe('getAllAttributeSlots', () => {
+    it('should return same as getAllAttributes when no redeclarations', () => {
+      const source = readFileSync(GEOMETRY_EXP, 'utf-8');
+      const schema = buildFull(source);
+
+      const cartesianPoint = schema.entities.get('CARTESIAN_POINT')!;
+      const allAttrs = getAllAttributes(cartesianPoint);
+      const slots = getAllAttributeSlots(cartesianPoint);
+
+      expect(slots.map((a) => a.name)).toEqual(allAttrs.map((a) => a.name));
+    });
+
+    it('should include redeclared derived slots for oriented_edge', () => {
+      const schema = buildFull(`
+        SCHEMA s;
+          ENTITY edge;
+            edge_start : INTEGER;
+            edge_end   : INTEGER;
+          END_ENTITY;
+          ENTITY oriented_edge SUBTYPE OF (edge);
+            orientation : BOOLEAN;
+          DERIVE
+            SELF\\edge.edge_start : INTEGER := 100;
+          END_ENTITY;
+        END_SCHEMA;
+      `);
+
+      const oriented = schema.entities.get('ORIENTED_EDGE')!;
+      const slots = getAllAttributeSlots(oriented);
+      const allAttrs = getAllAttributes(oriented);
+
+      expect(slots.map((a) => a.name)).toEqual([
+        'edge_start',
+        'edge_end',
+        'orientation',
+      ]);
+      expect(allAttrs.map((a) => a.name)).toEqual(['edge_end', 'orientation']);
+      expect(slots).toHaveLength(3);
+      expect(allAttrs).toHaveLength(2);
+    });
+
+    it('should preserve inheritance order with edge_start before edge_end', () => {
+      const schema = buildFull(`
+        SCHEMA s;
+          ENTITY edge;
+            edge_start : INTEGER;
+            edge_end   : INTEGER;
+          END_ENTITY;
+          ENTITY oriented_edge SUBTYPE OF (edge);
+            orientation : BOOLEAN;
+          DERIVE
+            SELF\\edge.edge_start : INTEGER := 100;
+          END_ENTITY;
+        END_SCHEMA;
+      `);
+
+      const oriented = schema.entities.get('ORIENTED_EDGE')!;
+      const slots = getAllAttributeSlots(oriented);
+
+      const edgeStartIdx = slots.findIndex(
+        (a) => a.name.toUpperCase() === 'EDGE_START',
+      );
+      const edgeEndIdx = slots.findIndex(
+        (a) => a.name.toUpperCase() === 'EDGE_END',
+      );
+      expect(edgeStartIdx).toBeLessThan(edgeEndIdx);
+    });
+
+    it('should work with multi-level inheritance', () => {
+      const schema = buildFull(`
+        SCHEMA s;
+          ENTITY a;
+            x : INTEGER;
+          END_ENTITY;
+          ENTITY b SUBTYPE OF (a);
+            y : INTEGER;
+          DERIVE
+            SELF\\a.x : INTEGER := 10;
+          END_ENTITY;
+          ENTITY c SUBTYPE OF (b);
+            z : INTEGER;
+          END_ENTITY;
+        END_SCHEMA;
+      `);
+
+      const c = schema.entities.get('C')!;
+      const slots = getAllAttributeSlots(c);
+
+      expect(slots.map((a) => a.name)).toEqual(['x', 'y', 'z']);
+    });
   });
 });

@@ -4,7 +4,8 @@ import type {
   ExpressSchema,
 } from '@step-nc/express-dictionary';
 import {
-  getAllAttributes,
+  getAllAttributeSlots,
+  getAllDerivedAttributes,
   getOwnAttributes,
   getSupertypeChain,
 } from '@step-nc/express-dictionary';
@@ -190,6 +191,14 @@ function getRawEntityName(entity: EntityInstanceNode): string {
   return last ? last.keyword : 'UNKNOWN';
 }
 
+function collectDerivedNames(definition: EntityDefinition): Set<string> {
+  const names = new Set<string>();
+  for (const d of getAllDerivedAttributes(definition)) {
+    names.add(d.name.toUpperCase());
+  }
+  return names;
+}
+
 function populateSimpleEntity(
   entity: SimpleEntityInstanceNode,
   definition: EntityDefinition,
@@ -199,7 +208,8 @@ function populateSimpleEntity(
   strictRefs: boolean,
 ): ReaderDiagnostic[] {
   const diagnostics: ReaderDiagnostic[] = [];
-  const allAttrs = getAllAttributes(definition);
+  const slots = getAllAttributeSlots(definition);
+  const derivedNames = collectDerivedNames(definition);
   const params = entity.record.parameters;
 
   let positionalIndex = 0;
@@ -207,11 +217,13 @@ function populateSimpleEntity(
   for (const param of params) {
     if (
       param.type === 'TypedParameter' &&
-      isAttributeName(param.keyword, allAttrs)
+      isAttributeName(param.keyword, slots)
     ) {
       // Named parameter: keyword matches an attribute name
       const attrName = param.keyword.toUpperCase();
-      const attrDef = allAttrs.find((a) => a.name.toUpperCase() === attrName);
+      if (derivedNames.has(attrName)) continue; // skip derived named params
+
+      const attrDef = slots.find((a) => a.name.toUpperCase() === attrName);
       if (!attrDef) continue;
 
       const ctx = {
@@ -240,19 +252,26 @@ function populateSimpleEntity(
       }
     } else {
       // Positional parameter
-      if (positionalIndex >= allAttrs.length) {
+      if (positionalIndex >= slots.length) {
         diagnostics.push(
           warningDiag(
             'EXTRA_PARAMETER',
-            `More parameters (${params.length}) than attributes (${allAttrs.length})`,
+            `More parameters (${params.length}) than attribute slots (${slots.length})`,
             { instanceId: instance.id, entityName: instance.typeName },
           ),
         );
         break;
       }
 
-      const attrDef = allAttrs[positionalIndex]!;
+      const attrDef = slots[positionalIndex]!;
       const attrName = attrDef.name.toUpperCase();
+
+      if (derivedNames.has(attrName)) {
+        // Derived slot: expect OmittedParameter (*), consume and skip
+        positionalIndex++;
+        continue;
+      }
+
       const ctx = {
         instanceId: instance.id,
         entityName: instance.typeName,
@@ -282,13 +301,14 @@ function populateSimpleEntity(
 
 function populateComplexEntity(
   entity: ComplexEntityInstanceNode,
-  _definition: EntityDefinition,
+  definition: EntityDefinition,
   instance: EntityInstance,
   schema: ExpressSchema,
   model: StepModel,
   strictRefs: boolean,
 ): ReaderDiagnostic[] {
   const diagnostics: ReaderDiagnostic[] = [];
+  const leafDerived = collectDerivedNames(definition);
 
   for (const record of entity.records) {
     const recordDef = schema.entities.get(record.keyword.toUpperCase());
@@ -303,12 +323,15 @@ function populateComplexEntity(
       continue;
     }
 
-    const ownAttrs = getOwnAttributes(recordDef).filter(
-      (attr) => !attr.redeclaring,
+    const allRecordAttrs = getOwnAttributes(recordDef);
+    const nonDerivedAttrs = allRecordAttrs.filter(
+      (attr) => !leafDerived.has(attr.name.toUpperCase()),
     );
     populateRecordAttributes(
       record,
-      ownAttrs,
+      nonDerivedAttrs,
+      allRecordAttrs,
+      leafDerived,
       instance,
       schema,
       model,
@@ -322,7 +345,9 @@ function populateComplexEntity(
 
 function populateRecordAttributes(
   record: SimpleRecordNode,
-  attrs: ExplicitAttribute[],
+  _nonDerivedAttrs: ExplicitAttribute[],
+  allRecordAttrs: ExplicitAttribute[],
+  derivedNames: Set<string>,
   instance: EntityInstance,
   schema: ExpressSchema,
   model: StepModel,
@@ -331,18 +356,26 @@ function populateRecordAttributes(
 ): void {
   const params = record.parameters;
 
-  for (let i = 0; i < params.length && i < attrs.length; i++) {
-    const param = params[i]!;
-    const attrDef = attrs[i]!;
-    const attrName = attrDef.name.toUpperCase();
+  let paramIdx = 0;
+  for (const attr of allRecordAttrs) {
+    if (paramIdx >= params.length) break;
 
+    const attrName = attr.name.toUpperCase();
+
+    if (derivedNames.has(attrName)) {
+      // Derived slot: skip the param (should be OmittedParameter *)
+      paramIdx++;
+      continue;
+    }
+
+    const param = params[paramIdx]!;
     const ctx = {
       instanceId: instance.id,
       entityName: instance.typeName,
       attributeName: attrName,
     };
 
-    const result = convertParameter(param, attrDef.type, schema, ctx);
+    const result = convertParameter(param, attr.type, schema, ctx);
     diagnostics.push(...result.diagnostics);
 
     if (result.value !== null) {
@@ -355,13 +388,15 @@ function populateRecordAttributes(
       );
       model.setAttribute(instance, attrName, resolved, schema);
     }
+
+    paramIdx++;
   }
 
-  if (params.length > attrs.length) {
+  if (paramIdx < params.length) {
     diagnostics.push(
       warningDiag(
         'EXTRA_PARAMETER',
-        `Record '${record.keyword}' has ${params.length} parameters but entity defines ${attrs.length} own attributes`,
+        `Record '${record.keyword}' has ${params.length} parameters but expected ${paramIdx}`,
         { instanceId: instance.id, entityName: instance.typeName },
       ),
     );

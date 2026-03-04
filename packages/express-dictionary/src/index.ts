@@ -72,6 +72,7 @@ export type {
 // ── Query API ─────────────────────────────────────────────────────────
 export {
   getAllAttributes,
+  getAllAttributeSlots,
   getAllDerivedAttributes,
   getAllInverseAttributes,
   getAllSubtypes,
