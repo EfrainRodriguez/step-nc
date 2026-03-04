@@ -203,4 +203,29 @@ describe('collectDeclarations', () => {
     expect(schema.constants.size).toBe(1);
     expect(schema.constants.has('PI')).toBe(true);
   });
+
+  it('should capture redeclaredFrom for SELF\\supertype.attribute in DERIVE', () => {
+    const ast = parseSchema(`
+      SCHEMA s;
+        ENTITY edge;
+          edge_start : INTEGER;
+        END_ENTITY;
+        ENTITY oriented_edge SUBTYPE OF (edge);
+          orientation : BOOLEAN;
+        DERIVE
+          SELF\\edge.edge_start : INTEGER := 42;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const { schema } = collectDeclarations(ast);
+    const oriented = schema.entities.get('ORIENTED_EDGE')!;
+
+    expect(oriented.derivedAttributes).toHaveLength(1);
+    const derived = oriented.derivedAttributes[0]!;
+    expect(derived.name).toBe('edge_start');
+    expect(derived.redeclaredFrom).toBeDefined();
+    expect(derived.redeclaredFrom!.entityName).toBe('edge');
+    expect(derived.redeclaredFrom!.attributeName).toBe('edge_start');
+  });
 });

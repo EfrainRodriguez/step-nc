@@ -145,11 +145,33 @@ function collectEntity(
 
   if (node.derivedAttributes) {
     for (const derivedNode of node.derivedAttributes) {
+      let redeclaredFrom:
+        | { entityName: string; attributeName: string }
+        | undefined;
+
+      if (derivedNode.redeclaredAttr) {
+        const qualifiers = derivedNode.redeclaredAttr.qualifiers;
+        const groupQ = qualifiers[0];
+        const attrQ = qualifiers[1];
+        if (
+          groupQ &&
+          groupQ.type === 'GroupRef' &&
+          attrQ &&
+          attrQ.type === 'AttributeRef'
+        ) {
+          redeclaredFrom = {
+            entityName: groupQ.name,
+            attributeName: attrQ.name,
+          };
+        }
+      }
+
       entity.derivedAttributes.push({
         name: derivedNode.name,
         parentEntity: entity,
         type: buildTypeDescriptor(derivedNode.attributeType),
         expression: derivedNode.expression,
+        ...(redeclaredFrom ? { redeclaredFrom } : {}),
       });
     }
   }

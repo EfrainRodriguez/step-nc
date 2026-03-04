@@ -11,25 +11,51 @@ export function getAllAttributes(
   const result: ExplicitAttribute[] = [];
   const seen = new Set<string>();
 
-  collectAttributes(entity, result, seen);
+  const redeclaredAsDerived = collectRedeclaredNames(entity);
+  collectAttributes(entity, result, seen, redeclaredAsDerived);
 
   return result;
+}
+
+function collectRedeclaredNames(entity: EntityDefinition): Set<string> {
+  const names = new Set<string>();
+  const visited = new Set<string>();
+  walkRedeclared(entity, names, visited);
+  return names;
+}
+
+function walkRedeclared(
+  entity: EntityDefinition,
+  names: Set<string>,
+  visited: Set<string>,
+): void {
+  const key = entity.name.toUpperCase();
+  if (visited.has(key)) return;
+  visited.add(key);
+
+  for (const derived of entity.derivedAttributes) {
+    if (derived.redeclaredFrom) {
+      names.add(derived.name.toUpperCase());
+    }
+  }
+  for (const supertype of entity.supertypes) {
+    walkRedeclared(supertype, names, visited);
+  }
 }
 
 function collectAttributes(
   entity: EntityDefinition,
   result: ExplicitAttribute[],
   seen: Set<string>,
+  redeclaredAsDerived: Set<string>,
 ): void {
-  // Collect inherited attributes first (depth-first through supertypes)
   for (const supertype of entity.supertypes) {
-    collectAttributes(supertype, result, seen);
+    collectAttributes(supertype, result, seen, redeclaredAsDerived);
   }
 
-  // Then own attributes (which may override inherited ones)
   for (const attr of entity.explicitAttributes) {
     const key = attr.name.toUpperCase();
-    if (!seen.has(key)) {
+    if (!seen.has(key) && !redeclaredAsDerived.has(key)) {
       seen.add(key);
       result.push(attr);
     }

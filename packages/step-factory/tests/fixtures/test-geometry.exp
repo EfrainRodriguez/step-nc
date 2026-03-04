@@ -151,4 +151,25 @@ SCHEMA TEST_GEOMETRY;
     END_IF;
   END_FUNCTION;
 
+  -- Entity with ABSTRACT SUPERTYPE without OF clause
+  ENTITY shape_item ABSTRACT SUPERTYPE;
+    item_name : STRING;
+  END_ENTITY;
+
+  ENTITY circle_shape SUBTYPE OF (shape_item);
+    radius : REAL;
+  END_ENTITY;
+
+  -- Entity hierarchy with DERIVE redeclaring an explicit attribute
+  ENTITY edge;
+    edge_start : INTEGER;
+    edge_end   : INTEGER;
+  END_ENTITY;
+
+  ENTITY oriented_edge SUBTYPE OF (edge);
+    orientation : BOOLEAN;
+  DERIVE
+    SELF\edge.edge_start : INTEGER := 100;
+  END_ENTITY;
+
 END_SCHEMA;

@@ -89,4 +89,43 @@ describe('DERIVED Attributes', () => {
     expect(diags[0]!.code).toBe('UNKNOWN_ATTRIBUTE');
     expect(diags[0]!.message).toContain('DERIVED');
   });
+
+  it('should reject instantiation of ABSTRACT SUPERTYPE without OF', () => {
+    const schema = buildTestSchema();
+    const model = new StepModel(schema);
+    const { instance, diagnostics } = model.createInstance('shape_item');
+    expect(instance).toBeUndefined();
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]!.code).toBe('ABSTRACT_INSTANTIATION');
+  });
+
+  it('should instantiate concrete subtype of ABSTRACT SUPERTYPE without OF', () => {
+    const schema = buildTestSchema();
+    const model = new StepModel(schema);
+    const { instance, diagnostics } = model.createInstance('circle_shape');
+    expect(diagnostics).toHaveLength(0);
+    expect(instance).toBeDefined();
+  });
+
+  it('should not include redeclared explicit in instance attributes', () => {
+    const schema = buildTestSchema();
+    const model = new StepModel(schema);
+    const { instance } = model.createInstance('oriented_edge');
+
+    expect(instance).toBeDefined();
+    expect(instance!.attributes.has('EDGE_START')).toBe(false);
+    expect(instance!.attributes.has('EDGE_END')).toBe(true);
+    expect(instance!.attributes.has('ORIENTATION')).toBe(true);
+  });
+
+  it('should compute redeclared derived attribute', () => {
+    const schema = buildTestSchema();
+    const model = new StepModel(schema);
+    const { instance } = model.createInstance('oriented_edge');
+
+    expect(instance).toBeDefined();
+    const result = getDerivedAttribute(instance!, 'edge_start', model);
+    expect(result.diagnostics).toHaveLength(0);
+    expect(result.value).toBe(100);
+  });
 });

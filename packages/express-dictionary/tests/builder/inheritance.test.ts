@@ -138,4 +138,94 @@ describe('buildInheritance', () => {
     expect(unresolved).toHaveLength(1);
     expect(unresolved[0]!.message).toContain('nonexistent');
   });
+
+  it('should handle ABSTRACT SUPERTYPE without OF clause', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY base ABSTRACT SUPERTYPE;
+          x : REAL;
+        END_ENTITY;
+        ENTITY child SUBTYPE OF (base);
+          y : REAL;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const errors = diagnostics.filter((d) => d.severity === 'error');
+    expect(errors).toHaveLength(0);
+
+    const base = schema.entities.get('BASE')!;
+    expect(base.abstract).toBe(true);
+    expect(base.instantiable).toBe(false);
+    expect(base.subtypes).toHaveLength(1);
+
+    const child = schema.entities.get('CHILD')!;
+    expect(child.instantiable).toBe(true);
+    expect(child.supertypes).toHaveLength(1);
+  });
+
+  it('should handle ABSTRACT SUPERTYPE without OF combined with SUBTYPE OF', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY root;
+          r : REAL;
+        END_ENTITY;
+        ENTITY middle ABSTRACT SUPERTYPE SUBTYPE OF (root);
+          m : REAL;
+        END_ENTITY;
+        ENTITY leaf SUBTYPE OF (middle);
+          l : REAL;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const errors = diagnostics.filter((d) => d.severity === 'error');
+    expect(errors).toHaveLength(0);
+
+    const middle = schema.entities.get('MIDDLE')!;
+    expect(middle.abstract).toBe(true);
+    expect(middle.instantiable).toBe(false);
+    expect(middle.supertypes).toHaveLength(1);
+    expect(middle.supertypes[0]!.name).toBe('root');
+  });
+
+  it('should validate redeclared derived attributes in inheritance', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY edge;
+          edge_start : INTEGER;
+          edge_end : INTEGER;
+        END_ENTITY;
+        ENTITY oriented_edge SUBTYPE OF (edge);
+          orientation : BOOLEAN;
+        DERIVE
+          SELF\\edge.edge_start : INTEGER := 42;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const warnings = diagnostics.filter((d) => d.severity === 'warning');
+    expect(warnings).toHaveLength(0);
+
+    const oriented = schema.entities.get('ORIENTED_EDGE')!;
+    expect(oriented.derivedAttributes).toHaveLength(1);
+    expect(oriented.derivedAttributes[0]!.redeclaredFrom).toBeDefined();
+  });
+
+  it('should warn when redeclared derived references unknown entity', () => {
+    const { diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY child;
+        DERIVE
+          SELF\\nonexistent.attr : INTEGER := 1;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const warnings = diagnostics.filter(
+      (d) => d.severity === 'warning' && d.code === 'UNRESOLVED_ENTITY_REF',
+    );
+    expect(warnings.length).toBeGreaterThanOrEqual(1);
+    expect(warnings[0]!.message).toContain('nonexistent');
+  });
 });

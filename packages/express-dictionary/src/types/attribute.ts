@@ -19,6 +19,10 @@ export interface DerivedAttribute {
   parentEntity: EntityDefinitionHost;
   type: TypeDescriptor;
   readonly expression: ExpressionNode;
+  readonly redeclaredFrom?: {
+    readonly entityName: string;
+    readonly attributeName: string;
+  };
 }
 
 export interface InverseAttribute {

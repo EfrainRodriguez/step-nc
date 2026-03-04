@@ -1,5 +1,5 @@
 import type { SchemaDiagnostic } from '../diagnostics';
-import { errorDiagnostic } from '../diagnostics';
+import { errorDiagnostic, warningDiagnostic } from '../diagnostics';
 import type { EntityDefinition } from '../types/entity';
 import type { ExpressSchema } from '../types/schema';
 
@@ -72,6 +72,49 @@ export function buildInheritance(schema: ExpressSchema): SchemaDiagnostic[] {
   for (const entity of schema.entities.values()) {
     if (entity.abstract) {
       entity.instantiable = false;
+    }
+  }
+
+  // Phase 6: Validate derived attribute redeclarations
+  for (const entity of schema.entities.values()) {
+    for (const derived of entity.derivedAttributes) {
+      if (!derived.redeclaredFrom) continue;
+
+      const superKey = derived.redeclaredFrom.entityName.toUpperCase();
+      const superEntity = schema.entities.get(superKey);
+      if (!superEntity) {
+        diagnostics.push(
+          warningDiagnostic(
+            'UNRESOLVED_ENTITY_REF',
+            `Derived attribute "${derived.name}" on "${entity.name}" redeclares from unknown entity "${derived.redeclaredFrom.entityName}"`,
+            { schemaName: schema.name, entityName: entity.name },
+          ),
+        );
+        continue;
+      }
+
+      const attrKey = derived.redeclaredFrom.attributeName.toUpperCase();
+      const targetAttr =
+        superEntity.explicitAttributes.find(
+          (a) => a.name.toUpperCase() === attrKey,
+        ) ??
+        superEntity.derivedAttributes.find(
+          (a) => a.name.toUpperCase() === attrKey,
+        );
+
+      if (!targetAttr) {
+        diagnostics.push(
+          warningDiagnostic(
+            'UNRESOLVED_ATTRIBUTE_REF',
+            `Derived attribute "${derived.name}" on "${entity.name}" redeclares unknown attribute "${derived.redeclaredFrom.attributeName}" from "${superEntity.name}"`,
+            {
+              schemaName: schema.name,
+              entityName: entity.name,
+              attributeName: derived.name,
+            },
+          ),
+        );
+      }
     }
   }
 

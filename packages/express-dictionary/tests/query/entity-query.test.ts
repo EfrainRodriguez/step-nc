@@ -11,6 +11,7 @@ import { resolveInverse } from '../../src/builder/resolve-inverse';
 import { resolveTypes } from '../../src/builder/resolve-types';
 import {
   getAllAttributes,
+  getAllDerivedAttributes,
   getAllSubtypes,
   getDirectSubtypes,
   getInheritedAttributes,
@@ -171,5 +172,75 @@ describe('Entity queries', () => {
     if (base.kind === 'simple') {
       expect(base.simpleType).toBe('REAL');
     }
+  });
+
+  it('getAllAttributes should exclude explicit attributes redeclared as derived', () => {
+    const schema = buildFull(`
+      SCHEMA s;
+        ENTITY edge;
+          edge_start : INTEGER;
+          edge_end : INTEGER;
+        END_ENTITY;
+        ENTITY oriented_edge SUBTYPE OF (edge);
+          orientation : BOOLEAN;
+        DERIVE
+          SELF\\edge.edge_start : INTEGER := 42;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const oriented = schema.entities.get('ORIENTED_EDGE')!;
+    const allAttrs = getAllAttributes(oriented);
+    const names = allAttrs.map((a) => a.name.toUpperCase());
+
+    expect(names).not.toContain('EDGE_START');
+    expect(names).toContain('EDGE_END');
+    expect(names).toContain('ORIENTATION');
+  });
+
+  it('getAllDerivedAttributes should include redeclared derived from supertypes', () => {
+    const schema = buildFull(`
+      SCHEMA s;
+        ENTITY edge;
+          edge_start : INTEGER;
+        END_ENTITY;
+        ENTITY oriented_edge SUBTYPE OF (edge);
+        DERIVE
+          SELF\\edge.edge_start : INTEGER := 42;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const oriented = schema.entities.get('ORIENTED_EDGE')!;
+    const allDerived = getAllDerivedAttributes(oriented);
+    const names = allDerived.map((a) => a.name.toUpperCase());
+
+    expect(names).toContain('EDGE_START');
+  });
+
+  it('getAllAttributes should exclude redeclared attrs for grandchild entities', () => {
+    const schema = buildFull(`
+      SCHEMA s;
+        ENTITY a;
+          x : INTEGER;
+          y : INTEGER;
+        END_ENTITY;
+        ENTITY b SUBTYPE OF (a);
+        DERIVE
+          SELF\\a.x : INTEGER := 10;
+        END_ENTITY;
+        ENTITY c SUBTYPE OF (b);
+          z : INTEGER;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const c = schema.entities.get('C')!;
+    const allAttrs = getAllAttributes(c);
+    const names = allAttrs.map((a) => a.name.toUpperCase());
+
+    expect(names).not.toContain('X');
+    expect(names).toContain('Y');
+    expect(names).toContain('Z');
   });
 });
