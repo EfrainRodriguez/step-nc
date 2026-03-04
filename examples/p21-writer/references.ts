@@ -26,7 +26,8 @@ const source = `
       direction_ratios : LIST [2:3] OF REAL;
     END_ENTITY;
     ENTITY line SUBTYPE OF (representation_item);
-      pnt : point;
+      start_point : point;
+      end_point : point;
       dir : direction;
     END_ENTITY;
   END_SCHEMA;
@@ -41,11 +42,17 @@ const model = new StepModel(schema);
 
 // ── Create instances and references ───────────────────────────
 
-const { instance: pt } = model.createInstance('point');
-setAttribute(pt!, 'name', 'Origin', schema);
-setAttribute(pt!, 'x', 0.0, schema);
-setAttribute(pt!, 'y', 0.0, schema);
-setAttribute(pt!, 'z', 0.0, schema);
+const { instance: startPoint } = model.createInstance('point');
+setAttribute(startPoint!, 'name', 'Origin', schema);
+setAttribute(startPoint!, 'x', 0.0, schema);
+setAttribute(startPoint!, 'y', 0.0, schema);
+setAttribute(startPoint!, 'z', 0.0, schema);
+
+const { instance: endPoint } = model.createInstance('point');
+setAttribute(endPoint!, 'name', 'End', schema);
+setAttribute(endPoint!, 'x', 10.0, schema);
+setAttribute(endPoint!, 'y', 0.0, schema);
+setAttribute(endPoint!, 'z', 0.0, schema);
 
 const { instance: dir } = model.createInstance('direction');
 setAttribute(dir!, 'name', 'X-axis', schema);
@@ -53,7 +60,8 @@ setAttribute(dir!, 'direction_ratios', createList([1.0, 0.0, 0.0]), schema);
 
 const { instance: line } = model.createInstance('line');
 setAttribute(line!, 'name', 'MyLine', schema);
-setAttribute(line!, 'pnt', createRef(pt!.id, 'POINT'), schema);
+setAttribute(line!, 'start_point', createRef(startPoint!.id, 'POINT'), schema);
+setAttribute(line!, 'end_point', createRef(endPoint!.id, 'POINT'), schema);
 setAttribute(line!, 'dir', createRef(dir!.id, 'DIRECTION'), schema);
 
 // ── Write P21 ────────────────────────────────────────────────
