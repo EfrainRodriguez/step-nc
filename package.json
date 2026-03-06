@@ -47,7 +47,12 @@
     "example:p21-writer-references": "pnpm --filter @step-nc/examples p21-writer:references",
     "example:p21-writer-enums-aggregations": "pnpm --filter @step-nc/examples p21-writer:enums-aggregations",
     "example:p21-writer-select-complex": "pnpm --filter @step-nc/examples p21-writer:select-complex",
-    "example:p21-writer-low-level": "pnpm --filter @step-nc/examples p21-writer:low-level"
+    "example:p21-writer-low-level": "pnpm --filter @step-nc/examples p21-writer:low-level",
+    "example:p21-reader": "pnpm --filter @step-nc/examples p21-reader:read-file",
+    "example:p21-reader-read-with-options": "pnpm --filter @step-nc/examples p21-reader:read-with-options",
+    "example:p21-reader-diagnostics": "pnpm --filter @step-nc/examples p21-reader:diagnostics",
+    "example:p21-reader-visit-instances": "pnpm --filter @step-nc/examples p21-reader:visit-instances",
+    "example:p21-reader-read-invalid": "pnpm --filter @step-nc/examples p21-reader:read-invalid"
   },
   "keywords": [
     "STEP-NC",
