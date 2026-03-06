@@ -128,6 +128,88 @@ describe('resolveConstraints', () => {
     const warns = diagnostics.filter(
       (d) => d.severity === 'warning' && d.message.includes('nonexistent'),
     );
-    expect(warns.length).toBeGreaterThanOrEqual(1);
+    expect(warns).toHaveLength(1);
+    expect(warns[0]!.code).toBe('UNRESOLVED_ATTRIBUTE_REF');
+  });
+
+  it('should resolve unique rule attributes inherited from supertypes', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY base;
+          id : INTEGER;
+        END_ENTITY;
+        ENTITY child
+          SUBTYPE OF (base);
+        UNIQUE
+          UR1 : id;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    expect(diagnostics).toHaveLength(0);
+
+    const child = schema.entities.get('CHILD')!;
+    expect(child.uniqueRules).toHaveLength(1);
+    expect(child.uniqueRules[0]!.resolvedAttributes).toEqual([{ name: 'id' }]);
+  });
+
+  it('should resolve unique rule with mix of own and inherited attributes', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY parent;
+          code : STRING;
+        END_ENTITY;
+        ENTITY child
+          SUBTYPE OF (parent);
+          name : STRING;
+        UNIQUE
+          UR1 : code, name;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    expect(diagnostics).toHaveLength(0);
+
+    const child = schema.entities.get('CHILD')!;
+    expect(child.uniqueRules).toHaveLength(1);
+    expect(child.uniqueRules[0]!.resolvedAttributes).toEqual([
+      { name: 'code' },
+      { name: 'name' },
+    ]);
+  });
+
+  it('should resolve unique rule attributes through multi-level inheritance', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY grandparent;
+          id : INTEGER;
+        END_ENTITY;
+        ENTITY parent
+          SUBTYPE OF (grandparent);
+        END_ENTITY;
+        ENTITY child
+          SUBTYPE OF (parent);
+        UNIQUE
+          UR1 : id;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    expect(diagnostics).toHaveLength(0);
+
+    const child = schema.entities.get('CHILD')!;
+    expect(child.uniqueRules).toHaveLength(1);
+    expect(child.uniqueRules[0]!.resolvedAttributes).toEqual([{ name: 'id' }]);
+  });
+
+  it('should build AP203 with zero diagnostics', () => {
+    const ap203Path = resolve(
+      __dirname,
+      '../../../../docs/express/APs/ap203.exp',
+    );
+    const source = readFileSync(ap203Path, 'utf-8');
+    const { diagnostics } = buildFull(source);
+
+    expect(diagnostics).toHaveLength(0);
   });
 });
