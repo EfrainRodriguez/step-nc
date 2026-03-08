@@ -116,6 +116,30 @@ describe('CASE statement', () => {
       expect(stmt.otherwise!.length).toBeGreaterThanOrEqual(1);
     }
   });
+
+  it('should parse CASE with parenthesized string expression labels', () => {
+    const stmt = parseStmt(`CASE x OF
+      ('ABC' IN TYPEOF(y)) : a := 1;
+      ('DEF' IN TYPEOF(y)) : a := 2;
+      OTHERWISE : a := 0;
+    END_CASE;`);
+    expect(stmt.type).toBe('CaseStatement');
+    if (stmt.type === 'CaseStatement') {
+      expect(stmt.actions.length).toBeGreaterThanOrEqual(2);
+      expect(stmt.otherwise).toBeDefined();
+    }
+  });
+
+  it('should parse CASE with normal identifier labels after SYM_LPAREN fix (regression)', () => {
+    const stmt = parseStmt(
+      'CASE n OF 1 : a := 1; 2 : a := 2; OTHERWISE : a := 0; END_CASE;',
+    );
+    expect(stmt.type).toBe('CaseStatement');
+    if (stmt.type === 'CaseStatement') {
+      expect(stmt.actions.length).toBeGreaterThanOrEqual(2);
+      expect(stmt.otherwise).toBeDefined();
+    }
+  });
 });
 
 describe('REPEAT statement', () => {
@@ -157,6 +181,59 @@ describe('REPEAT statement', () => {
     if (stmt.type === 'RepeatStatement') {
       expect(stmt.control).toBeUndefined();
       expect(stmt.statements.length).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  it('should parse REPEAT i := 1 TO n WHILE condition (FOR + WHILE combined)', () => {
+    const stmt = parseStmt(
+      'REPEAT i := 1 TO n WHILE x > 0; x := x - 1; END_REPEAT;',
+    );
+    expect(stmt.type).toBe('RepeatStatement');
+    if (stmt.type === 'RepeatStatement') {
+      expect(stmt.control).toBeDefined();
+      const ctrl = stmt.control as RepeatControlNode;
+      expect(ctrl.kind).toBe('FOR');
+      expect(ctrl.variable).toBe('i');
+      expect(ctrl.whileCondition).toBeDefined();
+      expect(ctrl.untilCondition).toBeUndefined();
+    }
+  });
+
+  it('should parse REPEAT i := 1 TO n UNTIL condition (FOR + UNTIL combined)', () => {
+    const stmt = parseStmt(
+      'REPEAT i := 1 TO n UNTIL done; x := i; END_REPEAT;',
+    );
+    expect(stmt.type).toBe('RepeatStatement');
+    if (stmt.type === 'RepeatStatement') {
+      expect(stmt.control).toBeDefined();
+      const ctrl = stmt.control as RepeatControlNode;
+      expect(ctrl.kind).toBe('FOR');
+      expect(ctrl.variable).toBe('i');
+      expect(ctrl.untilCondition).toBeDefined();
+      expect(ctrl.whileCondition).toBeUndefined();
+    }
+  });
+
+  it('should still parse REPEAT WHILE only (regression)', () => {
+    const stmt = parseStmt('REPEAT WHILE x > 0; x := x - 1; END_REPEAT;');
+    expect(stmt.type).toBe('RepeatStatement');
+    if (stmt.type === 'RepeatStatement' && stmt.control) {
+      const ctrl = stmt.control as RepeatControlNode;
+      expect(ctrl.kind).toBe('WHILE');
+      expect(ctrl.condition).toBeDefined();
+      expect(ctrl.whileCondition).toBeUndefined();
+      expect(ctrl.untilCondition).toBeUndefined();
+    }
+  });
+
+  it('should still parse REPEAT FOR only (regression)', () => {
+    const stmt = parseStmt('REPEAT i := 1 TO 10; x := i; END_REPEAT;');
+    expect(stmt.type).toBe('RepeatStatement');
+    if (stmt.type === 'RepeatStatement' && stmt.control) {
+      const ctrl = stmt.control as RepeatControlNode;
+      expect(ctrl.kind).toBe('FOR');
+      expect(ctrl.whileCondition).toBeUndefined();
+      expect(ctrl.untilCondition).toBeUndefined();
     }
   });
 });

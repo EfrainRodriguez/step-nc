@@ -21,6 +21,7 @@ import type {
   SupertypeConstraintNode,
   SupertypeExpressionNode,
   TypeDeclarationNode,
+  UniqueRuleNode,
   UseClauseNode,
   WhereRuleNode,
 } from './declarations';
@@ -78,16 +79,24 @@ export function getChildren(node: ASTNodeBase): readonly ASTNodeBase[] {
       const expr = (node as SupertypeConstraintNode).expression;
       return expr ? [expr] : EMPTY;
     }
-    case 'ExplicitAttribute':
-      return [(node as ExplicitAttributeNode).attributeType];
+    case 'ExplicitAttribute': {
+      const n = node as ExplicitAttributeNode;
+      return n.redeclaredAttr
+        ? [n.redeclaredAttr, n.attributeType]
+        : [n.attributeType];
+    }
     case 'DerivedAttribute': {
       const n = node as DerivedAttributeNode;
       return n.redeclaredAttr
         ? [n.redeclaredAttr, n.attributeType, n.expression]
         : [n.attributeType, n.expression];
     }
-    case 'InverseAttribute':
-      return [(node as InverseAttributeNode).attributeType];
+    case 'InverseAttribute': {
+      const n = node as InverseAttributeNode;
+      return n.redeclaredAttr
+        ? [n.redeclaredAttr, n.attributeType]
+        : [n.attributeType];
+    }
     case 'WhereRule':
       return [(node as WhereRuleNode).expression];
     case 'TypeDeclaration': {
@@ -215,6 +224,8 @@ export function getChildren(node: ASTNodeBase): readonly ASTNodeBase[] {
       if (n.initial) out.push(n.initial);
       if (n.increment) out.push(n.increment);
       if (n.final) out.push(n.final);
+      if (n.whileCondition) out.push(n.whileCondition);
+      if (n.untilCondition) out.push(n.untilCondition);
       return out;
     }
     case 'AliasStatement': {
@@ -227,6 +238,14 @@ export function getChildren(node: ASTNodeBase): readonly ASTNodeBase[] {
     }
     case 'CompoundStatement':
       return [...(node as CompoundStatementNode).statements];
+    case 'UniqueRule': {
+      const n = node as UniqueRuleNode;
+      const out: ASTNodeBase[] = [];
+      for (const attr of n.attributes) {
+        if (typeof attr !== 'string') out.push(attr);
+      }
+      return out.length > 0 ? out : EMPTY;
+    }
     default:
       return EMPTY;
   }

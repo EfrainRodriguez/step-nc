@@ -81,6 +81,48 @@ describe('lexExpress', () => {
       expect(t.line).toBe(1);
       expect(t.column).toBe(3);
     });
+
+    it('real con exponente E positivo → LIT_REAL', () => {
+      const t = firstToken('1.0E18');
+      expect(t.kind).toBe('LIT_REAL');
+      expect(t.text).toBe('1.0E18');
+    });
+
+    it('real terminado en punto con exponente → LIT_REAL', () => {
+      const t = firstToken('1.E18');
+      expect(t.kind).toBe('LIT_REAL');
+      expect(t.text).toBe('1.E18');
+    });
+
+    it('real con exponente negativo minúscula → LIT_REAL', () => {
+      const t = firstToken('2.5e-3');
+      expect(t.kind).toBe('LIT_REAL');
+      expect(t.text).toBe('2.5e-3');
+    });
+
+    it('real con exponente positivo explícito → LIT_REAL', () => {
+      const t = firstToken('3.14E+2');
+      expect(t.kind).toBe('LIT_REAL');
+      expect(t.text).toBe('3.14E+2');
+    });
+
+    it('entero sin punto no consume exponente (42 sigue LIT_INTEGER)', () => {
+      const t = firstToken('42');
+      expect(t.kind).toBe('LIT_INTEGER');
+      expect(t.text).toBe('42');
+    });
+
+    it('real sin exponente sigue siendo LIT_REAL (1.5)', () => {
+      const t = firstToken('1.5');
+      expect(t.kind).toBe('LIT_REAL');
+      expect(t.text).toBe('1.5');
+    });
+
+    it('1E18 se tokeniza como LIT_INTEGER + IDENT (no soportado sin punto)', () => {
+      const kinds = tokenKinds('1E18');
+      expect(kinds[0]).toBe('LIT_INTEGER');
+      expect(kinds[1]).toBe('IDENT');
+    });
   });
 
   // ─── Literales de string ───────────────────────────────────────

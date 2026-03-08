@@ -252,6 +252,105 @@ describe('Entity declarations', () => {
       expect(decl.whereRules).toHaveLength(1);
     }
   });
+
+  it('should parse explicit attribute with SELF\\supertype.attr redeclaration', () => {
+    const decl = parseDecl(`ENTITY child SUBTYPE OF (parent);
+      SELF\\parent.name : STRING;
+    END_ENTITY;`);
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.attributes).toHaveLength(1);
+      const attr = decl.attributes[0]!;
+      expect(attr.names).toEqual(['name']);
+      expect(attr.redeclaredAttr).toBeDefined();
+      expect(attr.redeclaredAttr!.type).toBe('QualifiedRef');
+      expect(attr.redeclaredAttr!.root.type).toBe('SelfRef');
+      expect(attr.redeclaredAttr!.qualifiers).toHaveLength(2);
+      expect(attr.redeclaredAttr!.qualifiers[0]!.type).toBe('GroupRef');
+      if (attr.redeclaredAttr!.qualifiers[0]!.type === 'GroupRef') {
+        expect(attr.redeclaredAttr!.qualifiers[0]!.name).toBe('parent');
+      }
+      expect(attr.redeclaredAttr!.qualifiers[1]!.type).toBe('AttributeRef');
+      if (attr.redeclaredAttr!.qualifiers[1]!.type === 'AttributeRef') {
+        expect(attr.redeclaredAttr!.qualifiers[1]!.name).toBe('name');
+      }
+    }
+  });
+
+  it('should parse inverse attribute with SELF\\supertype.attr redeclaration', () => {
+    const decl = parseDecl(`ENTITY child SUBTYPE OF (parent);
+      INVERSE
+        SELF\\parent.items : SET OF other_entity FOR ref;
+    END_ENTITY;`);
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.inverseAttributes).toHaveLength(1);
+      const inv = decl.inverseAttributes![0]!;
+      expect(inv.name).toBe('items');
+      expect(inv.redeclaredAttr).toBeDefined();
+      expect(inv.redeclaredAttr!.type).toBe('QualifiedRef');
+      expect(inv.redeclaredAttr!.root.type).toBe('SelfRef');
+      expect(inv.redeclaredAttr!.qualifiers).toHaveLength(2);
+    }
+  });
+
+  it('should parse normal explicit attributes after SELF\\ fix (regression)', () => {
+    const decl = parseDecl('ENTITY e; a, b : INTEGER; c : REAL; END_ENTITY;');
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.attributes).toHaveLength(2);
+      expect(decl.attributes[0]!.names).toEqual(['a', 'b']);
+      expect(decl.attributes[0]!.redeclaredAttr).toBeUndefined();
+      expect(decl.attributes[1]!.names).toEqual(['c']);
+      expect(decl.attributes[1]!.redeclaredAttr).toBeUndefined();
+    }
+  });
+
+  it('should parse UNIQUE clause with SELF\\entity.attribute', () => {
+    const decl = parseDecl(
+      'ENTITY foo SUBTYPE OF (bar); UNIQUE UR1: SELF\\bar.name; END_ENTITY;',
+    );
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.uniqueRules).toHaveLength(1);
+      const rule = decl.uniqueRules![0]!;
+      expect(rule.label).toBe('UR1');
+      expect(rule.attributes).toHaveLength(1);
+      expect(typeof rule.attributes[0]).not.toBe('string');
+      if (typeof rule.attributes[0] !== 'string') {
+        expect(rule.attributes[0].type).toBe('QualifiedRef');
+      }
+    }
+  });
+
+  it('should parse UNIQUE clause with mixed simple and qualified refs', () => {
+    const decl = parseDecl(
+      'ENTITY baz SUBTYPE OF (bar); cfg : STRING; UNIQUE UR1: cfg, SELF\\bar.name; END_ENTITY;',
+    );
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.uniqueRules).toHaveLength(1);
+      const rule = decl.uniqueRules![0]!;
+      expect(rule.attributes).toHaveLength(2);
+      expect(typeof rule.attributes[0]).toBe('string');
+      expect(rule.attributes[0]).toBe('cfg');
+      expect(typeof rule.attributes[1]).not.toBe('string');
+    }
+  });
+
+  it('should parse UNIQUE clause with multiple SELF refs', () => {
+    const decl = parseDecl(
+      'ENTITY qux SUBTYPE OF (bar); UNIQUE UR1: SELF\\bar.name, SELF\\bar.description; END_ENTITY;',
+    );
+    expect(decl.type).toBe('EntityDeclaration');
+    if (decl.type === 'EntityDeclaration') {
+      expect(decl.uniqueRules).toHaveLength(1);
+      const rule = decl.uniqueRules![0]!;
+      expect(rule.attributes).toHaveLength(2);
+      expect(typeof rule.attributes[0]).not.toBe('string');
+      expect(typeof rule.attributes[1]).not.toBe('string');
+    }
+  });
 });
 
 describe('Type declarations', () => {
@@ -351,6 +450,49 @@ describe('Function declarations', () => {
       expect(decl.body.length).toBeGreaterThan(0);
     }
   });
+
+  it('should parse FUNCTION with nested FUNCTION declaration', () => {
+    const src = `FUNCTION outer(x : INTEGER) : INTEGER;
+      FUNCTION inner(y : INTEGER) : INTEGER;
+        RETURN (y + 1);
+      END_FUNCTION;
+      RETURN (inner(x));
+    END_FUNCTION;`;
+    const decl = parseDecl(src);
+    expect(decl.type).toBe('FunctionDeclaration');
+    if (decl.type === 'FunctionDeclaration') {
+      expect(decl.name).toBe('outer');
+      expect(decl.declarations).toBeDefined();
+      expect(decl.declarations!.length).toBe(1);
+      expect(decl.declarations![0]!.type).toBe('FunctionDeclaration');
+      if (decl.declarations![0]!.type === 'FunctionDeclaration') {
+        expect(decl.declarations![0]!.name).toBe('inner');
+      }
+      expect(decl.body.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('should parse FUNCTION with nested PROCEDURE declaration', () => {
+    const src = `FUNCTION compute(x : INTEGER) : INTEGER;
+      PROCEDURE helper(VAR out : INTEGER);
+        out := x + 1;
+      END_PROCEDURE;
+      LOCAL
+        result : INTEGER;
+      END_LOCAL;
+      helper(result);
+      RETURN (result);
+    END_FUNCTION;`;
+    const decl = parseDecl(src);
+    expect(decl.type).toBe('FunctionDeclaration');
+    if (decl.type === 'FunctionDeclaration') {
+      expect(decl.declarations).toBeDefined();
+      const nestedProc = decl.declarations!.find(
+        (d) => d.type === 'ProcedureDeclaration',
+      );
+      expect(nestedProc).toBeDefined();
+    }
+  });
 });
 
 describe('Procedure declarations', () => {
@@ -387,6 +529,22 @@ describe('Procedure declarations', () => {
       expect(decl.parameters).toHaveLength(2);
       expect(decl.parameters[0]!.isVar).toBeUndefined();
       expect(decl.parameters[1]!.isVar).toBe(true);
+    }
+  });
+
+  it('should parse PROCEDURE with nested FUNCTION declaration', () => {
+    const src = `PROCEDURE do_calc(VAR out : INTEGER);
+      FUNCTION helper(x : INTEGER) : INTEGER;
+        RETURN (x * 2);
+      END_FUNCTION;
+      out := helper(5);
+    END_PROCEDURE;`;
+    const decl = parseDecl(src);
+    expect(decl.type).toBe('ProcedureDeclaration');
+    if (decl.type === 'ProcedureDeclaration') {
+      expect(decl.declarations).toBeDefined();
+      expect(decl.declarations!.length).toBe(1);
+      expect(decl.declarations![0]!.type).toBe('FunctionDeclaration');
     }
   });
 });

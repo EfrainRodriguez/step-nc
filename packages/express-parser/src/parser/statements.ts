@@ -261,6 +261,7 @@ function parseCaseAction(ctx: ParserContext): CaseActionNode {
     'IDENT',
     'BC_TRUE',
     'BC_FALSE',
+    'SYM_LPAREN',
   );
 
   if (statements.length === 0) {
@@ -324,14 +325,12 @@ function parseRepeatStatement(ctx: ParserContext): StatementNode {
   }
 
   if (control && control.kind === 'FOR') {
-    if (ctx.check('KW_WHILE') || ctx.check('KW_UNTIL')) {
-      ctx.warning(
-        'PAR080',
-        'Combined REPEAT controls (FOR+WHILE/UNTIL) are partially supported; only FOR control is preserved',
-        spanOfToken(ctx.current()),
-      );
-      ctx.consume();
-      parseExpression(ctx, 0);
+    if (ctx.skip('KW_WHILE')) {
+      const whileCondition = parseExpression(ctx, 0);
+      control = { ...control, whileCondition };
+    } else if (ctx.skip('KW_UNTIL')) {
+      const untilCondition = parseExpression(ctx, 0);
+      control = { ...control, untilCondition };
     }
   }
 

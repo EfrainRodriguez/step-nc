@@ -45,6 +45,8 @@ export interface RepeatControlNode extends ASTNodeBase {
   readonly initial?: ExpressionNode; // For FOR
   readonly increment?: ExpressionNode; // For FOR
   readonly final?: ExpressionNode; // For FOR
+  readonly whileCondition?: ExpressionNode; // For combined FOR+WHILE
+  readonly untilCondition?: ExpressionNode; // For combined FOR+UNTIL
 }
 
 export interface RepeatStatementNode extends ASTNodeBase {

@@ -71,6 +71,7 @@ export interface ExplicitAttributeNode extends ASTNodeBase {
   readonly type: 'ExplicitAttribute';
   readonly names: readonly string[]; // can declare multiple: a, b : Type;
   readonly optional?: boolean;
+  readonly redeclaredAttr?: QualifiedRefNode;
   readonly attributeType: TypeNode;
 }
 
@@ -85,6 +86,7 @@ export interface DerivedAttributeNode extends ASTNodeBase {
 export interface InverseAttributeNode extends ASTNodeBase {
   readonly type: 'InverseAttribute';
   readonly name: string;
+  readonly redeclaredAttr?: QualifiedRefNode;
   readonly attributeType: TypeNode;
   readonly invertedEntity: string;
   readonly invertedAttribute: string;
@@ -95,7 +97,7 @@ export interface InverseAttributeNode extends ASTNodeBase {
 export interface UniqueRuleNode extends ASTNodeBase {
   readonly type: 'UniqueRule';
   readonly label?: string;
-  readonly attributes: readonly string[];
+  readonly attributes: readonly (string | QualifiedRefNode)[];
 }
 
 export interface WhereRuleNode extends ASTNodeBase {
@@ -124,6 +126,8 @@ export interface FunctionDeclarationNode extends DeclarationNodeBase {
     | TypeDeclarationNode
     | ConstantDeclarationNode
     | LocalVariableNode
+    | FunctionDeclarationNode
+    | ProcedureDeclarationNode
   )[];
   readonly body: readonly StatementNode[];
 }
@@ -136,6 +140,8 @@ export interface ProcedureDeclarationNode extends DeclarationNodeBase {
     | TypeDeclarationNode
     | ConstantDeclarationNode
     | LocalVariableNode
+    | FunctionDeclarationNode
+    | ProcedureDeclarationNode
   )[];
   readonly body: readonly StatementNode[];
 }
@@ -157,6 +163,8 @@ export interface RuleDeclarationNode extends DeclarationNodeBase {
     | TypeDeclarationNode
     | ConstantDeclarationNode
     | LocalVariableNode
+    | FunctionDeclarationNode
+    | ProcedureDeclarationNode
   )[];
   readonly body: readonly StatementNode[];
   readonly whereRules?: readonly WhereRuleNode[];

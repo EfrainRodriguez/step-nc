@@ -73,6 +73,14 @@ export function scanNumberLiteral(ctx: LexerContext): boolean {
     ctx.advance();
     while (!ctx.eof() && isDigit(ctx.peek())) ctx.advance();
     kind = 'LIT_REAL';
+
+    if (!ctx.eof() && (ctx.peek() === 'E' || ctx.peek() === 'e')) {
+      ctx.advance();
+      if (!ctx.eof() && (ctx.peek() === '+' || ctx.peek() === '-')) {
+        ctx.advance();
+      }
+      while (!ctx.eof() && isDigit(ctx.peek())) ctx.advance();
+    }
   }
 
   ctx.emit(kind, ctx.slice(start), start, line, col);

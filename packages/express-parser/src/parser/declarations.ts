@@ -342,23 +342,55 @@ function parseOneOf(ctx: ParserContext): ExpressionNode {
 
 function parseExplicitAttribute(ctx: ParserContext): ExplicitAttributeNode[] {
   const start = ctx.startPos();
-  const optionalBeforeNames = ctx.skip('KW_OPTIONAL') || undefined;
-  const names = [parseIdentifier(ctx)];
-  while (ctx.skip('SYM_COMMA')) {
-    names.push(parseIdentifier(ctx));
+
+  let names: string[];
+  let redeclaredAttr: QualifiedRefNode | undefined;
+
+  if (ctx.current().kind === 'BC_SELF') {
+    const expr = parsePrimary(ctx);
+    if (expr.type === 'QualifiedRef') {
+      redeclaredAttr = expr;
+      const lastQ = expr.qualifiers[expr.qualifiers.length - 1];
+      names = [lastQ && lastQ.type === 'AttributeRef' ? lastQ.name : '<error>'];
+    } else {
+      names = ['<error>'];
+    }
+  } else {
+    const optionalBeforeNames = ctx.skip('KW_OPTIONAL') || undefined;
+    names = [parseIdentifier(ctx)];
+    while (ctx.skip('SYM_COMMA')) {
+      names.push(parseIdentifier(ctx));
+    }
+    ctx.expect('SYM_COLON');
+
+    const optionalBeforeType = ctx.skip('KW_OPTIONAL') || undefined;
+    const attributeType = parseType(ctx);
+    parseSemicolon(ctx);
+
+    const optional = optionalBeforeNames ?? optionalBeforeType;
+    return [
+      {
+        type: 'ExplicitAttribute',
+        names,
+        ...(optional ? { optional } : {}),
+        attributeType,
+        span: ctx.spanFrom(start),
+      },
+    ];
   }
+
   ctx.expect('SYM_COLON');
 
-  const optionalBeforeType = ctx.skip('KW_OPTIONAL') || undefined;
+  const optionalAfterColon = ctx.skip('KW_OPTIONAL') || undefined;
   const attributeType = parseType(ctx);
   parseSemicolon(ctx);
 
-  const optional = optionalBeforeNames ?? optionalBeforeType;
   return [
     {
       type: 'ExplicitAttribute',
       names,
-      ...(optional ? { optional } : {}),
+      ...(optionalAfterColon ? { optional: optionalAfterColon } : {}),
+      ...(redeclaredAttr ? { redeclaredAttr } : {}),
       attributeType,
       span: ctx.spanFrom(start),
     },
@@ -406,7 +438,23 @@ function parseDerivedAttribute(ctx: ParserContext): DerivedAttributeNode {
 
 function parseInverseAttribute(ctx: ParserContext): InverseAttributeNode {
   const start = ctx.startPos();
-  const name = parseIdentifier(ctx);
+
+  let name: string;
+  let redeclaredAttr: QualifiedRefNode | undefined;
+
+  if (ctx.current().kind === 'BC_SELF') {
+    const expr = parsePrimary(ctx);
+    if (expr.type === 'QualifiedRef') {
+      redeclaredAttr = expr;
+      const lastQ = expr.qualifiers[expr.qualifiers.length - 1];
+      name = lastQ && lastQ.type === 'AttributeRef' ? lastQ.name : '<error>';
+    } else {
+      name = '<error>';
+    }
+  } else {
+    name = parseIdentifier(ctx);
+  }
+
   ctx.expect('SYM_COLON');
 
   let attributeType: TypeNode;
@@ -438,6 +486,7 @@ function parseInverseAttribute(ctx: ParserContext): InverseAttributeNode {
   return {
     type: 'InverseAttribute',
     name,
+    ...(redeclaredAttr ? { redeclaredAttr } : {}),
     attributeType,
     invertedEntity,
     invertedAttribute,
@@ -482,6 +531,19 @@ export function parseWhereClause(ctx: ParserContext): WhereRuleNode[] {
 
 // ── UNIQUE Clause ───────────────────────────────────────────────────
 
+function parseUniqueAttributeRef(
+  ctx: ParserContext,
+): string | QualifiedRefNode {
+  if (ctx.current().kind === 'BC_SELF') {
+    const expr = parsePrimary(ctx);
+    if (expr.type === 'QualifiedRef') {
+      return expr;
+    }
+    return '<error>';
+  }
+  return parseIdentifier(ctx);
+}
+
 function parseUniqueClause(ctx: ParserContext): UniqueRuleNode[] {
   const rules: UniqueRuleNode[] = [];
   while (
@@ -498,9 +560,11 @@ function parseUniqueClause(ctx: ParserContext): UniqueRuleNode[] {
       ctx.consume();
     }
 
-    const attributes = [parseIdentifier(ctx)];
+    const attributes: (string | QualifiedRefNode)[] = [
+      parseUniqueAttributeRef(ctx),
+    ];
     while (ctx.skip('SYM_COMMA')) {
-      attributes.push(parseIdentifier(ctx));
+      attributes.push(parseUniqueAttributeRef(ctx));
     }
     parseSemicolon(ctx);
 
@@ -589,11 +653,19 @@ function parseLocalDeclarations(ctx: ParserContext): LocalVariableNode[] {
 
 function parseInternalDeclarations(
   ctx: ParserContext,
-): (TypeDeclarationNode | ConstantDeclarationNode | LocalVariableNode)[] {
+): (
+  | TypeDeclarationNode
+  | ConstantDeclarationNode
+  | LocalVariableNode
+  | FunctionDeclarationNode
+  | ProcedureDeclarationNode
+)[] {
   const decls: (
     | TypeDeclarationNode
     | ConstantDeclarationNode
     | LocalVariableNode
+    | FunctionDeclarationNode
+    | ProcedureDeclarationNode
   )[] = [];
 
   while (!ctx.isEOF()) {
@@ -603,6 +675,10 @@ function parseInternalDeclarations(
       decls.push(parseConstantDeclaration(ctx));
     } else if (ctx.check('KW_LOCAL')) {
       decls.push(...parseLocalDeclarations(ctx));
+    } else if (ctx.check('KW_FUNCTION')) {
+      decls.push(parseFunctionDeclaration(ctx));
+    } else if (ctx.check('KW_PROCEDURE')) {
+      decls.push(parseProcedureDeclaration(ctx));
     } else {
       break;
     }
