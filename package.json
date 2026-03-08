@@ -52,7 +52,8 @@
     "example:p21-reader-read-with-options": "pnpm --filter @step-nc/examples p21-reader:read-with-options",
     "example:p21-reader-diagnostics": "pnpm --filter @step-nc/examples p21-reader:diagnostics",
     "example:p21-reader-visit-instances": "pnpm --filter @step-nc/examples p21-reader:visit-instances",
-    "example:p21-reader-read-invalid": "pnpm --filter @step-nc/examples p21-reader:read-invalid"
+    "example:p21-reader-read-invalid": "pnpm --filter @step-nc/examples p21-reader:read-invalid",
+    "fix:express-doc": "tsx scripts/fix-express-doc-format.ts"
   },
   "keywords": [
     "STEP-NC",
@@ -78,7 +79,8 @@
     "rimraf": "^6.1.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.9"
+    "vitest": "^4.0.9",
+    "tsx": "^4.19.2"
   },
   "engines": {
     "node": ">= 20"
