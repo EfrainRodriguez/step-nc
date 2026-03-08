@@ -217,7 +217,11 @@ function parseCaseStatement(ctx: ParserContext): StatementNode {
     !ctx.check('KW_OTHERWISE') &&
     !ctx.check('KW_END_CASE')
   ) {
+    const posBefore = ctx.position();
     actions.push(parseCaseAction(ctx));
+    if (ctx.position() === posBefore && !ctx.isEOF()) {
+      ctx.consume();
+    }
   }
 
   let otherwise: StatementNode[] | undefined;

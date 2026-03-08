@@ -23,6 +23,9 @@ export class LexerContext {
   /** Collected diagnostics (errors/warnings) produced during lexing */
   readonly diagnostics: LexDiagnostic[] = [];
 
+  private _streaming = false;
+  private _pendingToken: Token | null = null;
+
   constructor(source: string) {
     this.source = source;
   }
@@ -72,6 +75,14 @@ export class LexerContext {
   }
 
   /**
+   * Returns a substring of the source from `start` to the current index.
+   * V8 creates a lightweight SlicedString that shares memory with source.
+   */
+  slice(start: number): string {
+    return this.source.slice(start, this.index);
+  }
+
+  /**
    * Emits a new token with the provided kind and text at the given location.
    */
   emit(
@@ -81,13 +92,12 @@ export class LexerContext {
     line: number,
     col: number,
   ): void {
-    this.tokens.push({
-      kind,
-      text,
-      offset,
-      line,
-      column: col,
-    });
+    const token: Token = { kind, text, offset, line, column: col };
+    if (this._streaming) {
+      this._pendingToken = token;
+    } else {
+      this.tokens.push(token);
+    }
   }
 
   /**
@@ -103,5 +113,17 @@ export class LexerContext {
       column: this.column,
       severity: 'error',
     });
+  }
+
+  /** Enable streaming mode: emit() stores tokens in a pending slot instead of the array. */
+  enableStreaming(): void {
+    this._streaming = true;
+  }
+
+  /** Retrieve and clear the pending token produced in streaming mode. */
+  takePendingToken(): Token | null {
+    const t = this._pendingToken;
+    this._pendingToken = null;
+    return t;
   }
 }

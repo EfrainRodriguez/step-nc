@@ -259,7 +259,7 @@ describe('Type declarations', () => {
     const decl = parseDecl('TYPE length = REAL; END_TYPE;');
     expect(decl.type).toBe('TypeDeclaration');
     if (decl.type === 'TypeDeclaration') {
-      expect(decl.name).toBe('length');
+      expect(decl.name).toBe('LENGTH');
     }
   });
 

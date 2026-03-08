@@ -1,6 +1,8 @@
 export { lexExpress } from './lexer/lexer';
 export type { LexResult } from './lexer/lexer';
 
+export { createTokenStream, TokenStream } from './lexer/token-stream';
+
 export type {
   LexDiagnostic,
   Token,

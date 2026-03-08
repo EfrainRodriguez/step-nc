@@ -19,6 +19,8 @@ export interface ParseOptions {
   maxExplicitAttributes?: number;
   /** Max items in DERIVE/INVERSE sections per entity (default: DEFAULT_MAX_ENTITY_SECTION_ITEMS). */
   maxEntitySectionItems?: number;
+  /** Use streaming lexer + sliding-window parser to reduce peak memory. Default: false. */
+  streaming?: boolean;
 }
 
 // ── Types of diagnosis ────────────────────────────────────────

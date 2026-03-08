@@ -454,6 +454,7 @@ export function parseWhereClause(ctx: ParserContext): WhereRuleNode[] {
     !isEndKeyword(ctx.current().kind) &&
     !isStartOfDeclaration(ctx.current().kind)
   ) {
+    const posBefore = ctx.position();
     const start = ctx.startPos();
     ctx.skip('KW_WHERE');
     let label: string | undefined;
@@ -471,6 +472,10 @@ export function parseWhereClause(ctx: ParserContext): WhereRuleNode[] {
       expression,
       span: ctx.spanFrom(start),
     });
+
+    if (ctx.position() === posBefore && !ctx.isEOF()) {
+      ctx.consume();
+    }
   }
   return rules;
 }
@@ -484,6 +489,7 @@ function parseUniqueClause(ctx: ParserContext): UniqueRuleNode[] {
     !isEndKeyword(ctx.current().kind) &&
     ctx.current().kind !== 'KW_WHERE'
   ) {
+    const posBefore = ctx.position();
     const start = ctx.startPos();
     let label: string | undefined;
 
@@ -504,6 +510,10 @@ function parseUniqueClause(ctx: ParserContext): UniqueRuleNode[] {
       attributes,
       span: ctx.spanFrom(start),
     });
+
+    if (ctx.position() === posBefore && !ctx.isEOF()) {
+      ctx.consume();
+    }
   }
   return rules;
 }

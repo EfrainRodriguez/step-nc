@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { lexExpress } from '../src/index';
 import type { Token, TokenKind } from '../src/index';
+import { lexExpress } from '../src/index';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -165,6 +165,12 @@ describe('lexExpress', () => {
       expect(t.kind).toBe('IDENT');
       expect(t.text).toBe('x2');
     });
+
+    it('identifiers preserve original case (not interned)', () => {
+      expect(firstToken('MyEntity').text).toBe('MyEntity');
+      expect(firstToken('some_var').text).toBe('some_var');
+      expect(firstToken('MixedCase').text).toBe('MixedCase');
+    });
   });
 
   // ─── Keywords ──────────────────────────────────────────────────
@@ -188,6 +194,19 @@ describe('lexExpress', () => {
       expect(firstToken('Entity').kind).toBe('KW_ENTITY');
       expect(firstToken('ENTITY').kind).toBe('KW_ENTITY');
       expect(firstToken('eNtItY').kind).toBe('KW_ENTITY');
+    });
+
+    it('keyword interning: all keyword variants emit canonical uppercase lexeme', () => {
+      expect(firstToken('entity').text).toBe('ENTITY');
+      expect(firstToken('Entity').text).toBe('ENTITY');
+      expect(firstToken('ENTITY').text).toBe('ENTITY');
+      expect(firstToken('eNtItY').text).toBe('ENTITY');
+
+      expect(firstToken('type').text).toBe('TYPE');
+      expect(firstToken('select').text).toBe('SELECT');
+      expect(firstToken('and').text).toBe('AND');
+      expect(firstToken('true').text).toBe('TRUE');
+      expect(firstToken('sizeof').text).toBe('SIZEOF');
     });
 
     it('operator keywords (AND, OR, NOT, DIV, MOD)', () => {

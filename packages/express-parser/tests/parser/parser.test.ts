@@ -57,7 +57,7 @@ describe('parseExpress — end-to-end integration', () => {
 
     const typeDecl = ast.declarations[0]!;
     if (typeDecl.type === 'TypeDeclaration') {
-      expect(typeDecl.name).toBe('length');
+      expect(typeDecl.name).toBe('LENGTH');
       expect(typeDecl.underlyingType.type).toBe('SimpleType');
       expect(typeDecl.whereRules).toHaveLength(1);
     }

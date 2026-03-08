@@ -1,14 +1,14 @@
 import { LexerContext } from './context';
 import {
-  isWhitespace,
-  isDigit,
-  isIdentifierStart,
-  isIdentifierPart,
   isBinaryDigit,
+  isDigit,
+  isIdentifierPart,
+  isIdentifierStart,
+  isWhitespace,
 } from './helpers';
-import type { BaseToken, TokenKind } from './types';
 import { KEYWORD_MAP, SYMBOLS_SORTED } from './tables';
 import { BUILTIN_CONSTANT_TOKENS } from './tokens';
+import type { BaseToken, TokenKind } from './types';
 
 /* ──────────────────────────────────────────────────────────────── */
 /*  Whitespace                                                      */
@@ -65,19 +65,17 @@ export function scanNumberLiteral(ctx: LexerContext): boolean {
   const line = ctx.line;
   const col = ctx.column;
 
-  let text = '';
-
-  while (!ctx.eof() && isDigit(ctx.peek())) text += ctx.advance();
+  while (!ctx.eof() && isDigit(ctx.peek())) ctx.advance();
 
   let kind: TokenKind = 'LIT_INTEGER';
 
   if (ctx.peek() === '.') {
-    text += ctx.advance();
-    while (!ctx.eof() && isDigit(ctx.peek())) text += ctx.advance();
+    ctx.advance();
+    while (!ctx.eof() && isDigit(ctx.peek())) ctx.advance();
     kind = 'LIT_REAL';
   }
 
-  ctx.emit(kind, text, start, line, col);
+  ctx.emit(kind, ctx.slice(start), start, line, col);
   return true;
 }
 
@@ -92,20 +90,17 @@ export function scanStringLiteral(ctx: LexerContext): boolean {
   const line = ctx.line;
   const col = ctx.column;
 
-  let text = '';
-  text += ctx.advance(); // opening quote
+  ctx.advance(); // opening quote
 
   while (!ctx.eof()) {
-    const c = ctx.advance();
-    text += c;
-    if (c === "'") {
-      ctx.emit('LIT_STRING', text, start, line, col);
+    if (ctx.advance() === "'") {
+      ctx.emit('LIT_STRING', ctx.slice(start), start, line, col);
       return true;
     }
   }
 
   ctx.error('LEX002', 'Unterminated string literal. Expected closing quote.');
-  ctx.emit('LIT_STRING', text, start, line, col);
+  ctx.emit('LIT_STRING', ctx.slice(start), start, line, col);
   return true;
 }
 
@@ -142,13 +137,13 @@ export function scanBinaryLiteral(ctx: LexerContext): boolean {
   const line = ctx.line;
   const col = ctx.column;
 
-  let text = ctx.advance(); // consume '%'
+  ctx.advance(); // consume '%'
 
   while (!ctx.eof() && isBinaryDigit(ctx.peek())) {
-    text += ctx.advance();
+    ctx.advance();
   }
 
-  ctx.emit('LIT_BINARY', text, start, line, col);
+  ctx.emit('LIT_BINARY', ctx.slice(start), start, line, col);
   return true;
 }
 
@@ -182,16 +177,23 @@ export function scanIdentifierOrKeyword(ctx: LexerContext): boolean {
   const line = ctx.line;
   const col = ctx.column;
 
-  let text = '';
   while (!ctx.eof() && isIdentifierPart(ctx.peek())) {
-    text += ctx.advance();
+    ctx.advance();
   }
 
+  const text = ctx.slice(start);
   const upper = text.toUpperCase();
   const keywordSpec = KEYWORD_MAP[upper];
 
   if (keywordSpec) {
-    ctx.emit(keywordSpec.name as TokenKind, text, start, line, col);
+    // Intern: use the canonical lexeme string shared across all occurrences
+    ctx.emit(
+      keywordSpec.name as TokenKind,
+      keywordSpec.lexeme,
+      start,
+      line,
+      col,
+    );
   } else {
     ctx.emit('IDENT', text, start, line, col);
   }

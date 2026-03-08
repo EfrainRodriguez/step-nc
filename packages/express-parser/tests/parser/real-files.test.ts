@@ -97,3 +97,37 @@ describe('Real EXPRESS files — SDAI', () => {
     }
   });
 });
+
+describe('Streaming mode — equivalence tests', () => {
+  it('geometry.exp: streaming produces same AST as eager', () => {
+    const source = readFileSync(GEOMETRY_EXP, 'utf-8');
+    const eager = parseExpress(source);
+    const streaming = parseExpress(source, { streaming: true });
+
+    expect(streaming.ast).toEqual(eager.ast);
+  });
+
+  it('geometry.exp: streaming produces same diagnostics count as eager', () => {
+    const source = readFileSync(GEOMETRY_EXP, 'utf-8');
+    const eager = parseExpress(source);
+    const streaming = parseExpress(source, { streaming: true });
+
+    expect(streaming.diagnostics.length).toBe(eager.diagnostics.length);
+  });
+
+  it('sdai.exp: streaming produces same AST as eager', () => {
+    const source = readFileSync(SDAI_EXP, 'utf-8');
+    const eager = parseExpress(source);
+    const streaming = parseExpress(source, { streaming: true });
+
+    expect(streaming.ast).toEqual(eager.ast);
+  });
+
+  it('SDAI-dictionary_schema.exp: streaming produces same AST as eager', () => {
+    const source = readFileSync(SDAI_DICTIONARY_EXP, 'utf-8');
+    const eager = parseExpress(source);
+    const streaming = parseExpress(source, { streaming: true });
+
+    expect(streaming.ast).toEqual(eager.ast);
+  });
+});
