@@ -228,4 +228,82 @@ describe('buildInheritance', () => {
     expect(warnings.length).toBeGreaterThanOrEqual(1);
     expect(warnings[0]!.message).toContain('nonexistent');
   });
+
+  it('should link redeclaring for explicit attributes via redeclaredFrom', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY base;
+          attr : INTEGER;
+        END_ENTITY;
+        ENTITY sub SUBTYPE OF (base);
+          SELF\\base.attr : STRING(50);
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const warnings = diagnostics.filter((d) => d.severity === 'warning');
+    expect(warnings).toHaveLength(0);
+
+    const sub = schema.entities.get('SUB')!;
+    const explicit = sub.explicitAttributes[0]!;
+    expect(explicit.redeclaredFrom).toBeDefined();
+    expect(explicit.redeclaring).toBeDefined();
+    expect(explicit.redeclaring!.name).toBe('attr');
+    expect(explicit.redeclaring!.parentEntity.name).toBe('base');
+  });
+
+  it('should warn when explicit redeclaredFrom references unknown entity', () => {
+    const { diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY child;
+          SELF\\nonexistent.attr : INTEGER;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const warnings = diagnostics.filter(
+      (d) => d.severity === 'warning' && d.code === 'UNRESOLVED_ENTITY_REF',
+    );
+    expect(warnings.length).toBeGreaterThanOrEqual(1);
+    expect(warnings[0]!.message).toContain('nonexistent');
+  });
+
+  it('should warn when explicit redeclaredFrom references unknown attribute', () => {
+    const { diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY base;
+          real_attr : INTEGER;
+        END_ENTITY;
+        ENTITY child SUBTYPE OF (base);
+          SELF\\base.fake_attr : INTEGER;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const warnings = diagnostics.filter(
+      (d) => d.severity === 'warning' && d.code === 'UNRESOLVED_ATTRIBUTE_REF',
+    );
+    expect(warnings.length).toBeGreaterThanOrEqual(1);
+    expect(warnings[0]!.message).toContain('fake_attr');
+  });
+
+  it('should warn when inverse redeclaredFrom references unknown entity', () => {
+    const { diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY target;
+          ref : child;
+        END_ENTITY;
+        ENTITY child;
+        INVERSE
+          SELF\\nonexistent.inv_ref : SET [0:?] OF target FOR ref;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const warnings = diagnostics.filter(
+      (d) => d.severity === 'warning' && d.code === 'UNRESOLVED_ENTITY_REF',
+    );
+    expect(warnings.length).toBeGreaterThanOrEqual(1);
+    expect(warnings[0]!.message).toContain('nonexistent');
+  });
 });

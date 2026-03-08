@@ -195,7 +195,7 @@ function executeRepeat(
       typeof final !== 'number' ||
       typeof increment !== 'number'
     ) {
-      return undefined; // INDETERMINATE bounds — skip loop
+      return undefined;
     }
 
     ensureVariables(ctx);
@@ -211,8 +211,20 @@ function executeRepeat(
         );
       }
       ctx.variables!.set(varName, i);
+
+      if (control.whileCondition) {
+        const whileCond = evaluate(control.whileCondition, ctx);
+        if (whileCond !== true) break;
+      }
+
       const signal = executeStatements(stmt.statements, ctx);
-      if (signal === undefined || signal.kind === EXEC_SKIP) continue;
+      if (signal === undefined || signal.kind === EXEC_SKIP) {
+        if (control.untilCondition) {
+          const untilCond = evaluate(control.untilCondition, ctx);
+          if (untilCond === true) break;
+        }
+        continue;
+      }
       if (signal.kind === EXEC_ESCAPE) break;
       return signal;
     }

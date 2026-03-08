@@ -212,4 +212,49 @@ describe('resolveConstraints', () => {
 
     expect(diagnostics).toHaveLength(0);
   });
+
+  it('should normalize QualifiedRefNode in unique rule to string attribute names', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY base;
+          attr1 : INTEGER;
+        END_ENTITY;
+        ENTITY child SUBTYPE OF (base);
+          attr2 : STRING;
+        UNIQUE
+          ur1 : SELF\\base.attr1, attr2;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    expect(diagnostics).toHaveLength(0);
+
+    const child = schema.entities.get('CHILD')!;
+    expect(child.uniqueRules).toHaveLength(1);
+    const ur = child.uniqueRules[0]!;
+    expect(ur.attributeNames).toEqual(['attr1', 'attr2']);
+  });
+
+  it('should resolve constraints for qualified unique rule attributes', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY base;
+          id : INTEGER;
+        END_ENTITY;
+        ENTITY child SUBTYPE OF (base);
+          name : STRING;
+        UNIQUE
+          ur1 : SELF\\base.id, name;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    expect(diagnostics).toHaveLength(0);
+
+    const child = schema.entities.get('CHILD')!;
+    expect(child.uniqueRules[0]!.resolvedAttributes).toEqual([
+      { name: 'id' },
+      { name: 'name' },
+    ]);
+  });
 });

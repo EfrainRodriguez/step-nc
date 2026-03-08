@@ -12,6 +12,10 @@ export interface ExplicitAttribute {
   type: TypeDescriptor;
   readonly optional: boolean;
   redeclaring?: ExplicitAttribute;
+  readonly redeclaredFrom?: {
+    readonly entityName: string;
+    readonly attributeName: string;
+  };
 }
 
 export interface DerivedAttribute {
@@ -33,4 +37,8 @@ export interface InverseAttribute {
   invertedAttribute?: ExplicitAttribute;
   readonly invertedEntityName: string;
   readonly invertedAttributeName: string;
+  readonly redeclaredFrom?: {
+    readonly entityName: string;
+    readonly attributeName: string;
+  };
 }

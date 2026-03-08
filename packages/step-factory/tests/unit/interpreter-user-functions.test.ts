@@ -196,3 +196,135 @@ describe('Recursion depth limit', () => {
     expect(result).toBe(3628800);
   });
 });
+
+describe('REPEAT FOR+WHILE and FOR+UNTIL', () => {
+  it('FOR+WHILE should stop when WHILE condition becomes false', () => {
+    const source = `
+      SCHEMA FOR_WHILE_SCHEMA;
+        FUNCTION sum_while(n : INTEGER) : INTEGER;
+          LOCAL acc : INTEGER := 0; END_LOCAL;
+          REPEAT i := 1 TO n WHILE (acc < 50);
+            acc := acc + i;
+          END_REPEAT;
+          RETURN(acc);
+        END_FUNCTION;
+      END_SCHEMA;
+    `;
+    const { ast } = parseExpress(source);
+    if (ast.type !== 'SchemaDeclaration') throw new Error('parse failed');
+    const { schema } = buildSchema(ast);
+    const ctx: EvalContext = { schema };
+
+    // acc accumulates: 1, 3, 6, 10, 15, 21, 28, 36, 45, 55
+    // At i=10: acc before body = 45 < 50 → WHILE true → acc becomes 55
+    // At i=11: acc = 55 >= 50 → WHILE false → break
+    const result = evaluate(callExpr('sum_while', [intLit(100)]), ctx);
+    expect(result).toBe(55);
+  });
+
+  it('FOR+UNTIL should stop when UNTIL condition becomes true', () => {
+    const source = `
+      SCHEMA FOR_UNTIL_SCHEMA;
+        FUNCTION sum_until(n : INTEGER) : INTEGER;
+          LOCAL acc : INTEGER := 0; END_LOCAL;
+          REPEAT i := 1 TO n UNTIL (acc > 20);
+            acc := acc + i;
+          END_REPEAT;
+          RETURN(acc);
+        END_FUNCTION;
+      END_SCHEMA;
+    `;
+    const { ast } = parseExpress(source);
+    if (ast.type !== 'SchemaDeclaration') throw new Error('parse failed');
+    const { schema } = buildSchema(ast);
+    const ctx: EvalContext = { schema };
+
+    // acc: 1, 3, 6, 10, 15, 21 → after i=6: acc=21 > 20 → UNTIL true → break
+    const result = evaluate(callExpr('sum_until', [intLit(100)]), ctx);
+    expect(result).toBe(21);
+  });
+
+  it('pure FOR loop should still work (no regression)', () => {
+    const source = `
+      SCHEMA PURE_FOR_SCHEMA;
+        FUNCTION sum_n(n : INTEGER) : INTEGER;
+          LOCAL acc : INTEGER := 0; END_LOCAL;
+          REPEAT i := 1 TO n;
+            acc := acc + i;
+          END_REPEAT;
+          RETURN(acc);
+        END_FUNCTION;
+      END_SCHEMA;
+    `;
+    const { ast } = parseExpress(source);
+    if (ast.type !== 'SchemaDeclaration') throw new Error('parse failed');
+    const { schema } = buildSchema(ast);
+    const ctx: EvalContext = { schema };
+
+    const result = evaluate(callExpr('sum_n', [intLit(10)]), ctx);
+    expect(result).toBe(55);
+  });
+});
+
+describe('Nested function evaluation', () => {
+  it('should resolve and call a nested function', () => {
+    const source = `
+      SCHEMA NESTED_FN_SCHEMA;
+        FUNCTION outer(x : REAL) : REAL;
+          FUNCTION inner(y : REAL) : REAL;
+            RETURN(y * 2.0);
+          END_FUNCTION;
+          RETURN(inner(x) + 1.0);
+        END_FUNCTION;
+      END_SCHEMA;
+    `;
+    const { ast } = parseExpress(source);
+    if (ast.type !== 'SchemaDeclaration') throw new Error('parse failed');
+    const { schema } = buildSchema(ast);
+    const ctx: EvalContext = { schema };
+
+    const result = evaluate(callExpr('outer', [realLit(5.0)]), ctx);
+    expect(result).toBe(11.0);
+  });
+
+  it('nested function uses its own parameters (not parent scope)', () => {
+    const source = `
+      SCHEMA NESTED_SCOPE_SCHEMA;
+        FUNCTION compute(a : INTEGER) : INTEGER;
+          FUNCTION helper(b : INTEGER) : INTEGER;
+            RETURN(b + 10);
+          END_FUNCTION;
+          RETURN(helper(a));
+        END_FUNCTION;
+      END_SCHEMA;
+    `;
+    const { ast } = parseExpress(source);
+    if (ast.type !== 'SchemaDeclaration') throw new Error('parse failed');
+    const { schema } = buildSchema(ast);
+    const ctx: EvalContext = { schema };
+
+    const result = evaluate(callExpr('compute', [intLit(3)]), ctx);
+    expect(result).toBe(13);
+  });
+
+  it('schema-level functions should propagate localDeclarations to context', () => {
+    const source = `
+      SCHEMA PROPAGATE_SCHEMA;
+        FUNCTION wrapper(x : REAL) : REAL;
+          FUNCTION double(y : REAL) : REAL;
+            RETURN(y * 2.0);
+          END_FUNCTION;
+          LOCAL temp : REAL := double(x); END_LOCAL;
+          RETURN(temp + 0.5);
+        END_FUNCTION;
+      END_SCHEMA;
+    `;
+    const { ast } = parseExpress(source);
+    if (ast.type !== 'SchemaDeclaration') throw new Error('parse failed');
+    const { schema } = buildSchema(ast);
+    const ctx: EvalContext = { schema };
+
+    const result = evaluate(callExpr('wrapper', [realLit(3.0)]), ctx);
+    expect(result).toBe(6.5);
+  });
+});

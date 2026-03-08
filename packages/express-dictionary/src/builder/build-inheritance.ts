@@ -118,6 +118,86 @@ export function buildInheritance(schema: ExpressSchema): SchemaDiagnostic[] {
     }
   }
 
+  // Phase 7: Validate explicit attribute redeclarations and link redeclaring
+  for (const entity of schema.entities.values()) {
+    for (const explicit of entity.explicitAttributes) {
+      if (!explicit.redeclaredFrom) continue;
+
+      const superKey = explicit.redeclaredFrom.entityName.toUpperCase();
+      const superEntity = schema.entities.get(superKey);
+      if (!superEntity) {
+        diagnostics.push(
+          warningDiagnostic(
+            'UNRESOLVED_ENTITY_REF',
+            `Explicit attribute "${explicit.name}" on "${entity.name}" redeclares from unknown entity "${explicit.redeclaredFrom.entityName}"`,
+            { schemaName: schema.name, entityName: entity.name },
+          ),
+        );
+        continue;
+      }
+
+      const attrKey = explicit.redeclaredFrom.attributeName.toUpperCase();
+      const targetAttr = superEntity.explicitAttributes.find(
+        (a) => a.name.toUpperCase() === attrKey,
+      );
+
+      if (targetAttr) {
+        explicit.redeclaring = targetAttr;
+      } else {
+        diagnostics.push(
+          warningDiagnostic(
+            'UNRESOLVED_ATTRIBUTE_REF',
+            `Explicit attribute "${explicit.name}" on "${entity.name}" redeclares unknown attribute "${explicit.redeclaredFrom.attributeName}" from "${superEntity.name}"`,
+            {
+              schemaName: schema.name,
+              entityName: entity.name,
+              attributeName: explicit.name,
+            },
+          ),
+        );
+      }
+    }
+  }
+
+  // Phase 8: Validate inverse attribute redeclarations
+  for (const entity of schema.entities.values()) {
+    for (const inverse of entity.inverseAttributes) {
+      if (!inverse.redeclaredFrom) continue;
+
+      const superKey = inverse.redeclaredFrom.entityName.toUpperCase();
+      const superEntity = schema.entities.get(superKey);
+      if (!superEntity) {
+        diagnostics.push(
+          warningDiagnostic(
+            'UNRESOLVED_ENTITY_REF',
+            `Inverse attribute "${inverse.name}" on "${entity.name}" redeclares from unknown entity "${inverse.redeclaredFrom.entityName}"`,
+            { schemaName: schema.name, entityName: entity.name },
+          ),
+        );
+        continue;
+      }
+
+      const attrKey = inverse.redeclaredFrom.attributeName.toUpperCase();
+      const targetAttr = superEntity.inverseAttributes.find(
+        (a) => a.name.toUpperCase() === attrKey,
+      );
+
+      if (!targetAttr) {
+        diagnostics.push(
+          warningDiagnostic(
+            'UNRESOLVED_ATTRIBUTE_REF',
+            `Inverse attribute "${inverse.name}" on "${entity.name}" redeclares unknown attribute "${inverse.redeclaredFrom.attributeName}" from "${superEntity.name}"`,
+            {
+              schemaName: schema.name,
+              entityName: entity.name,
+              attributeName: inverse.name,
+            },
+          ),
+        );
+      }
+    }
+  }
+
   return diagnostics;
 }
 

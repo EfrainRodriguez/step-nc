@@ -228,4 +228,121 @@ describe('collectDeclarations', () => {
     expect(derived.redeclaredFrom!.entityName).toBe('edge');
     expect(derived.redeclaredFrom!.attributeName).toBe('edge_start');
   });
+
+  it('should capture redeclaredFrom for SELF\\supertype.attribute in explicit attribute', () => {
+    const ast = parseSchema(`
+      SCHEMA s;
+        ENTITY base;
+          attr : INTEGER;
+        END_ENTITY;
+        ENTITY sub SUBTYPE OF (base);
+          SELF\\base.attr : STRING(50);
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const { schema } = collectDeclarations(ast);
+    const sub = schema.entities.get('SUB')!;
+
+    expect(sub.explicitAttributes).toHaveLength(1);
+    const explicit = sub.explicitAttributes[0]!;
+    expect(explicit.name).toBe('attr');
+    expect(explicit.redeclaredFrom).toBeDefined();
+    expect(explicit.redeclaredFrom!.entityName).toBe('base');
+    expect(explicit.redeclaredFrom!.attributeName).toBe('attr');
+  });
+
+  it('should capture redeclaredFrom for SELF\\supertype.inv in inverse attribute', () => {
+    const ast = parseSchema(`
+      SCHEMA s;
+        ENTITY target;
+          ref : sub;
+        END_ENTITY;
+        ENTITY base;
+        INVERSE
+          inv_ref : SET [0:?] OF target FOR ref;
+        END_ENTITY;
+        ENTITY sub SUBTYPE OF (base);
+        INVERSE
+          SELF\\base.inv_ref : SET [0:?] OF target FOR ref;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const { schema } = collectDeclarations(ast);
+    const sub = schema.entities.get('SUB')!;
+
+    expect(sub.inverseAttributes).toHaveLength(1);
+    const inv = sub.inverseAttributes[0]!;
+    expect(inv.name).toBe('inv_ref');
+    expect(inv.redeclaredFrom).toBeDefined();
+    expect(inv.redeclaredFrom!.entityName).toBe('base');
+    expect(inv.redeclaredFrom!.attributeName).toBe('inv_ref');
+  });
+
+  it('should collect nested function in localDeclarations', () => {
+    const ast = parseSchema(`
+      SCHEMA s;
+        FUNCTION outer(x : REAL) : REAL;
+          FUNCTION inner(y : REAL) : REAL;
+            RETURN(y * 2.0);
+          END_FUNCTION;
+          RETURN(inner(x) + 1.0);
+        END_FUNCTION;
+      END_SCHEMA;
+    `);
+
+    const { schema } = collectDeclarations(ast);
+    const fn = schema.functions.get('OUTER')!;
+    expect(fn.localDeclarations).toBeDefined();
+
+    const nestedFn = fn.localDeclarations!.find(
+      (d) => d.type === 'FunctionDeclaration',
+    );
+    expect(nestedFn).toBeDefined();
+    expect((nestedFn as { name: string }).name).toBe('inner');
+  });
+
+  it('should collect nested procedure in localDeclarations', () => {
+    const ast = parseSchema(`
+      SCHEMA s;
+        FUNCTION main_fn(x : INTEGER) : INTEGER;
+          PROCEDURE helper(VAR y : INTEGER);
+            y := y + 1;
+          END_PROCEDURE;
+          LOCAL result : INTEGER := x; END_LOCAL;
+          RETURN(result);
+        END_FUNCTION;
+      END_SCHEMA;
+    `);
+
+    const { schema } = collectDeclarations(ast);
+    const fn = schema.functions.get('MAIN_FN')!;
+    expect(fn.localDeclarations).toBeDefined();
+
+    const nestedProc = fn.localDeclarations!.find(
+      (d) => d.type === 'ProcedureDeclaration',
+    );
+    expect(nestedProc).toBeDefined();
+    expect((nestedProc as { name: string }).name).toBe('helper');
+  });
+
+  it('should collect body and declarations on ProcedureDefinition', () => {
+    const ast = parseSchema(`
+      SCHEMA s;
+        PROCEDURE my_proc(x : INTEGER);
+          LOCAL temp : INTEGER := 0; END_LOCAL;
+          temp := x + 1;
+        END_PROCEDURE;
+      END_SCHEMA;
+    `);
+
+    const { schema } = collectDeclarations(ast);
+    const proc = schema.procedures.get('MY_PROC')!;
+    expect(proc.body).toBeDefined();
+    expect(proc.body!.length).toBeGreaterThan(0);
+    expect(proc.localDeclarations).toBeDefined();
+    expect(proc.localDeclarations!.length).toBe(1);
+    expect(proc.localDeclarations![0]!.type).toBe('LocalVariable');
+  });
 });

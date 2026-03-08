@@ -1,4 +1,5 @@
 import type { ExpressSchema } from '@step-nc/express-dictionary';
+import type { FunctionLocalDeclaration } from '@step-nc/express-dictionary';
 import type { ExpressionNode } from '@step-nc/express-parser';
 import type { StepModel } from '../model/step-model';
 import type { EntityInstance } from '../types/instance';
@@ -25,6 +26,7 @@ export interface EvalContext {
   schema: ExpressSchema;
   variables?: Map<string, EvalValue>;
   callDepth?: number;
+  localDeclarations?: readonly FunctionLocalDeclaration[];
 }
 
 export class EvalError extends Error {

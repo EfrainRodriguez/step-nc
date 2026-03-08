@@ -2,7 +2,11 @@ import {
   getAllAttributes,
   getAllDerivedAttributes,
 } from '@step-nc/express-dictionary';
-import type { ExpressionNode } from '@step-nc/express-parser';
+import type { FunctionDefinition } from '@step-nc/express-dictionary';
+import type {
+  ExpressionNode,
+  FunctionDeclarationNode,
+} from '@step-nc/express-parser';
 import { resolveRef } from '../references/reference-resolver';
 import type { EntityInstance } from '../types/instance';
 import type { AttributeValue, InstanceId, InstanceRef } from '../types/values';
@@ -239,55 +243,135 @@ function evaluateFunctionCall(
     return builtinFn(args, ctx);
   }
 
+  if (ctx.localDeclarations) {
+    const nestedFn = ctx.localDeclarations.find(
+      (d) =>
+        d.type === 'FunctionDeclaration' && d.name.toUpperCase() === fnName,
+    ) as FunctionDeclarationNode | undefined;
+    if (nestedFn) {
+      return executeNestedFunction(nestedFn, args, expr, ctx);
+    }
+  }
+
   if (ctx.schema.functions.has(fnName)) {
     const funcDef = ctx.schema.functions.get(fnName)!;
-
-    if (!funcDef.body || funcDef.body.length === 0) {
-      return EVAL_INDETERMINATE;
-    }
-
-    const depth = (ctx.callDepth ?? 0) + 1;
-    if (depth > MAX_CALL_DEPTH) {
-      throw new EvalError(
-        `Maximum call depth (${MAX_CALL_DEPTH}) exceeded in function '${expr.name}'`,
-        expr,
-      );
-    }
-
-    const localVars = new Map<string, EvalValue>();
-    funcDef.parameters.forEach((param, index) => {
-      localVars.set(
-        param.name.toUpperCase(),
-        args[index] ?? EVAL_INDETERMINATE,
-      );
-    });
-
-    if (funcDef.localDeclarations) {
-      for (const decl of funcDef.localDeclarations) {
-        if (decl.type === 'LocalVariable') {
-          const initVal = decl.initialValue
-            ? evaluate(decl.initialValue, { ...ctx, variables: localVars })
-            : EVAL_INDETERMINATE;
-          localVars.set(decl.name.toUpperCase(), initVal);
-        }
-      }
-    }
-
-    const funcCtx: EvalContext = {
-      ...ctx,
-      variables: localVars,
-      callDepth: depth,
-    };
-    const signal = executeStatements(funcDef.body, funcCtx);
-
-    if (signal !== undefined && signal.kind === EXEC_RETURN) {
-      return signal.value;
-    }
-
-    return EVAL_INDETERMINATE;
+    return executeSchemaFunction(funcDef, args, expr, ctx);
   }
 
   throw new EvalError(`Unknown function: '${expr.name}'`, expr);
+}
+
+function executeSchemaFunction(
+  funcDef: FunctionDefinition,
+  args: EvalValue[],
+  expr: ExpressionNode,
+  ctx: EvalContext,
+): EvalValue {
+  if (!funcDef.body || funcDef.body.length === 0) {
+    return EVAL_INDETERMINATE;
+  }
+
+  const depth = (ctx.callDepth ?? 0) + 1;
+  if (depth > MAX_CALL_DEPTH) {
+    throw new EvalError(
+      `Maximum call depth (${MAX_CALL_DEPTH}) exceeded in function '${(expr as { name: string }).name}'`,
+      expr,
+    );
+  }
+
+  const localVars = new Map<string, EvalValue>();
+  funcDef.parameters.forEach((param, index) => {
+    localVars.set(param.name.toUpperCase(), args[index] ?? EVAL_INDETERMINATE);
+  });
+
+  if (funcDef.localDeclarations) {
+    for (const decl of funcDef.localDeclarations) {
+      if (decl.type === 'LocalVariable') {
+        const initVal = decl.initialValue
+          ? evaluate(decl.initialValue, {
+              ...ctx,
+              variables: localVars,
+              localDeclarations: funcDef.localDeclarations,
+            })
+          : EVAL_INDETERMINATE;
+        localVars.set(decl.name.toUpperCase(), initVal);
+      }
+    }
+  }
+
+  const funcCtx: EvalContext = {
+    ...ctx,
+    variables: localVars,
+    callDepth: depth,
+    ...(funcDef.localDeclarations !== undefined && {
+      localDeclarations: funcDef.localDeclarations,
+    }),
+  };
+  const signal = executeStatements(funcDef.body, funcCtx);
+
+  if (signal !== undefined && signal.kind === EXEC_RETURN) {
+    return signal.value;
+  }
+
+  return EVAL_INDETERMINATE;
+}
+
+function executeNestedFunction(
+  fnNode: FunctionDeclarationNode,
+  args: EvalValue[],
+  expr: ExpressionNode,
+  ctx: EvalContext,
+): EvalValue {
+  if (!fnNode.body || fnNode.body.length === 0) {
+    return EVAL_INDETERMINATE;
+  }
+
+  const depth = (ctx.callDepth ?? 0) + 1;
+  if (depth > MAX_CALL_DEPTH) {
+    throw new EvalError(
+      `Maximum call depth (${MAX_CALL_DEPTH}) exceeded in nested function '${fnNode.name}'`,
+      expr,
+    );
+  }
+
+  const localVars = new Map<string, EvalValue>();
+  const flatParams = fnNode.parameters.flatMap((p) =>
+    p.names.map((name) => name),
+  );
+  flatParams.forEach((name, index) => {
+    localVars.set(name.toUpperCase(), args[index] ?? EVAL_INDETERMINATE);
+  });
+
+  if (fnNode.declarations) {
+    for (const decl of fnNode.declarations) {
+      if (decl.type === 'LocalVariable') {
+        const initVal = decl.initialValue
+          ? evaluate(decl.initialValue, {
+              ...ctx,
+              variables: localVars,
+              localDeclarations: fnNode.declarations,
+            })
+          : EVAL_INDETERMINATE;
+        localVars.set(decl.name.toUpperCase(), initVal);
+      }
+    }
+  }
+
+  const funcCtx: EvalContext = {
+    ...ctx,
+    variables: localVars,
+    callDepth: depth,
+    ...(fnNode.declarations !== undefined && {
+      localDeclarations: fnNode.declarations,
+    }),
+  };
+  const signal = executeStatements(fnNode.body, funcCtx);
+
+  if (signal !== undefined && signal.kind === EXEC_RETURN) {
+    return signal.value;
+  }
+
+  return EVAL_INDETERMINATE;
 }
 
 function evaluateQuery(

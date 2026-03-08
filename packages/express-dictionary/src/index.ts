@@ -18,6 +18,7 @@ export type {
 export type {
   ConstantDefinition,
   FunctionDefinition,
+  FunctionLocalDeclaration,
   ParameterDefinition,
   ProcedureDefinition,
   RuleDefinition,

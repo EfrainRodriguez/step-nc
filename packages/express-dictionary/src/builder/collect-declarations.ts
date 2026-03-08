@@ -3,6 +3,7 @@ import type {
   EntityDeclarationNode,
   FunctionDeclarationNode,
   ProcedureDeclarationNode,
+  QualifiedRefNode,
   RuleDeclarationNode,
   SchemaDeclarationNode,
   SubtypeConstraintDeclarationNode,
@@ -133,12 +134,34 @@ function collectEntity(
 
   // Expand ExplicitAttributeNode.names[] into individual ExplicitAttribute entries
   for (const attrNode of node.attributes) {
+    let redeclaredFrom:
+      | { entityName: string; attributeName: string }
+      | undefined;
+
+    if (attrNode.redeclaredAttr) {
+      const qualifiers = attrNode.redeclaredAttr.qualifiers;
+      const groupQ = qualifiers[0];
+      const attrQ = qualifiers[1];
+      if (
+        groupQ &&
+        groupQ.type === 'GroupRef' &&
+        attrQ &&
+        attrQ.type === 'AttributeRef'
+      ) {
+        redeclaredFrom = {
+          entityName: groupQ.name,
+          attributeName: attrQ.name,
+        };
+      }
+    }
+
     for (const attrName of attrNode.names) {
       entity.explicitAttributes.push({
         name: attrName,
         parentEntity: entity,
         type: buildTypeDescriptor(attrNode.attributeType),
         optional: attrNode.optional ?? false,
+        ...(redeclaredFrom ? { redeclaredFrom } : {}),
       });
     }
   }
@@ -178,12 +201,34 @@ function collectEntity(
 
   if (node.inverseAttributes) {
     for (const invNode of node.inverseAttributes) {
+      let redeclaredFrom:
+        | { entityName: string; attributeName: string }
+        | undefined;
+
+      if (invNode.redeclaredAttr) {
+        const qualifiers = invNode.redeclaredAttr.qualifiers;
+        const groupQ = qualifiers[0];
+        const attrQ = qualifiers[1];
+        if (
+          groupQ &&
+          groupQ.type === 'GroupRef' &&
+          attrQ &&
+          attrQ.type === 'AttributeRef'
+        ) {
+          redeclaredFrom = {
+            entityName: groupQ.name,
+            attributeName: attrQ.name,
+          };
+        }
+      }
+
       entity.inverseAttributes.push({
         name: invNode.name,
         parentEntity: entity,
         type: buildTypeDescriptor(invNode.attributeType),
         invertedEntityName: invNode.invertedEntity,
         invertedAttributeName: invNode.invertedAttribute,
+        ...(redeclaredFrom ? { redeclaredFrom } : {}),
       });
     }
   }
@@ -192,7 +237,9 @@ function collectEntity(
     for (const ur of node.uniqueRules) {
       entity.uniqueRules.push({
         ...(ur.label !== undefined && { label: ur.label }),
-        attributeNames: ur.attributes,
+        attributeNames: ur.attributes.map((a) =>
+          typeof a === 'string' ? a : extractQualifiedAttributeName(a),
+        ),
       });
     }
   }
@@ -290,6 +337,11 @@ function collectProcedure(
     name: node.name,
     schema,
     parameters: params,
+    ...(node.body.length > 0 && { body: node.body }),
+    ...(node.declarations &&
+      node.declarations.length > 0 && {
+        localDeclarations: node.declarations,
+      }),
   };
 
   registerWithDuplicateCheck(
@@ -370,4 +422,12 @@ function collectConstants(
       diagnostics,
     );
   }
+}
+
+function extractQualifiedAttributeName(ref: QualifiedRefNode): string {
+  const lastQ = ref.qualifiers[ref.qualifiers.length - 1];
+  if (lastQ && lastQ.type === 'AttributeRef') return lastQ.name;
+  return String(
+    ref.qualifiers[0]?.type === 'GroupRef' ? ref.qualifiers[0].name : '??',
+  );
 }

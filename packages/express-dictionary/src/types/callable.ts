@@ -1,7 +1,9 @@
 import type {
   ConstantDeclarationNode,
   ExpressionNode,
+  FunctionDeclarationNode,
   LocalVariableNode,
+  ProcedureDeclarationNode,
   StatementNode,
   TypeDeclarationNode,
 } from '@step-nc/express-parser';
@@ -22,7 +24,9 @@ export interface ParameterDefinition {
 export type FunctionLocalDeclaration =
   | TypeDeclarationNode
   | ConstantDeclarationNode
-  | LocalVariableNode;
+  | LocalVariableNode
+  | FunctionDeclarationNode
+  | ProcedureDeclarationNode;
 
 export interface FunctionDefinition {
   readonly name: string;
@@ -31,7 +35,7 @@ export interface FunctionDefinition {
   returnType: TypeDescriptor;
   /** Body AST preserved for user-defined function evaluation. Absent when imported without AST. */
   body?: readonly StatementNode[];
-  /** Local declarations (VAR, TYPE, CONSTANT) inside the function. */
+  /** Local declarations (VAR, TYPE, CONSTANT, nested FUNCTION/PROCEDURE) inside the function. */
   localDeclarations?: readonly FunctionLocalDeclaration[];
 }
 
@@ -39,6 +43,8 @@ export interface ProcedureDefinition {
   readonly name: string;
   schema: SchemaHost;
   parameters: ParameterDefinition[];
+  body?: readonly StatementNode[];
+  localDeclarations?: readonly FunctionLocalDeclaration[];
 }
 
 export interface RuleDefinition {
