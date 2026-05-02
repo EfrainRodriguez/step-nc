@@ -1,0 +1,106 @@
+---
+description: Estilo de comentarios en archivos TypeScript (JSDoc, secciones, inline)
+globs: "**/*.ts"
+alwaysApply: false
+---
+
+# Comentarios en TypeScript
+
+Estandar de comentarios alineado con el paquete `@express-parser`. Usar este estilo en todo el monorepo.
+
+## 1. JSDoc para API pública
+
+- **Funciones/clases exportadas**: bloque `/** ... */` con descripción en una o varias frases. Incluir `@param`, `@returns` cuando aporten valor; `@example` si ayuda a entender el uso.
+- **Descripción**: Frase completa, mayúscula inicial, punto al final. Líneas siguientes con ` * ` (espacio-asterisco-espacio).
+- **Una sola línea**: Si la descripción cabe en una línea, usar `/** Descripción en una frase. */` (espacio después de `/**`, punto al final).
+
+```typescript
+/** Advance the parser until a token in `syncTokens` is found (or EOF). */
+export function synchronize(ctx: ParserContext, syncTokens: ReadonlySet<TokenKind>): void { ... }
+
+/**
+ * Visits the AST in pre-order. For each node, the corresponding visitor handler
+ * is called if defined. If a handler returns `'skip'`, that node's children are not visited.
+ *
+ * @param ast - Root schema node
+ * @param visitor - Object with optional handlers per node type
+ */
+export function visit(ast: SchemaDeclarationNode, visitor: ExpressVisitor): void { ... }
+```
+
+## 2. JSDoc en tipos e interfaces
+
+- Propiedades o tipos que necesiten aclaración: una línea `/** Descripción. */` encima del miembro.
+- En interfaces, documentar solo lo no obvio.
+
+```typescript
+/** When returned from a visitor handler, prevents visiting the node's children. */
+export type VisitorAction = 'skip';
+
+interface ParseOptions {
+  /** Max explicit attributes in an entity (default: DEFAULT_MAX_EXPLICIT_ATTRIBUTES). */
+  maxExplicitAttributes?: number;
+}
+```
+
+## 3. Encabezados de sección dentro del archivo
+
+- Formato: `// ── Nombre de la sección ────────────────────────────────────────`
+- Reglas: un espacio después de `//`, luego `──`, espacio, título, espacio, `──`, y guiones hasta ~60–70 caracteres para alinear visualmente.
+- Usar para agrupar métodos de una clase o bloques de funciones relacionadas.
+
+```typescript
+// ── Navigation ────────────────────────────────────────────────
+
+// ── Entity Section Helpers ──────────────────────────────────────────
+```
+
+## 4. Comentarios inline y agrupación
+
+- **Una línea**: `// Descripción` (un espacio después de `//`). Para agrupar casos en `switch`, aclarar un paso o una condición.
+- **Varias líneas**: cada línea con `//`; preferir frases cortas.
+
+```typescript
+// Simple types
+case 'KW_INTEGER':
+// Aggregation types
+case 'KW_ARRAY':
+
+// Exit at loop body start when we see a section keyword or EOF.
+// Configurable limits protect against malformed or huge input.
+```
+
+## 5. Encabezados de índice / agrupación de exports
+
+- En barril (`index.ts`) o listas de exports: `// Categoría` o `// Categoría / subcategoría`. Sin guiones `──`, solo `//` y el nombre de la categoría.
+
+```typescript
+// AST types
+// Parser
+// Visitor / AST traversal
+```
+
+## 6. Comentarios de archivo (opcional)
+
+- Si se documenta el propósito del archivo, usar un JSDoc al inicio: `/** ... */` con descripción y, si aplica, viñetas (` * - ...`) para convenciones o notas.
+
+```typescript
+/**
+ * This file declares the static token specifications used by the lexer.
+ * Notes on naming:
+ * - Prefixes (KW_, OP_, SYM_, ...) keep token names short and predictable.
+ */
+```
+
+## Resumen
+
+| Uso | Formato |
+|-----|--------|
+| API pública (función/clase) | JSDoc `/** ... */` con @param/@example si aplica |
+| Tipo/propiedad que lo necesite | Una línea `/** Descripción. */` |
+| Sección dentro del archivo | `// ── Título ─── ...` |
+| Agrupación en switch / lógica | `// Descripción` |
+| Índice de exports | `// Categoría` |
+| Propósito del archivo | JSDoc al inicio (opcional) |
+
+Excepciones: comentarios de herramienta como `// eslint-disable-next-line ...` se dejan tal cual.

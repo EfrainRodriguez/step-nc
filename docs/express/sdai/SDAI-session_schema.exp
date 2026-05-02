@@ -1,0 +1,84 @@
+(* doc: https://www.steptools.com/docs/sdailib/session.html *)
+SCHEMA session_schema;
+
+    REFERENCE FROM parameter_data_schema
+      ( entity_instance,
+      aggregate_instance );
+
+    USE FROM population_schema;
+
+    (* Access type is identifies the type of access to models, and transactions *)
+    TYPE access_type = ENUMERATION OF
+      (read_only,
+      read_write);
+    END_TYPE;
+
+    TYPE error_base = SELECT
+      (entity_instance,
+      aggregate_instance);
+    END_TYPE;
+
+    TYPE time_stamp = STRING(256);
+    END_TYPE;
+
+    ENTITY sdai_session;
+      sdai_implementation : implementation; 
+      recording_active    : BOOLEAN;  (* always false in this implementation*)
+      errors              : LIST [0:?] OF error_event; (* always unset *)
+      known_servers       : SET [1:?] OF sdai_repository; 
+      active_servers      : SET [1:?] OF sdai_repository;
+      active_models       : SET [1:?] OF sdai_model;
+      data_dictionary     : OPTIONAL schema_instance; 
+    INVERSE
+      active_transaction : SET [0:1] OF sdai_transaction FOR owning_session;
+    END_ENTITY;
+
+    ENTITY implementation;
+      name                     : STRING;
+      level                    : STRING;
+      sdai_version             : STRING;
+      binding_version          : STRING;
+      implementation_class     : INTEGER;
+      transaction_level        : INTEGER;
+      expression_level         : INTEGER;
+      recording_level          : INTEGER;
+      scope_level              : INTEGER;
+      domain_equivalence_level : INTEGER;
+    END_ENTITY;
+
+    ENTITY sdai_repository;
+      name        : STRING;
+      contents    : sdai_repository_contents;
+      description : STRING;
+    INVERSE
+      session : sdai_session FOR known_servers;
+    UNIQUE
+      UR1: name, session;
+    END_ENTITY;
+
+    ENTITY sdai_repository_contents;
+      models  : SET[0:?] OF sdai_model;
+      schemas : SET[0:?] OF schema_instance;
+    INVERSE
+      repository : sdai_repository FOR contents;
+    END_ENTITY;
+
+    ENTITY sdai_transaction;
+      mode           : access_type;
+      owning_session : sdai_session;
+    END_ENTITY;
+
+    ENTITY event
+      ABSTRACT SUPERTYPE OF (error_event);
+      function_id : STRING;
+      time        : time_stamp;
+    END_ENTITY;
+
+    ENTITY error_event
+      SUBTYPE OF (event);
+      error       : INTEGER;
+      description : OPTIONAL STRING;
+      base        : OPTIONAL error_base;
+    END_ENTITY;
+
+END_SCHEMA; -- session_schema

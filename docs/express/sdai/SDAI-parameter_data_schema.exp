@@ -1,0 +1,156 @@
+(* doc: https://www.steptools.com/docs/sdailib/session.html *)
+SCHEMA parameter_data_schema;
+
+REFERENCE FROM population_schema
+( schema_instance,
+sdai_model,
+sdai_model_contents );
+
+REFERENCE FROM session_schema
+( sdai_repository );
+
+TYPE primitive = SELECT
+(aggregate_instance,
+assignable_primitive);
+END_TYPE;
+
+TYPE assignable_primitive = SELECT
+(entity_instance,
+string_value,
+binary_value,
+integer_value,
+number_value,
+enumeration_value,
+select_value,
+real_value,
+boolean_value,
+logical_value);
+END_TYPE;
+
+TYPE aggregate_primitive = SELECT
+(aggregate_instance,
+select_aggregate_instance);
+END_TYPE;
+
+TYPE string_value = STRING;
+END_TYPE;
+
+TYPE binary_value = BINARY;
+END_TYPE;
+
+TYPE integer_value = INTEGER;
+END_TYPE;
+
+TYPE real_value = REAL;
+END_TYPE;
+
+TYPE number_value = SELECT
+(real_value,
+integer_value);
+END_TYPE;
+
+TYPE boolean_value = BOOLEAN;
+END_TYPE;
+
+TYPE logical_value = LOGICAL;
+END_TYPE;
+
+TYPE bound_instance_value = INTEGER;
+END_TYPE;
+
+TYPE query_source = SELECT
+(aggregate_instance,
+sdai_model,
+sdai_repository,
+schema_instance) ;
+END_TYPE;
+
+ENTITY iterator;
+subject : aggregate_instance;
+current_member : OPTIONAL primitive;
+END_ENTITY;
+
+ENTITY entity_instance
+ABSTRACT SUPERTYPE OF (ONEOF(sdai_instance, application_instance));
+END_ENTITY;
+
+ENTITY application_instance
+SUBTYPE OF (entity_instance);
+END_ENTITY;
+
+ENTITY sdai_instance
+ABSTRACT SUPERTYPE OF (ONEOF(dictionary_instance,
+session_instance))
+SUBTYPE OF (entity_instance);
+END_ENTITY;
+
+ENTITY dictionary_instance
+SUBTYPE OF (sdai_instance);
+END_ENTITY;
+
+ENTITY session_instance
+SUBTYPE OF (sdai_instance);
+END_ENTITY;
+
+ENTITY attribute_value;
+END_ENTITY;
+
+ENTITY select_value
+SUPERTYPE OF (ONEOF(select_aggregate_instance));
+END_ENTITY;
+
+ENTITY select_aggregate_instance
+SUBTYPE OF (select_value);
+END_ENTITY;
+
+ENTITY enumeration_value;
+END_ENTITY;
+
+ENTITY aggregate_instance
+ABSTRACT SUPERTYPE OF (ONEOF(unordered_collection,
+ordered_collection));
+END_ENTITY;
+
+ENTITY unordered_collection
+ABSTRACT SUPERTYPE OF (ONEOF(set_instance, bag_instance))
+SUBTYPE OF (aggregate_instance);
+END_ENTITY;
+
+ENTITY set_instance
+SUBTYPE OF (unordered_collection);
+END_ENTITY;
+
+ENTITY bag_instance
+SUBTYPE OF (unordered_collection);
+END_ENTITY;
+
+ENTITY ordered_collection
+ABSTRACT SUPERTYPE OF (ONEOF(list_instance, array_instance))
+SUBTYPE OF (aggregate_instance);
+END_ENTITY;
+
+ENTITY list_instance
+ABSTRACT SUPERTYPE OF (ONEOF(non_persistent_list_instance,
+schema_defined_list_instance))
+SUBTYPE OF (ordered_collection);
+END_ENTITY;
+
+ENTITY schema_defined_list_instance
+SUBTYPE OF (list_instance);
+END_ENTITY;
+
+ENTITY non_persistent_list_instance
+SUBTYPE OF (list_instance);
+contents : LIST[0:?] OF primitive;
+END_ENTITY;
+
+ENTITY array_instance
+SUPERTYPE OF (ONEOF(application_indexed_array_instance))
+SUBTYPE OF (ordered_collection);
+END_ENTITY;
+
+ENTITY application_indexed_array_instance
+SUBTYPE OF (array_instance);
+END_ENTITY;
+
+END_SCHEMA; -- parameter_data_schema

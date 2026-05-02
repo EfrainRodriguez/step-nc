@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@step-nc/p21-parser": ["../p21-parser/dist"],
+      "@step-nc/express-parser": ["../express-parser/dist"],
+      "@step-nc/express-dictionary": ["../express-dictionary/dist"],
+      "@step-nc/step-factory": ["../step-factory/dist"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
+}

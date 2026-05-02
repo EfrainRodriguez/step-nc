@@ -1,0 +1,11 @@
+SCHEMA example_schema;
+  ENTITY CPT;
+    x : REAL;
+    y : REAL;
+    z : REAL;
+  END_ENTITY;
+
+  ENTITY VX;
+    ref : CPT;
+  END_ENTITY;
+END_SCHEMA;

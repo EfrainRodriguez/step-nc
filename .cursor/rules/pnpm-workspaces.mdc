@@ -1,0 +1,149 @@
+---
+description: Guide for working with pnpm workspaces and monorepo structure
+alwaysApply: true
+---
+
+# pnpm Workspaces Management
+
+This repository uses **pnpm workspaces** to manage multiple packages. Follow these guidelines to maintain consistency and efficiency.
+
+## Workspace Structure
+
+```
+step-nc/
+├── packages/
+│   └── <package-name>/ # Package in of workspace project
+├── pnpm-workspace.yaml
+└── package.json       # Workspace scripts
+```
+
+## Essential Commands
+
+### Installation and Dependencies
+
+```bash
+# Install all workspace dependencies
+pnpm install
+
+# Install dependency in a specific package
+pnpm --filter <package-name> add <dependency>
+
+# Install dependency in all packages
+pnpm -r add <dependency> -D
+
+# Install dependency only in root
+pnpm add <dependency> -D --ignore-workspace
+```
+
+### Script Execution
+
+```bash
+# Run script in all packages
+pnpm -r <script>
+
+# Run script in specific package
+pnpm --filter <package-name> <script>
+
+# Common workspace scripts:
+pnpm build      # Build all packages
+pnpm clean      # Clean builds
+pnpm dev        # Development mode
+pnpm test       # Run tests
+pnpm lint       # Linting
+pnpm typecheck  # Type checking
+```
+
+## Package Management
+
+### Create New Package
+
+```bash
+# 1. Create directory
+mkdir packages/<new-package>
+
+# 2. Initialize package.json
+cd packages/<new-package>
+pnpm init
+
+# 3. Configure build (tsup recommended)
+# Check configuration in existing packages
+```
+
+### Inter-Package Dependencies
+
+```json
+// In packages/A/package.json
+{
+  "dependencies": {
+    "@step-nc/<package-name>": "workspace:*"
+  }
+}
+```
+
+### Publishing
+
+We use **changesets** for versioning:
+
+```bash
+# Create changeset for changes
+pnpm changeset
+
+# Version packages
+pnpm version-packages
+
+# Publish
+pnpm release
+```
+
+## Project Conventions
+
+### Commits
+- Follow conventional commits
+- Husky hooks verify format
+- Commitlint integrated
+
+### Code Quality
+- **ESLint** + **Prettier** for linting/formatting
+- **TypeScript** with strict checking
+- **Vitest** for testing
+- **tsup** for bundling
+
+### Versioning
+- Semantic versioning
+- Changesets for version management
+- Automatic publishing from CI
+
+## Recommended Workflow
+
+1. **Development**: `pnpm dev` for development mode
+2. **Testing**: `pnpm test` before commits
+3. **Linting**: `pnpm lint` to maintain quality
+4. **Build**: `pnpm build` to verify builds
+5. **Typecheck**: `pnpm typecheck` for type checking
+
+## Common Mistakes
+
+### ❌ Bad
+```bash
+# Don't use npm/yarn in pnpm workspace
+npm install
+
+# Don't install dependencies individually
+cd packages/core && npm install
+```
+
+### ✅ Correct
+```bash
+# Use pnpm workspace commands
+pnpm install
+pnpm --filter core add lodash
+```
+
+### Dependency Resolution
+```bash
+# If there are lockfile conflicts
+rm pnpm-lock.yaml && pnpm install
+
+# Update lockfile after changes
+pnpm install
+```

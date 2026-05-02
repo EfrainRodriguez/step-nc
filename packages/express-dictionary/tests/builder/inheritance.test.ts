@@ -1,0 +1,309 @@
+import type { SchemaDeclarationNode } from '@step-nc/express-parser';
+import { parseExpress } from '@step-nc/express-parser';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { describe, expect, it } from 'vitest';
+import { buildInheritance } from '../../src/builder/build-inheritance';
+import { collectDeclarations } from '../../src/builder/collect-declarations';
+import { resolveTypes } from '../../src/builder/resolve-types';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const GEOMETRY_EXP = resolve(
+  __dirname,
+  '../../../../examples/data/geometry.exp',
+);
+
+function parseSchema(source: string): SchemaDeclarationNode {
+  const result = parseExpress(source);
+  if (result.ast.type !== 'SchemaDeclaration') {
+    throw new Error(`Expected SchemaDeclaration, got ${result.ast.type}`);
+  }
+  return result.ast;
+}
+
+function buildFull(source: string) {
+  const ast = parseSchema(source);
+  const { schema, diagnostics: collectDiags } = collectDeclarations(ast);
+  const resolveDiags = resolveTypes(schema);
+  const inheritDiags = buildInheritance(schema);
+  return {
+    schema,
+    diagnostics: [...collectDiags, ...resolveDiags, ...inheritDiags],
+  };
+}
+
+describe('buildInheritance', () => {
+  it('should resolve supertypes in geometry.exp', () => {
+    const source = readFileSync(GEOMETRY_EXP, 'utf-8');
+    const { schema, diagnostics } = buildFull(source);
+
+    const errors = diagnostics.filter((d) => d.severity === 'error');
+    expect(errors).toHaveLength(0);
+
+    const cartesianPoint = schema.entities.get('CARTESIAN_POINT')!;
+    expect(cartesianPoint.supertypes).toHaveLength(1);
+    expect(cartesianPoint.supertypes[0]!.name).toBe('point');
+  });
+
+  it('should compute subtypes (inverse)', () => {
+    const source = readFileSync(GEOMETRY_EXP, 'utf-8');
+    const { schema } = buildFull(source);
+
+    const point = schema.entities.get('POINT')!;
+    expect(point.subtypes).toHaveLength(1);
+    expect(point.subtypes[0]!.name).toBe('cartesian_point');
+  });
+
+  it('should mark abstract entities as not instantiable', () => {
+    const source = readFileSync(GEOMETRY_EXP, 'utf-8');
+    const { schema } = buildFull(source);
+
+    const point = schema.entities.get('POINT')!;
+    expect(point.abstract).toBe(true);
+    expect(point.instantiable).toBe(false);
+
+    const cartesianPoint = schema.entities.get('CARTESIAN_POINT')!;
+    expect(cartesianPoint.abstract).toBe(false);
+    expect(cartesianPoint.instantiable).toBe(true);
+  });
+
+  it('should handle multi-level inheritance', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY a; x : REAL; END_ENTITY;
+        ENTITY b SUBTYPE OF (a); y : REAL; END_ENTITY;
+        ENTITY c SUBTYPE OF (b); z : REAL; END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const errors = diagnostics.filter((d) => d.severity === 'error');
+    expect(errors).toHaveLength(0);
+
+    const c = schema.entities.get('C')!;
+    expect(c.supertypes).toHaveLength(1);
+    expect(c.supertypes[0]!.name).toBe('b');
+
+    const b = schema.entities.get('B')!;
+    expect(b.supertypes).toHaveLength(1);
+    expect(b.supertypes[0]!.name).toBe('a');
+
+    const a = schema.entities.get('A')!;
+    expect(a.subtypes).toHaveLength(1);
+    expect(a.subtypes[0]!.name).toBe('b');
+  });
+
+  it('should handle multiple supertypes (multiple inheritance)', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY a; END_ENTITY;
+        ENTITY b; END_ENTITY;
+        ENTITY c SUBTYPE OF (a, b); END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const errors = diagnostics.filter((d) => d.severity === 'error');
+    expect(errors).toHaveLength(0);
+
+    const c = schema.entities.get('C')!;
+    expect(c.supertypes).toHaveLength(2);
+  });
+
+  it('should detect circular inheritance', () => {
+    const { diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY a SUBTYPE OF (b); END_ENTITY;
+        ENTITY b SUBTYPE OF (a); END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const circular = diagnostics.filter(
+      (d) => d.code === 'CIRCULAR_INHERITANCE',
+    );
+    expect(circular.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should report unresolved supertype entity', () => {
+    const { diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY a SUBTYPE OF (nonexistent); END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const unresolved = diagnostics.filter(
+      (d) => d.code === 'UNRESOLVED_ENTITY_REF',
+    );
+    expect(unresolved).toHaveLength(1);
+    expect(unresolved[0]!.message).toContain('nonexistent');
+  });
+
+  it('should handle ABSTRACT SUPERTYPE without OF clause', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY base ABSTRACT SUPERTYPE;
+          x : REAL;
+        END_ENTITY;
+        ENTITY child SUBTYPE OF (base);
+          y : REAL;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const errors = diagnostics.filter((d) => d.severity === 'error');
+    expect(errors).toHaveLength(0);
+
+    const base = schema.entities.get('BASE')!;
+    expect(base.abstract).toBe(true);
+    expect(base.instantiable).toBe(false);
+    expect(base.subtypes).toHaveLength(1);
+
+    const child = schema.entities.get('CHILD')!;
+    expect(child.instantiable).toBe(true);
+    expect(child.supertypes).toHaveLength(1);
+  });
+
+  it('should handle ABSTRACT SUPERTYPE without OF combined with SUBTYPE OF', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY root;
+          r : REAL;
+        END_ENTITY;
+        ENTITY middle ABSTRACT SUPERTYPE SUBTYPE OF (root);
+          m : REAL;
+        END_ENTITY;
+        ENTITY leaf SUBTYPE OF (middle);
+          l : REAL;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const errors = diagnostics.filter((d) => d.severity === 'error');
+    expect(errors).toHaveLength(0);
+
+    const middle = schema.entities.get('MIDDLE')!;
+    expect(middle.abstract).toBe(true);
+    expect(middle.instantiable).toBe(false);
+    expect(middle.supertypes).toHaveLength(1);
+    expect(middle.supertypes[0]!.name).toBe('root');
+  });
+
+  it('should validate redeclared derived attributes in inheritance', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY edge;
+          edge_start : INTEGER;
+          edge_end : INTEGER;
+        END_ENTITY;
+        ENTITY oriented_edge SUBTYPE OF (edge);
+          orientation : BOOLEAN;
+        DERIVE
+          SELF\\edge.edge_start : INTEGER := 42;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const warnings = diagnostics.filter((d) => d.severity === 'warning');
+    expect(warnings).toHaveLength(0);
+
+    const oriented = schema.entities.get('ORIENTED_EDGE')!;
+    expect(oriented.derivedAttributes).toHaveLength(1);
+    expect(oriented.derivedAttributes[0]!.redeclaredFrom).toBeDefined();
+  });
+
+  it('should warn when redeclared derived references unknown entity', () => {
+    const { diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY child;
+        DERIVE
+          SELF\\nonexistent.attr : INTEGER := 1;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const warnings = diagnostics.filter(
+      (d) => d.severity === 'warning' && d.code === 'UNRESOLVED_ENTITY_REF',
+    );
+    expect(warnings.length).toBeGreaterThanOrEqual(1);
+    expect(warnings[0]!.message).toContain('nonexistent');
+  });
+
+  it('should link redeclaring for explicit attributes via redeclaredFrom', () => {
+    const { schema, diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY base;
+          attr : INTEGER;
+        END_ENTITY;
+        ENTITY sub SUBTYPE OF (base);
+          SELF\\base.attr : STRING(50);
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const warnings = diagnostics.filter((d) => d.severity === 'warning');
+    expect(warnings).toHaveLength(0);
+
+    const sub = schema.entities.get('SUB')!;
+    const explicit = sub.explicitAttributes[0]!;
+    expect(explicit.redeclaredFrom).toBeDefined();
+    expect(explicit.redeclaring).toBeDefined();
+    expect(explicit.redeclaring!.name).toBe('attr');
+    expect(explicit.redeclaring!.parentEntity.name).toBe('base');
+  });
+
+  it('should warn when explicit redeclaredFrom references unknown entity', () => {
+    const { diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY child;
+          SELF\\nonexistent.attr : INTEGER;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const warnings = diagnostics.filter(
+      (d) => d.severity === 'warning' && d.code === 'UNRESOLVED_ENTITY_REF',
+    );
+    expect(warnings.length).toBeGreaterThanOrEqual(1);
+    expect(warnings[0]!.message).toContain('nonexistent');
+  });
+
+  it('should warn when explicit redeclaredFrom references unknown attribute', () => {
+    const { diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY base;
+          real_attr : INTEGER;
+        END_ENTITY;
+        ENTITY child SUBTYPE OF (base);
+          SELF\\base.fake_attr : INTEGER;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const warnings = diagnostics.filter(
+      (d) => d.severity === 'warning' && d.code === 'UNRESOLVED_ATTRIBUTE_REF',
+    );
+    expect(warnings.length).toBeGreaterThanOrEqual(1);
+    expect(warnings[0]!.message).toContain('fake_attr');
+  });
+
+  it('should warn when inverse redeclaredFrom references unknown entity', () => {
+    const { diagnostics } = buildFull(`
+      SCHEMA s;
+        ENTITY target;
+          ref : child;
+        END_ENTITY;
+        ENTITY child;
+        INVERSE
+          SELF\\nonexistent.inv_ref : SET [0:?] OF target FOR ref;
+        END_ENTITY;
+      END_SCHEMA;
+    `);
+
+    const warnings = diagnostics.filter(
+      (d) => d.severity === 'warning' && d.code === 'UNRESOLVED_ENTITY_REF',
+    );
+    expect(warnings.length).toBeGreaterThanOrEqual(1);
+    expect(warnings[0]!.message).toContain('nonexistent');
+  });
+});

@@ -1,0 +1,12 @@
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('Example STEP file'),'2;1');
+FILE_NAME('example','2024-01-01',(''),(''),'','','');
+FILE_SCHEMA(('AUTO'));
+ENDSEC;
+DATA;
+#1=CPT(0.0,0.0,0.0);
+#2=CPT(1.0,0.0,0.0);
+#3=VX(#1);
+ENDSEC;
+END-ISO-10303-21;

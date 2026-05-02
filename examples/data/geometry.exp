@@ -1,0 +1,39 @@
+SCHEMA geometry;
+
+TYPE length_measure = REAL;
+END_TYPE;
+
+TYPE plane_angle_measure = REAL;
+END_TYPE;
+
+ENTITY point
+  ABSTRACT SUPERTYPE OF (ONEOF(cartesian_point));
+  coordinates : LIST [2:3] OF length_measure;
+END_ENTITY;
+
+ENTITY cartesian_point
+  SUBTYPE OF (point);
+END_ENTITY;
+
+ENTITY vector;
+  orientation : direction;
+  magnitude   : length_measure;
+WHERE
+  WR1 : magnitude > 0.0;
+END_ENTITY;
+
+ENTITY direction;
+  direction_ratios : LIST [2:3] OF REAL;
+END_ENTITY;
+
+FUNCTION dot_product(a, b : direction) : REAL;
+  LOCAL
+    result : REAL := 0.0;
+  END_LOCAL;
+  REPEAT i := 1 TO SIZEOF(a.direction_ratios);
+    result := result + a.direction_ratios[i] * b.direction_ratios[i];
+  END_REPEAT;
+  RETURN(result);
+END_FUNCTION;
+
+END_SCHEMA;

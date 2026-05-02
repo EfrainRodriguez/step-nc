@@ -1,0 +1,69 @@
+(* doc: https://www.steptools.com/docs/sdailib/session.html *)
+SCHEMA population_schema;
+
+    REFERENCE FROM parameter_data_schema
+      ( entity_instance,
+        application_instance );
+
+    REFERENCE FROM session_schema
+      ( sdai_session,
+        sdai_repository,
+        access_type,
+        time_stamp );
+
+    USE FROM dictionary_schema;
+
+    ENTITY schema_instance;
+      name              : STRING;
+      associated_models : SET [0:?] OF sdai_model;
+      native_schema     : schema_definition;
+      repository        : sdai_repository;
+      change_date       : OPTIONAL time_stamp;
+      validation_date   : time_stamp;
+      validation_result : LOGICAL;
+      validation_level  : INTEGER;
+    UNIQUE
+      UR1: name, repository;
+    WHERE
+      WR1: SELF IN SELF.repository.contents.schemas;
+    END_ENTITY;
+
+    ENTITY sdai_model;
+      name              : STRING;
+      contents          : sdai_model_contents;
+      underlying_schema : schema_definition;
+      repository        : sdai_repository;
+      change_date       : OPTIONAL time_stamp;
+      mode              : OPTIONAL access_type;
+    INVERSE
+      associated_with : SET [0:?] OF schema_instance FOR associated_models;
+    UNIQUE
+      UR1: repository, name;
+    WHERE
+      WR1: SELF IN SELF.repository.contents.models;
+    END_ENTITY;
+
+    ENTITY sdai_model_contents;
+      instances         : SET[0:?] OF entity_instance;  
+      folders           : SET[0:?] OF entity_extent;
+      populated_folders : SET[0:?] OF entity_extent;
+    END_ENTITY;
+
+    ENTITY entity_extent;
+      definition : entity_definition;
+      instances  : SET[0:?] OF entity_instance;
+    INVERSE 
+      owned_by : sdai_model_contents FOR folders;
+    END_ENTITY;
+
+    ENTITY scope;
+      owner       : application_instance;
+      owned       : SET [1:?] OF application_instance;
+      export_list : SET [0:?] OF application_instance;
+    UNIQUE
+      UR1: owner;
+    WHERE
+      WR2: NOT (owner IN owned);
+    END_ENTITY;
+
+END_SCHEMA; -- population_schema

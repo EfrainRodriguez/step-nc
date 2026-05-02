@@ -1,0 +1,103 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Integration: roundtrip snapshot tests > SELECT types > should serialize SELECT values 1`] = `
+"ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((''),'2;1');
+FILE_NAME('','2025-01-01T00:00:00',(''),(''),'','','');
+FILE_SCHEMA(('TEST_SELECT'));
+ENDSEC;
+DATA;
+#1=POINT(1.,2.);
+#2=CONTAINER(POINT(#1));
+ENDSEC;
+END-ISO-10303-21;
+"
+`;
+
+exports[`Integration: roundtrip snapshot tests > aggregations > should serialize aggregation attributes 1`] = `
+"ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((''),'2;1');
+FILE_NAME('','2025-01-01T00:00:00',(''),(''),'','','');
+FILE_SCHEMA(('TEST_AGG'));
+ENDSEC;
+DATA;
+#1=POLYGON((1.,2.,3.,4.,5.,6.));
+ENDSEC;
+END-ISO-10303-21;
+"
+`;
+
+exports[`Integration: roundtrip snapshot tests > basic geometry > should serialize geometry model with cross-references 1`] = `
+"ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((''),'2;1');
+FILE_NAME('test-geometry.stp','2025-01-01T00:00:00',(''),(''),'','','');
+FILE_SCHEMA(('TEST_GEOM'));
+ENDSEC;
+DATA;
+#1=POINT('Origin',0.,0.,0.);
+#2=POINT('End',10.,0.,0.);
+#3=DIRECTION('X-axis',(1.,0.,0.));
+#4=LINE('MyLine',#1,#3);
+ENDSEC;
+END-ISO-10303-21;
+"
+`;
+
+exports[`Integration: roundtrip snapshot tests > complex entities > should serialize complex entity instances 1`] = `
+"ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((''),'2;1');
+FILE_NAME('','2025-01-01T00:00:00',(''),(''),'','','');
+FILE_SCHEMA(('TEST_COMPLEX'));
+ENDSEC;
+DATA;
+#1=(LENGTH_SI_UNIT() LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.));
+ENDSEC;
+END-ISO-10303-21;
+"
+`;
+
+exports[`Integration: roundtrip snapshot tests > empty model > should produce valid P21 with only header and empty data section 1`] = `
+"ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((''),'2;1');
+FILE_NAME('','2025-01-01T00:00:00',(''),(''),'','','');
+FILE_SCHEMA(('EMPTY_TEST'));
+ENDSEC;
+DATA;
+ENDSEC;
+END-ISO-10303-21;
+"
+`;
+
+exports[`Integration: roundtrip snapshot tests > enumerations > should serialize enumeration values 1`] = `
+"ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((''),'2;1');
+FILE_NAME('','2025-01-01T00:00:00',(''),(''),'','','');
+FILE_SCHEMA(('TEST_ENUM'));
+ENDSEC;
+DATA;
+#1=MOVEMENT(.FORWARD.,5.);
+ENDSEC;
+END-ISO-10303-21;
+"
+`;
+
+exports[`Integration: roundtrip snapshot tests > optional and DERIVED attributes > should serialize mix of $, values, and * in single instance 1`] = `
+"ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION((''),'2;1');
+FILE_NAME('','2025-01-01T00:00:00',(''),(''),'','','');
+FILE_SCHEMA(('TEST_DERIVED'));
+ENDSEC;
+DATA;
+#1=DIRECTION((1.,0.,0.));
+#2=VECTOR(#1,10.);
+ENDSEC;
+END-ISO-10303-21;
+"
+`;

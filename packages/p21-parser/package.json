@@ -1,0 +1,47 @@
+{
+  "name": "@step-nc/p21-parser",
+  "version": "0.1.0",
+  "description": "Zero-dependency TypeScript parser for ISO 10303-21 (STEP Part 21) exchange structure files.",
+  "author": "Efrain Rodriguez",
+  "contributors": [
+    "Efrain Rodriguez <efrainrg92@gmail.com>",
+    "Juan Rodriguez <engineer.jrg@gmail.com>"
+  ],
+  "maintainers": [
+    "Efrain Rodriguez <efrainrg92@gmail.com>",
+    "Juan Rodriguez <engineer.jrg@gmail.com>"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.9"
+  },
+  "engines": {
+    "node": ">= 20"
+  }
+}
