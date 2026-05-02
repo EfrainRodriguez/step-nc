@@ -1,6 +1,6 @@
 {
   "name": "@step-nc/p21-writer",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Serializer for StepModel to ISO-10303-21 (Part 21) files — export STEP models to .stp/.p21 format",
   "author": "Efrain Rodriguez",
   "contributors": [
