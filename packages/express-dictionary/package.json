@@ -1,6 +1,6 @@
 {
   "name": "@step-nc/express-dictionary",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Extract schema from EXPRESS AST and build in-memory entity instances",
   "author": "Efrain Rodriguez",
   "license": "MIT",
