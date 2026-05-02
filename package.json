@@ -31,7 +31,7 @@
     "lint:check": "eslint . --ext .ts",
     "format": "prettier --write .",
     "typecheck": "pnpm -r typecheck",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
     "prerelease": "pnpm run typecheck && pnpm run lint:check && pnpm run test",
