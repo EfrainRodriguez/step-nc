@@ -1,7 +1,6 @@
+import { lexP21 } from '@step-nc/p21-parser';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { lexP21 } from '@step-nc/p21-parser';
-import type { P21Token } from '@step-nc/p21-parser';
 
 // ── CLI args ────────────────────────────────────────────────
 
