@@ -14,3 +14,9 @@ coverage
 
 /tmp/
 /plans/
+
+# ISO normative text / PDFs — keep copies locally only; do not redistribute via Git
+docs/express/pdfs/
+docs/express/ISO10303-11(EXPRESS).md
+docs/express/ISO-10303-21(p21).md
+docs/express/all-express-11.bnf

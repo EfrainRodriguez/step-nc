@@ -1,6 +1,6 @@
 {
   "name": "@step-nc/step-factory",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "description": "Runtime instance engine for EXPRESS/STEP schemas — create, populate, and validate entity instances",
   "author": "Efrain Rodriguez",
   "license": "MIT",
@@ -8,9 +8,13 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "files": [

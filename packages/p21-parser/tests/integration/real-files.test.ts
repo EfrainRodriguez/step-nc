@@ -1,6 +1,5 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { ComplexEntityInstanceNode } from 'packages/p21-parser/src';
 import { describe, expect, it } from 'vitest';
 import { parseP21 } from '../../src/parser/parser';
 import { walk } from '../../src/visitor/walk';
@@ -87,9 +86,7 @@ describe('Integration — real .stp files', () => {
     expect(ast.data.length).toBeGreaterThanOrEqual(1);
 
     const hasComplex = ast.data.some((d) =>
-      d.entities.some(
-        (e: ComplexEntityInstanceNode) => e.type === 'ComplexEntityInstance',
-      ),
+      d.entities.some((e) => e.type === 'ComplexEntityInstance'),
     );
     expect(hasComplex).toBe(true);
 
