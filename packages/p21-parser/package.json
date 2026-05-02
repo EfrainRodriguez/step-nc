@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "description": "Zero-dependency TypeScript parser for ISO 10303-21 (STEP Part 21) exchange structure files.",
   "author": "Efrain Rodriguez",
+  "contributors": [
+    "Efrain Rodriguez <efrainrg92@gmail.com>",
+    "Juan Rodriguez <juangasca95@gmail.com>"
+  ],
+  "maintainers": [
+    "Efrain Rodriguez <efrainrg92@gmail.com>",
+    "Juan Rodriguez <juangasca95@gmail.com>"
+  ],
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -18,7 +26,9 @@
     "test": "vitest run",
     "coverage": "vitest run --coverage"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

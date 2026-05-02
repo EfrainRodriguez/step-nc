@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "description": "Runtime instance engine for EXPRESS/STEP schemas — create, populate, and validate entity instances",
   "author": "Efrain Rodriguez",
+  "contributors": [
+    "Efrain Rodriguez <efrainrg92@gmail.com>",
+    "Juan Rodriguez <juangasca95@gmail.com>"
+  ],
+  "maintainers": [
+    "Efrain Rodriguez <efrainrg92@gmail.com>",
+    "Juan Rodriguez <juangasca95@gmail.com>"
+  ],
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",

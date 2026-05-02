@@ -4,6 +4,14 @@
   "description": "Extract schema from EXPRESS AST and build in-memory entity instances",
   "author": "Efrain Rodriguez",
   "license": "MIT",
+  "contributors": [
+    "Efrain Rodriguez <efrainrg92@gmail.com>",
+    "Juan Rodriguez <juangasca95@gmail.com>"
+  ],
+  "maintainers": [
+    "Efrain Rodriguez <efrainrg92@gmail.com>",
+    "Juan Rodriguez <juangasca95@gmail.com>"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -17,7 +25,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

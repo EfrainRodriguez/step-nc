@@ -3,6 +3,14 @@
   "version": "0.1.0",
   "description": "Reader for ISO-10303-21 (Part 21) files — load P21 data into a StepModel using an EXPRESS schema",
   "author": "Efrain Rodriguez",
+  "contributors": [
+    "Efrain Rodriguez <efrainrg92@gmail.com>",
+    "Juan Rodriguez <juangasca95@gmail.com>"
+  ],
+  "maintainers": [
+    "Efrain Rodriguez <efrainrg92@gmail.com>",
+    "Juan Rodriguez <juangasca95@gmail.com>"
+  ],
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -17,7 +25,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
