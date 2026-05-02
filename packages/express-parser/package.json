@@ -1,6 +1,6 @@
 {
   "name": "@step-nc/express-parser",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "An open-source, extensible, and runtime-friendly Javascript/Typescript library for handling STEP and STEP-NC models.",
   "author": "Efrain Rodriguez",
   "contributors": [

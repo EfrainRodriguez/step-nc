@@ -1,6 +1,6 @@
 {
   "name": "@step-nc/p21-reader",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Reader for ISO-10303-21 (Part 21) files — load P21 data into a StepModel using an EXPRESS schema",
   "author": "Efrain Rodriguez",
   "contributors": [
