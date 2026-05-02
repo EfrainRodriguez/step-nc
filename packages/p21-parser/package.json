@@ -1,6 +1,6 @@
 {
   "name": "@step-nc/p21-parser",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Zero-dependency TypeScript parser for ISO 10303-21 (STEP Part 21) exchange structure files.",
   "author": "Efrain Rodriguez",
   "contributors": [
