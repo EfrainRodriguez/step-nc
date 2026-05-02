@@ -6,11 +6,11 @@
   "license": "MIT",
   "contributors": [
     "Efrain Rodriguez <efrainrg92@gmail.com>",
-    "Juan Rodriguez <juangasca95@gmail.com>"
+    "Juan Rodriguez <engineer.jrg@gmail.com>"
   ],
   "maintainers": [
     "Efrain Rodriguez <efrainrg92@gmail.com>",
-    "Juan Rodriguez <juangasca95@gmail.com>"
+    "Juan Rodriguez <engineer.jrg@gmail.com>"
   ],
   "type": "module",
   "main": "./dist/index.cjs",
