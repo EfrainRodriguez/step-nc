@@ -202,8 +202,4 @@ function main(): void {
   console.log(`Written: ${inputPath}`);
 }
 
-function escapeRe(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 main();
