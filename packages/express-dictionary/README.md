@@ -1,10 +1,10 @@
 # @step-nc/express-dictionary
 
-Construye un diccionario semántico (modelo resuelto y enlazado) a partir del AST de EXPRESS. Toma el árbol de sintaxis abstracta producido por `@step-nc/express-parser` y lo transforma en un `ExpressSchema` con entidades, tipos, atributos, herencia e inversos resueltos, listo para consultas y uso en el ecosistema STEP-NC.
+Builds a semantic dictionary (resolved and linked model) from an EXPRESS AST. It transforms the AST produced by `@step-nc/express-parser` into an `ExpressSchema` with resolved entities, types, attributes, inheritance, and inverses.
 
-Para entender la **arquitectura** del paquete (pipeline, builder, registry, API de consulta), véase [ARCHITECTURE.md](./ARCHITECTURE.md).
+For package architecture details (pipeline, builder, registry, query API), see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-## Uso mínimo
+## Minimal usage
 
 ```ts
 import { parseExpress } from '@step-nc/express-parser';
@@ -20,64 +20,22 @@ const source = `
 
 const parseResult = parseExpress(source);
 const { schema, diagnostics } = buildSchema(parseResult.ast);
-
-// Schema resuelto: entidades y tipos por nombre
-const point = schema.entities.get('POINT');
-// Consultas por API
-import { getEntity, getOwnAttributes } from '@step-nc/express-dictionary';
-const entity = getEntity(schema, 'point');
-const attrs = getOwnAttributes(entity!);
 ```
 
-## API principal
+## Main API
 
-- **`buildSchema(ast, options?)`** — Punto de entrada: transforma un `SchemaDeclarationNode` (AST) en un `ExpressSchema` resuelto. Opcionalmente recibe un `SchemaRegistry` para multi-schema y resolución de USE/REFERENCE.
-- **`BuildSchemaResult`** — `{ schema: ExpressSchema; diagnostics: SchemaDiagnostic[] }`.
-- **`SchemaRegistry`** — Registro de varios esquemas; `buildAndRegister(ast)`, `get(name)`, `list()`, `resolveInterfaces()` para resolver cláusulas USE/REFERENCE entre esquemas.
-- **Tipos del modelo semántico** — `ExpressSchema`, `EntityDefinition`, `TypeDefinition`, `ExplicitAttribute`, `TypeDescriptor`, etc., exportados desde el paquete.
-- **Diagnósticos** — `SchemaDiagnostic`, `formatDiagnostic`, `createDiagnostic`, `errorDiagnostic`, `warningDiagnostic`, `hasErrors`, `filterBySeverity`.
+- `buildSchema(ast, options?)` -> converts `SchemaDeclarationNode` into a resolved `ExpressSchema`.
+- `BuildSchemaResult` -> `{ schema: ExpressSchema; diagnostics: SchemaDiagnostic[] }`.
+- `SchemaRegistry` -> multi-schema support (`buildAndRegister`, `get`, `list`, `resolveInterfaces`).
+- Semantic model types are exported (`EntityDefinition`, `TypeDefinition`, `TypeDescriptor`, etc.).
+- Diagnostics helpers are exported (`formatDiagnostic`, `hasErrors`, `filterBySeverity`, etc.).
 
-### API de consulta
+## Query API
 
-- **Schema:** `getEntity(schema, name)`, `getType(schema, name)`, `getNamedType(schema, name)`, `getAllEntities`, `getAllTypes`, `getInstantiableEntities`.
-- **Entidad:** `getOwnAttributes`, `getInheritedAttributes`, `getAllAttributes`, `getAllDerivedAttributes`, `getAllInverseAttributes`, `getDirectSubtypes`, `getAllSubtypes`, `getSupertypeChain`, `isSubtypeOf`, `isInstantiable`.
-- **Tipo:** `isSimpleType`, `isEntityType`, `isSelectType`, `isEnumerationType`, `isAggregationType`, `getSelectOptions`, `resolveToBaseType`.
+- Schema lookups: `getEntity`, `getType`, `getNamedType`, `getAllEntities`, `getAllTypes`, `getInstantiableEntities`.
+- Entity utilities: `getOwnAttributes`, `getInheritedAttributes`, `getAllAttributes`, `getDirectSubtypes`, `getAllSubtypes`, `getSupertypeChain`, `isSubtypeOf`, `isInstantiable`.
+- Type utilities: `isSimpleType`, `isEntityType`, `isSelectType`, `isEnumerationType`, `isAggregationType`, `getSelectOptions`, `resolveToBaseType`.
 
-Ejemplo (listar atributos y subtipos):
+## Dependencies
 
-```ts
-import {
-  buildSchema,
-  getEntity,
-  getOwnAttributes,
-  getDirectSubtypes,
-} from '@step-nc/express-dictionary';
-
-const { schema } = buildSchema(ast);
-const entity = getEntity(schema, 'geometric_representation_item');
-if (entity) {
-  const attrs = getOwnAttributes(entity);
-  const subtypes = getDirectSubtypes(entity);
-}
-```
-
-Ejemplo (multi-schema con registry):
-
-```ts
-import { parseExpress } from '@step-nc/express-parser';
-import { buildSchema, SchemaRegistry } from '@step-nc/express-dictionary';
-
-const registry = new SchemaRegistry();
-const ast1 = parseExpress(source1).ast;
-const ast2 = parseExpress(source2).ast;
-
-const r1 = buildSchema(ast1, { registry });
-const r2 = buildSchema(ast2, { registry });
-const interfaceDiags = registry.resolveInterfaces();
-
-const schemaA = registry.get('schema_a');
-```
-
-## Dependencias
-
-- **@step-nc/express-parser** — Se espera un AST ya parseado (`SchemaDeclarationNode`). El diccionario no parsea texto EXPRESS.
+- `@step-nc/express-parser` (expects a pre-parsed AST; this package does not parse EXPRESS text).

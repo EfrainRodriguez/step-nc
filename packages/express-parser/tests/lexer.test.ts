@@ -40,41 +40,41 @@ describe('lexExpress', () => {
       expect(kinds).toEqual([]);
     });
 
-    it('reporta error en block comment sin cerrar', () => {
-      const { diagnostics } = lexExpress('(* sin cerrar');
+    it('reports error for unclosed block comment', () => {
+      const { diagnostics } = lexExpress('(* unclosed');
       expect(diagnostics).toHaveLength(1);
       expect(diagnostics[0]!.code).toBe('LEX003');
     });
   });
 
-  // ─── Literales numéricos ───────────────────────────────────────
+  // ─── Numeric literals ───────────────────────────────────────
 
-  describe('Literales numéricos', () => {
-    it('entero simple → LIT_INTEGER', () => {
+  describe('Numeric literals', () => {
+    it('simple integer -> LIT_INTEGER', () => {
       const t = firstToken('7');
       expect(t.kind).toBe('LIT_INTEGER');
       expect(t.text).toBe('7');
     });
 
-    it('entero con múltiples dígitos → LIT_INTEGER', () => {
+    it('integer with multiple digits -> LIT_INTEGER', () => {
       const t = firstToken('42');
       expect(t.kind).toBe('LIT_INTEGER');
       expect(t.text).toBe('42');
     });
 
-    it('real con parte decimal → LIT_REAL', () => {
+    it('real with decimal part -> LIT_REAL', () => {
       const t = firstToken('3.14');
       expect(t.kind).toBe('LIT_REAL');
       expect(t.text).toBe('3.14');
     });
 
-    it('real terminado en punto (ej: 3.) → LIT_REAL', () => {
+    it('real ending with dot (e.g., 3.) -> LIT_REAL', () => {
       const t = firstToken('3.');
       expect(t.kind).toBe('LIT_REAL');
       expect(t.text).toBe('3.');
     });
 
-    it('posición (offset, line, column) correcta', () => {
+    it('correct position (offset, line, column)', () => {
       const { tokens } = lexExpress('  42');
       const t = tokens[0]!;
       expect(t.offset).toBe(2);
@@ -82,43 +82,43 @@ describe('lexExpress', () => {
       expect(t.column).toBe(3);
     });
 
-    it('real con exponente E positivo → LIT_REAL', () => {
+    it('real with positive E exponent -> LIT_REAL', () => {
       const t = firstToken('1.0E18');
       expect(t.kind).toBe('LIT_REAL');
       expect(t.text).toBe('1.0E18');
     });
 
-    it('real terminado en punto con exponente → LIT_REAL', () => {
+    it('real ending with dot and exponent -> LIT_REAL', () => {
       const t = firstToken('1.E18');
       expect(t.kind).toBe('LIT_REAL');
       expect(t.text).toBe('1.E18');
     });
 
-    it('real con exponente negativo minúscula → LIT_REAL', () => {
+    it('real with lowercase negative exponent -> LIT_REAL', () => {
       const t = firstToken('2.5e-3');
       expect(t.kind).toBe('LIT_REAL');
       expect(t.text).toBe('2.5e-3');
     });
 
-    it('real con exponente positivo explícito → LIT_REAL', () => {
+    it('real with explicit positive exponent -> LIT_REAL', () => {
       const t = firstToken('3.14E+2');
       expect(t.kind).toBe('LIT_REAL');
       expect(t.text).toBe('3.14E+2');
     });
 
-    it('entero sin punto no consume exponente (42 sigue LIT_INTEGER)', () => {
+    it('integer without dot does not consume exponent (42 stays LIT_INTEGER)', () => {
       const t = firstToken('42');
       expect(t.kind).toBe('LIT_INTEGER');
       expect(t.text).toBe('42');
     });
 
-    it('real sin exponente sigue siendo LIT_REAL (1.5)', () => {
+    it('real without exponent remains LIT_REAL (1.5)', () => {
       const t = firstToken('1.5');
       expect(t.kind).toBe('LIT_REAL');
       expect(t.text).toBe('1.5');
     });
 
-    it('1E18 se tokeniza como LIT_INTEGER + IDENT (no soportado sin punto)', () => {
+    it('1E18 tokenizes as LIT_INTEGER + IDENT (unsupported without dot)', () => {
       const kinds = tokenKinds('1E18');
       expect(kinds[0]).toBe('LIT_INTEGER');
       expect(kinds[1]).toBe('IDENT');
@@ -134,14 +134,14 @@ describe('lexExpress', () => {
       expect(t.text).toBe("'hello'");
     });
 
-    it("string vacío '' → LIT_STRING", () => {
+    it("empty string '' -> LIT_STRING", () => {
       const t = firstToken("''");
       expect(t.kind).toBe('LIT_STRING');
       expect(t.text).toBe("''");
     });
 
-    it('reporta error en string sin cerrar', () => {
-      const { diagnostics } = lexExpress("'sin cerrar");
+    it('reports error for unclosed string', () => {
+      const { diagnostics } = lexExpress("'unclosed");
       expect(diagnostics).toHaveLength(1);
       expect(diagnostics[0]!.code).toBe('LEX002');
     });
@@ -172,7 +172,7 @@ describe('lexExpress', () => {
       expect(kinds).toEqual(['SYM_PERCENT', 'IDENT']);
     });
 
-    it('posición correcta', () => {
+    it('correct position', () => {
       const { tokens } = lexExpress('  %01101');
       const t = tokens[0]!;
       expect(t.offset).toBe(2);
@@ -184,25 +184,25 @@ describe('lexExpress', () => {
   // ─── Identificadores ──────────────────────────────────────────
 
   describe('Identificadores', () => {
-    it('identificador simple → IDENT', () => {
+    it('simple identifier -> IDENT', () => {
       const t = firstToken('foo');
       expect(t.kind).toBe('IDENT');
       expect(t.text).toBe('foo');
     });
 
-    it('identificador con underscore → IDENT', () => {
+    it('identifier with underscore -> IDENT', () => {
       const t = firstToken('my_var');
       expect(t.kind).toBe('IDENT');
       expect(t.text).toBe('my_var');
     });
 
-    it('identificador que empieza con underscore → IDENT', () => {
+    it('identifier starting with underscore -> IDENT', () => {
       const t = firstToken('_private');
       expect(t.kind).toBe('IDENT');
       expect(t.text).toBe('_private');
     });
 
-    it('identificador con dígitos → IDENT', () => {
+    it('identifier with digits -> IDENT', () => {
       const t = firstToken('x2');
       expect(t.kind).toBe('IDENT');
       expect(t.text).toBe('x2');
@@ -286,10 +286,10 @@ describe('lexExpress', () => {
     });
   });
 
-  // ─── Símbolos ──────────────────────────────────────────────────
+  // ─── Symbols ──────────────────────────────────────────────────
 
-  describe('Símbolos', () => {
-    it('símbolos simples', () => {
+  describe('Symbols', () => {
+    it('single-character symbols', () => {
       expect(firstToken('.').kind).toBe('SYM_DOT');
       expect(firstToken(',').kind).toBe('SYM_COMMA');
       expect(firstToken(';').kind).toBe('SYM_SEMICOLON');
@@ -311,7 +311,7 @@ describe('lexExpress', () => {
       expect(firstToken('|').kind).toBe('SYM_PIPE');
     });
 
-    it('símbolos multi-carácter', () => {
+    it('multi-character symbols', () => {
       expect(firstToken(':=').kind).toBe('SYM_ASSIGN');
       expect(firstToken('<>').kind).toBe('SYM_NOT_EQUAL');
       expect(firstToken('<=').kind).toBe('SYM_LESS_EQUAL');
@@ -347,35 +347,35 @@ describe('lexExpress', () => {
   // ─── Token EOF ─────────────────────────────────────────────────
 
   describe('Token EOF', () => {
-    it('string vacío produce solo EOF', () => {
+    it('empty input produces only EOF', () => {
       const { tokens } = lexExpress('');
       expect(tokens).toHaveLength(1);
       expect(tokens[0]!.kind).toBe('EOF');
     });
 
-    it('EOF siempre es el último token', () => {
+    it('EOF is always the last token', () => {
       const { tokens } = lexExpress('ENTITY foo;');
       const last = tokens[tokens.length - 1]!;
       expect(last.kind).toBe('EOF');
     });
   });
 
-  // ─── Posición (line/column tracking) ───────────────────────────
+  // ─── Position (line/column tracking) ───────────────────────────
 
-  describe('Posición (line/column tracking)', () => {
+  describe('Position (line/column tracking)', () => {
     it('offset correcto en tokens secuenciales', () => {
       const { tokens } = lexExpress('A B');
       expect(tokens[0]!.offset).toBe(0);
       expect(tokens[1]!.offset).toBe(2);
     });
 
-    it('line incrementa con \\n', () => {
+    it('line increments with \\n', () => {
       const { tokens } = lexExpress('A\nB');
       expect(tokens[0]!.line).toBe(1);
       expect(tokens[1]!.line).toBe(2);
     });
 
-    it('column resetea después de \\n', () => {
+    it('column resets after \\n', () => {
       const { tokens } = lexExpress('A\nB');
       expect(tokens[0]!.column).toBe(1);
       expect(tokens[1]!.column).toBe(1);
@@ -385,13 +385,13 @@ describe('lexExpress', () => {
   // ─── Caracteres inesperados ────────────────────────────────────
 
   describe('Caracteres inesperados', () => {
-    it('carácter desconocido genera diagnóstico LEX001', () => {
+    it('unknown character generates LEX001 diagnostic', () => {
       const { diagnostics } = lexExpress('`');
       expect(diagnostics).toHaveLength(1);
       expect(diagnostics[0]!.code).toBe('LEX001');
     });
 
-    it('el lexer continúa después del error', () => {
+    it('lexer continues after an error', () => {
       const { tokens, diagnostics } = lexExpress('` ENTITY');
       expect(diagnostics).toHaveLength(1);
       const kinds = tokens.filter((t) => t.kind !== 'EOF').map((t) => t.kind);
@@ -399,16 +399,16 @@ describe('lexExpress', () => {
     });
   });
 
-  // ─── Integración: archivo EXPRESS completo ─────────────────────
+  // ─── Integration: full EXPRESS file ─────────────────────
 
-  describe('Integración: archivo EXPRESS completo', () => {
+  describe('Integration: full EXPRESS file', () => {
     const fixturePath = resolve(
       __dirname,
       '../../../examples/data/geometry.exp',
     );
     const source = readFileSync(fixturePath, 'utf-8');
 
-    it('tokeniza geometry.exp sin errores (diagnostics vacío)', () => {
+    it('tokenizes geometry.exp without errors (empty diagnostics)', () => {
       const { diagnostics } = lexExpress(source);
       expect(diagnostics).toEqual([]);
     });

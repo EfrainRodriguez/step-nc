@@ -45,10 +45,10 @@ function eofOnly(): Token[] {
 // ── Tests ────────────────────────────────────────────────────────
 
 describe('ParserContext', () => {
-  // ─── Suite 1: Navegación básica ─────────────────────────────────
+  // ─── Suite 1: Basic navigation ─────────────────────────────────
 
-  describe('Navegación básica', () => {
-    it('peek() retorna el primer token sin consumirlo', () => {
+  describe('Basic navigation', () => {
+    it('peek() returns the first token without consuming it', () => {
       const tokens = makeTokens(['KW_ENTITY', 'ENTITY'], ['IDENT', 'foo']);
       const ctx = new ParserContext(tokens);
 
@@ -56,12 +56,12 @@ describe('ParserContext', () => {
       expect(ctx.peek().kind).toBe('KW_ENTITY');
     });
 
-    it('peek() retorna EOF en array vacío (solo EOF)', () => {
+    it('peek() returns EOF for empty array (only EOF)', () => {
       const ctx = new ParserContext(eofOnly());
       expect(ctx.peek().kind).toBe('EOF');
     });
 
-    it('peek(1) retorna el segundo token (lookahead)', () => {
+    it('peek(1) returns the second token (lookahead)', () => {
       const tokens = makeTokens(
         ['KW_ENTITY', 'ENTITY'],
         ['IDENT', 'foo'],
@@ -74,14 +74,14 @@ describe('ParserContext', () => {
       expect(ctx.peek(2).kind).toBe('SYM_SEMICOLON');
     });
 
-    it('peek(offset) fuera de rango retorna EOF', () => {
+    it('peek(offset) out of range returns EOF', () => {
       const tokens = makeTokens(['KW_ENTITY', 'ENTITY']);
       const ctx = new ParserContext(tokens);
 
       expect(ctx.peek(99).kind).toBe('EOF');
     });
 
-    it('consume() retorna el token actual y avanza', () => {
+    it('consume() returns current token and advances', () => {
       const tokens = makeTokens(['KW_ENTITY', 'ENTITY'], ['IDENT', 'foo']);
       const ctx = new ParserContext(tokens);
 
@@ -90,7 +90,7 @@ describe('ParserContext', () => {
       expect(ctx.peek().kind).toBe('IDENT');
     });
 
-    it('consume() múltiple avanza secuencialmente', () => {
+    it('multiple consume() calls advance sequentially', () => {
       const tokens = makeTokens(
         ['KW_ENTITY', 'ENTITY'],
         ['IDENT', 'foo'],
@@ -117,7 +117,7 @@ describe('ParserContext', () => {
   // ─── Suite 2: check y skip ──────────────────────────────────────
 
   describe('check y skip', () => {
-    it('check(kind) retorna true si coincide, sin consumir', () => {
+    it('check(kind) returns true on match without consuming', () => {
       const tokens = makeTokens(['KW_ENTITY', 'ENTITY']);
       const ctx = new ParserContext(tokens);
 
@@ -125,14 +125,14 @@ describe('ParserContext', () => {
       expect(ctx.peek().kind).toBe('KW_ENTITY');
     });
 
-    it('check(kind) retorna false si no coincide', () => {
+    it('check(kind) returns false when not matching', () => {
       const tokens = makeTokens(['KW_ENTITY', 'ENTITY']);
       const ctx = new ParserContext(tokens);
 
       expect(ctx.check('KW_TYPE')).toBe(false);
     });
 
-    it('skip(kind) retorna true y consume si coincide', () => {
+    it('skip(kind) returns true and consumes on match', () => {
       const tokens = makeTokens(
         ['SYM_SEMICOLON', ';'],
         ['KW_ENTITY', 'ENTITY'],
@@ -143,7 +143,7 @@ describe('ParserContext', () => {
       expect(ctx.peek().kind).toBe('KW_ENTITY');
     });
 
-    it('skip(kind) retorna false y no consume si no coincide', () => {
+    it('skip(kind) returns false and does not consume on mismatch', () => {
       const tokens = makeTokens(['KW_ENTITY', 'ENTITY']);
       const ctx = new ParserContext(tokens);
 
@@ -155,7 +155,7 @@ describe('ParserContext', () => {
   // ─── Suite 3: expect ────────────────────────────────────────────
 
   describe('expect', () => {
-    it('expect(kind) consume y retorna el token si coincide', () => {
+    it('expect(kind) consumes and returns token on match', () => {
       const tokens = makeTokens(['KW_ENTITY', 'ENTITY'], ['IDENT', 'foo']);
       const ctx = new ParserContext(tokens);
 
@@ -164,7 +164,7 @@ describe('ParserContext', () => {
       expect(ctx.peek().kind).toBe('IDENT');
     });
 
-    it('expect(kind) registra diagnóstico si no coincide', () => {
+    it('expect(kind) records diagnostic if token does not match', () => {
       const tokens = makeTokens(['IDENT', 'foo'], ['SYM_SEMICOLON', ';']);
       const ctx = new ParserContext(tokens);
 
@@ -181,7 +181,7 @@ describe('ParserContext', () => {
       expect(ctx.peek().kind).toBe('IDENT');
     });
 
-    it('diagnóstico de expect tiene código, mensaje y span correctos', () => {
+    it('expect diagnostic has correct code, message, and span', () => {
       const tokens = makeTokens(['IDENT', 'foo']);
       const ctx = new ParserContext(tokens);
 
@@ -201,14 +201,14 @@ describe('ParserContext', () => {
   // ─── Suite 4: EOF ───────────────────────────────────────────────
 
   describe('EOF', () => {
-    it('isEOF() retorna false al inicio con tokens', () => {
+    it('isEOF() returns false at start when tokens exist', () => {
       const tokens = makeTokens(['KW_ENTITY', 'ENTITY']);
       const ctx = new ParserContext(tokens);
 
       expect(ctx.isEOF()).toBe(false);
     });
 
-    it('isEOF() retorna true cuando se llega al EOF', () => {
+    it('isEOF() returns true when EOF is reached', () => {
       const tokens = makeTokens(['KW_ENTITY', 'ENTITY']);
       const ctx = new ParserContext(tokens);
 
@@ -216,7 +216,7 @@ describe('ParserContext', () => {
       expect(ctx.isEOF()).toBe(true);
     });
 
-    it('consume() en EOF retorna el token EOF sin avanzar más allá', () => {
+    it('consume() at EOF returns EOF token without advancing further', () => {
       const ctx = new ParserContext(eofOnly());
 
       const t1 = ctx.consume();
@@ -226,7 +226,7 @@ describe('ParserContext', () => {
       expect(t1).toBe(t2);
     });
 
-    it('peek() en EOF siempre retorna EOF', () => {
+    it('peek() at EOF always returns EOF', () => {
       const ctx = new ParserContext(eofOnly());
 
       expect(ctx.peek().kind).toBe('EOF');
@@ -235,10 +235,10 @@ describe('ParserContext', () => {
     });
   });
 
-  // ─── Suite 5: Diagnósticos ──────────────────────────────────────
+  // ─── Suite 5: Diagnostics ──────────────────────────────────────
 
-  describe('Diagnósticos', () => {
-    it('error() acumula en diagnostics con severity error', () => {
+  describe('Diagnostics', () => {
+    it('error() accumulates in diagnostics with error severity', () => {
       const ctx = new ParserContext(eofOnly());
       const span = {
         start: { offset: 0, line: 1, column: 1 },
@@ -253,7 +253,7 @@ describe('ParserContext', () => {
       expect(ctx.diagnostics[0]!.message).toBe('test error');
     });
 
-    it('warning() acumula con severity warning', () => {
+    it('warning() accumulates with warning severity', () => {
       const ctx = new ParserContext(eofOnly());
       const span = {
         start: { offset: 0, line: 1, column: 1 },
@@ -266,7 +266,7 @@ describe('ParserContext', () => {
       expect(ctx.diagnostics[0]!.severity).toBe('warning');
     });
 
-    it('múltiples errores se acumulan en orden', () => {
+    it('multiple errors accumulate in order', () => {
       const ctx = new ParserContext(eofOnly());
       const span = {
         start: { offset: 0, line: 1, column: 1 },
@@ -284,9 +284,9 @@ describe('ParserContext', () => {
     });
   });
 
-  // ─── Suite 6: Helpers de posición ───────────────────────────────
+  // ─── Suite 6: Position helpers ───────────────────────────────
 
-  describe('Helpers de posición', () => {
+  describe('Position helpers', () => {
     it('tokenStart() extrae Position correcta de un Token', () => {
       const token: Token = {
         kind: 'KW_ENTITY',
@@ -333,7 +333,7 @@ describe('ParserContext', () => {
       expect(span.end.column).toBe(4);
     });
 
-    it('spanFromTokens() cubre desde el inicio del primero hasta el final del último', () => {
+    it('spanFromTokens() covers from first start to last end', () => {
       const first: Token = {
         kind: 'KW_ENTITY',
         text: 'ENTITY',
@@ -356,7 +356,7 @@ describe('ParserContext', () => {
       expect(span.end.column).toBe(12);
     });
 
-    it('startPos() retorna la posición del token actual', () => {
+    it('startPos() returns the current token position', () => {
       const tokens = makeTokens(['KW_ENTITY', 'ENTITY'], ['IDENT', 'foo']);
       const ctx = new ParserContext(tokens);
 
@@ -366,7 +366,7 @@ describe('ParserContext', () => {
       expect(pos.column).toBe(tokens[0]!.column);
     });
 
-    it('spanFrom(start) crea span desde posición hasta el final del último token consumido', () => {
+    it('spanFrom(start) builds span from start to end of last consumed token', () => {
       const tokens = makeTokens(
         ['KW_ENTITY', 'ENTITY'],
         ['IDENT', 'foo'],
@@ -383,7 +383,7 @@ describe('ParserContext', () => {
       expect(span.end.offset).toBe(tokens[1]!.offset + tokens[1]!.text.length);
     });
 
-    it('spanFrom(start) sin consumir usa posición del token actual como fallback', () => {
+    it('spanFrom(start) without consume uses current token position as fallback', () => {
       const tokens = makeTokens(['KW_ENTITY', 'ENTITY']);
       const ctx = new ParserContext(tokens);
 
@@ -395,10 +395,10 @@ describe('ParserContext', () => {
     });
   });
 
-  // ─── Suite 7: Filtrado de trivia (preparación futura) ───────────
+  // ─── Suite 7: Trivia filtering (future prep) ───────────
 
-  describe('Filtrado de trivia (preparación futura)', () => {
-    it('con el lexer actual (sin trivia), todos los tokens se procesan normalmente', () => {
+  describe('Trivia filtering (future prep)', () => {
+    it('with current lexer (no trivia), all tokens are processed normally', () => {
       const tokens = makeTokens(
         ['KW_ENTITY', 'ENTITY'],
         ['IDENT', 'foo'],

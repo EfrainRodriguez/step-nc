@@ -1,10 +1,10 @@
 # @step-nc/express-parser
 
-Parser de EXPRESS a AST tipado para uso en el ecosistema STEP-NC. Convierte texto EXPRESS en un árbol de sintaxis abstracta (AST) con tipos TypeScript y diagnósticos de lexer y parser.
+Type-safe EXPRESS parser for the STEP-NC ecosystem. It converts EXPRESS text into a typed AST and reports lexer/parser diagnostics.
 
-Para entender la **arquitectura** del parser (pipeline, lexer, parser, AST y visitor), véase [ARCHITECTURE.md](./ARCHITECTURE.md).
+For parser architecture details (pipeline, lexer, parser, AST, visitor), see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-## Uso mínimo
+## Minimal usage
 
 ```ts
 import { parseExpress } from '@step-nc/express-parser';
@@ -18,35 +18,32 @@ const source = `
 `;
 
 const result = parseExpress(source);
-
-// AST raíz: un único schema (SchemaDeclarationNode)
 const ast = result.ast;
-
-// Diagnósticos (errores y advertencias de lexer y parser)
 const diagnostics = result.diagnostics;
 ```
 
-## API principal
+## Main API
 
-- **`parseExpress(source, options?)`** — Parsea una cadena EXPRESS y devuelve un `ParseResult` con `ast` y `diagnostics`.
-- **`ParseResult`** — `{ ast: SchemaDeclarationNode; diagnostics: ParseDiagnostic[] }`.
-- **Tipos de nodos del AST** — Todos los nodos (declaraciones, expresiones, statements, tipos) se exportan como tipos desde el paquete (p. ej. `SchemaDeclarationNode`, `EntityDeclarationNode`, `TypeNode`, `ExpressionNode`).
-- **`ParseOptions`** — Opciones del parser: `maxExplicitAttributes`, `maxEntitySectionItems`. Valores por defecto: `DEFAULT_MAX_EXPLICIT_ATTRIBUTES` y `DEFAULT_MAX_ENTITY_SECTION_ITEMS`.
-- **Bases para narrowing** — `ASTNodeBase` (base de todos los nodos AST) y `TypeNodeBase` (base de nodos de tipo) para guards y helpers.
-- **Lexer y utilidades** — `lexExpress`, `ParserContext`, helpers de span (`spanBetween`, `spanOfToken`, etc.) y tipos de tokens/diagnósticos según necesidad.
+- `parseExpress(source, options?)` -> parses EXPRESS text and returns `ParseResult`.
+- `ParseResult` -> `{ ast: SchemaDeclarationNode; diagnostics: ParseDiagnostic[] }`.
+- AST node types are exported (for example `SchemaDeclarationNode`, `EntityDeclarationNode`, `TypeNode`, `ExpressionNode`).
+- `ParseOptions` -> parser limits like `maxExplicitAttributes` and `maxEntitySectionItems`.
+- Base node types for narrowing: `ASTNodeBase`, `TypeNodeBase`.
+- Low-level utilities are available (lexer, parser context, span helpers, token/diagnostic types).
 
-### Recorrido del AST
+## AST traversal
 
-- **`visit(ast, visitor)`** — Recorrido en pre-order con handlers opcionales por tipo de nodo (`onSchemaDeclaration`, `onEntityDeclaration`, etc.). Retornar `'skip'` desde un handler para no visitar los hijos de ese nodo.
-- **`walk(ast, callback, options?)`** — Recorrido de todos los nodos; orden `'pre'` (por defecto) o `'post'` según `options.order`.
+- `visit(ast, visitor)` -> pre-order traversal with per-node handlers. Return `'skip'` to skip children.
+- `walk(ast, callback, options?)` -> visit all nodes in `'pre'` (default) or `'post'` order.
 
-Ejemplo con `visit` (listar entidades):
+Example (`visit`):
 
 ```ts
 import { parseExpress, visit } from '@step-nc/express-parser';
 
 const result = parseExpress(source);
 const names: string[] = [];
+
 visit(result.ast, {
   onEntityDeclaration(node) {
     names.push(node.name);
@@ -54,13 +51,14 @@ visit(result.ast, {
 });
 ```
 
-Ejemplo con `walk` (contar nodos):
+Example (`walk`):
 
 ```ts
 import { parseExpress, walk } from '@step-nc/express-parser';
 
 const result = parseExpress(source);
 let count = 0;
+
 walk(result.ast, () => count++);
 console.log('Total nodes:', count);
 ```

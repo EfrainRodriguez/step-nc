@@ -108,14 +108,14 @@ describe('AST types', () => {
   // ─── Position y Span ──────────────────────────────────────────
 
   describe('Position y Span', () => {
-    it('crea una Position válida', () => {
+    it('creates a valid Position', () => {
       const p: Position = pos(1, 5, 4);
       expect(p.line).toBe(1);
       expect(p.column).toBe(5);
       expect(p.offset).toBe(4);
     });
 
-    it('crea un Span válido (half-open interval)', () => {
+    it('creates a valid Span (half-open interval)', () => {
       const s: Span = span(1, 1, 3, 10);
       expect(s.start.line).toBe(1);
       expect(s.end.line).toBe(3);
@@ -230,7 +230,7 @@ describe('AST types', () => {
       expect(node.type).toBe('EnumRef');
     });
 
-    it('EnumRef con typeName', () => {
+    it('EnumRef with typeName', () => {
       const node: EnumRefNode = {
         type: 'EnumRef',
         span: S,
@@ -351,7 +351,7 @@ describe('AST types', () => {
   // ─── Discriminated union narrowing — ExpressionNode ───────────
 
   describe('ExpressionNode narrowing', () => {
-    it('switch en node.type permite acceso a propiedades específicas', () => {
+    it('switch on node.type enables access to specific properties', () => {
       const exprs: ExpressionNode[] = [
         intLit(42),
         strLit('abc'),
@@ -440,7 +440,7 @@ describe('AST types', () => {
       expect(node.selections).toHaveLength(3);
     });
 
-    it('NamedType con schemaRef', () => {
+    it('NamedType with schemaRef', () => {
       const node: NamedTypeNode = {
         type: 'NamedType',
         span: S,
@@ -537,7 +537,7 @@ describe('AST types', () => {
       expect(node.thenBody).toHaveLength(1);
     });
 
-    it('IfStatement con ELSE', () => {
+    it('IfStatement with ELSE', () => {
       const node: IfStatementNode = {
         type: 'IfStatement',
         span: S,
@@ -629,7 +629,7 @@ describe('AST types', () => {
       expect(node.variable).toBe('p');
     });
 
-    it('ReturnStatement con y sin valor', () => {
+    it('ReturnStatement with and without value', () => {
       const r1: ReturnStatementNode = {
         type: 'ReturnStatement',
         span: S,
@@ -707,7 +707,7 @@ describe('AST types', () => {
       expect(node.underlyingType.type).toBe('SimpleType');
     });
 
-    it('TypeDeclaration con WHERE rule', () => {
+    it('TypeDeclaration with WHERE rule', () => {
       const wr: WhereRuleNode = {
         type: 'WhereRule',
         span: S,
@@ -730,7 +730,7 @@ describe('AST types', () => {
       expect(node.whereRules).toHaveLength(1);
     });
 
-    it('EntityDeclaration — entidad simple con atributos explícitos', () => {
+    it('EntityDeclaration - simple entity with explicit attributes', () => {
       const attr: ExplicitAttributeNode = {
         type: 'ExplicitAttribute',
         span: S,
@@ -790,7 +790,7 @@ describe('AST types', () => {
       ]);
     });
 
-    it('EntityDeclaration con DERIVE, INVERSE, UNIQUE, WHERE', () => {
+    it('EntityDeclaration with DERIVE, INVERSE, UNIQUE, WHERE', () => {
       const derived: DerivedAttributeNode = {
         type: 'DerivedAttribute',
         span: S,
@@ -892,7 +892,7 @@ describe('AST types', () => {
       expect(node.returnType.type).toBe('SimpleType');
     });
 
-    it('ProcedureDeclaration con VAR parameter', () => {
+    it('ProcedureDeclaration with VAR parameter', () => {
       const param: ParameterNode = {
         type: 'Parameter',
         span: S,
@@ -998,7 +998,7 @@ describe('AST types', () => {
       expect(ref.items).toBeUndefined();
     });
 
-    it('LocalVariable con initialValue', () => {
+    it('LocalVariable with initialValue', () => {
       const node: LocalVariableNode = {
         type: 'LocalVariable',
         span: S,
@@ -1046,7 +1046,7 @@ describe('AST types', () => {
   // ─── SchemaDeclaration completo ───────────────────────────────
 
   describe('SchemaDeclaration', () => {
-    it('schema con USE, REFERENCE y declaraciones', () => {
+    it('schema with USE, REFERENCE, and declarations', () => {
       const schema: SchemaDeclarationNode = {
         type: 'SchemaDeclaration',
         span: span(1, 1, 100, 12),
@@ -1176,10 +1176,10 @@ describe('AST types', () => {
     });
   });
 
-  // ─── Serialización JSON ───────────────────────────────────────
+  // ─── JSON serialization ───────────────────────────────────────
 
-  describe('Serialización JSON', () => {
-    it('JSON.stringify produce output válido', () => {
+  describe('JSON serialization', () => {
+    it('JSON.stringify produces valid output', () => {
       const node: TypeDeclarationNode = {
         type: 'TypeDeclaration',
         span: span(1, 1, 1, 30),

@@ -150,7 +150,7 @@ describe('serializeAttributeValue', () => {
     });
 
     it('should encode non-ASCII BMP characters with \\X2\\', () => {
-      const { text } = serializeAttributeValue('\u00E9', STRING_TYPE); // é
+      const { text } = serializeAttributeValue('\u00E9', STRING_TYPE);
       expect(text).toBe("'\\X2\\00E9\\X0\\'");
     });
 

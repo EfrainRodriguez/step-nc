@@ -1,147 +1,49 @@
 # @step-nc/p21-writer
 
-Serializador de `StepModel` a archivos ISO-10303-21 (Part 21). Exporta modelos STEP construidos en runtime a formato `.stp`/`.p21` conforme al estándar, habilitando interoperabilidad con herramientas CAD/CAM externas.
+Serializer from `StepModel` to ISO 10303-21 (Part 21) text. It exports runtime STEP models to `.stp` / `.p21` format for interoperability with CAD/CAM ecosystems.
 
-Para funcionalidades futuras planificadas, véase [ROADMAP.md](./ROADMAP.md).
+For planned features, see [ROADMAP.md](./ROADMAP.md).
 
-## Uso mínimo
+## Minimal usage
 
 ```ts
-import { parseExpress } from '@step-nc/express-parser';
-import { buildSchema } from '@step-nc/express-dictionary';
-import { StepModel, setAttribute } from '@step-nc/step-factory';
 import { writeP21ToString } from '@step-nc/p21-writer';
-
-const source = `
-  SCHEMA example;
-    TYPE length_measure = REAL;
-    END_TYPE;
-    ENTITY point;
-      x, y, z : length_measure;
-    END_ENTITY;
-  END_SCHEMA;
-`;
-
-const ast = parseExpress(source).ast;
-const { schema } = buildSchema(ast);
-
-const model = new StepModel(schema);
-const { instance } = model.createInstance('point');
-
-setAttribute(instance!, 'x', 1.0, schema);
-setAttribute(instance!, 'y', 2.0, schema);
-setAttribute(instance!, 'z', 3.0, schema);
 
 const p21 = writeP21ToString(model);
 console.log(p21);
 ```
 
-Produce:
+## Main API
 
-```
-ISO-10303-21;
-HEADER;
-FILE_DESCRIPTION((''),'2;1');
-FILE_NAME('','2025-01-15T10:30:00',(''),(''),'','','');
-FILE_SCHEMA(('EXAMPLE'));
-ENDSEC;
-DATA;
-#1=POINT(1.,2.,3.);
-ENDSEC;
-END-ISO-10303-21;
-```
+- `writeP21(model, options?)` -> returns `{ content, diagnostics }`.
+- `writeP21ToString(model, options?)` -> convenience wrapper returning only the serialized string.
 
-## API principal
+## Options
 
-### `writeP21(model, options?): P21WriteResult`
+- `P21WriteOptions`
+  - `header?: P21HeaderOptions`
+  - `formatting?: P21FormattingOptions`
 
-Serializa un `StepModel` completo a formato P21. Retorna `{ content, diagnostics }`.
+- `P21HeaderOptions`
+  - File metadata (`fileName`, `author`, `organization`, `originatingSystem`, etc.)
+  - Explicit schema list support
 
-```ts
-import { writeP21 } from '@step-nc/p21-writer';
+- `P21FormattingOptions`
+  - `maxLineLength?: number`
+  - `prettyPrint?: boolean`
 
-const { content, diagnostics } = writeP21(model, {
-  header: {
-    fileName: 'output.stp',
-    author: ['John Doe'],
-    organization: ['ACME Inc.'],
-    originatingSystem: 'My CAD System',
-  },
-});
+## Advanced API
 
-if (diagnostics.length > 0) {
-  console.warn('Warnings:', diagnostics);
-}
+- `serializeAttributeValue(...)`
+- `serializeInstance(...)`
+- `serializeHeader(...)`
+- `isComplexEntity(...)`
 
-fs.writeFileSync('output.stp', content);
-```
+## Diagnostics
 
-### `writeP21ToString(model, options?): string`
+Writer diagnostics include warning/error codes such as unsupported values, encoding errors, missing attributes, and serialization warnings.
 
-Convenience wrapper que retorna solo el string P21 (sin diagnósticos).
+## Dependencies
 
-```ts
-import { writeP21ToString } from '@step-nc/p21-writer';
-const p21 = writeP21ToString(model);
-```
-
-### `P21WriteOptions`
-
-```ts
-interface P21WriteOptions {
-  header?: P21HeaderOptions;
-  formatting?: P21FormattingOptions;
-}
-```
-
-### `P21HeaderOptions`
-
-| Campo | Tipo | Default | Descripción |
-|-------|------|---------|-------------|
-| `description` | `string[]` | `['']` | Descripción del archivo |
-| `implementationLevel` | `string` | `'2;1'` | Nivel de implementación P21 |
-| `fileName` | `string` | `''` | Nombre del archivo |
-| `timestamp` | `string` | ISO 8601 actual | Timestamp de creación |
-| `author` | `string[]` | `['']` | Autores |
-| `organization` | `string[]` | `['']` | Organizaciones |
-| `preprocessorVersion` | `string` | `''` | Versión del preprocesador |
-| `originatingSystem` | `string` | `''` | Sistema de origen |
-| `authorization` | `string` | `''` | Autorización |
-| `schemas` | `string[]` | `[model.schema.name]` | Schemas en FILE_SCHEMA |
-
-### `P21FormattingOptions`
-
-| Campo | Tipo | Default | Descripción |
-|-------|------|---------|-------------|
-| `maxLineLength` | `number` | Sin límite | Longitud máxima de línea |
-| `prettyPrint` | `boolean` | `false` | Formato con indentación |
-
-## Soporte de complex entities
-
-El writer detecta automáticamente entidades con herencia múltiple y las serializa en formato complejo P21:
-
-```
-#1=(LENGTH_UNIT() NAMED_UNIT(*) SI_UNIT(.MILLI.,.METRE.));
-```
-
-Cada entity type en la cadena de herencia aparece listado alfabéticamente, con solo sus propios atributos explícitos.
-
-## API de bajo nivel
-
-Para uso avanzado, las funciones de serialización individuales están exportadas:
-
-- **`serializeAttributeValue(value, typeDescriptor?, schema?)`** — Serializa un `AttributeValue` individual.
-- **`serializeInstance(instance, schema?)`** — Serializa una `EntityInstance` como data record P21.
-- **`serializeHeader(options, schemaName)`** — Genera la sección HEADER.
-- **`isComplexEntity(definition)`** — Detecta si una entidad requiere formato complejo.
-
-## Diagnósticos
-
-- **`WriterDiagnostic`** — `{ severity, code, message, instanceId?, entityName?, attributeName? }`.
-- **`WriterDiagnosticCode`** — `UNSUPPORTED_VALUE`, `ENCODING_ERROR`, `MISSING_ATTRIBUTE`, `UNKNOWN_TYPE`, `SERIALIZATION_WARNING`.
-- **Helpers** — `hasWriterErrors`, `filterBySeverity`, `formatWriterDiagnostic`, `errorDiag`, `warningDiag`, `infoDiag`.
-
-## Dependencias
-
-- **@step-nc/step-factory** — Provee `StepModel`, `EntityInstance`, `AttributeValue` y type guards.
-- **@step-nc/express-dictionary** — Provee `EntityDefinition`, `ExpressSchema`, `TypeDescriptor` y query API.
+- `@step-nc/step-factory`
+- `@step-nc/express-dictionary`

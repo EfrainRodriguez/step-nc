@@ -1,111 +1,111 @@
-# Publicación de versiones (`@step-nc/*`)
+# Publishing versions (`@step-nc/*`)
 
-Este repositorio usa **[Changesets](https://github.com/changesets/changesets)** para versionar y publicar los paquetes publicables del monorepo en npm. La rama de integración por defecto es **`master`** (configurada en `.changeset/config.json` como `baseBranch`).
+This repository uses **[Changesets](https://github.com/changesets/changesets)** to version and publish monorepo packages to npm. The default integration branch is **`master`** (configured in `.changeset/config.json` as `baseBranch`).
 
-Para que la publicación automática en GitHub Actions funcione, hace falta el secret **`NPM_TOKEN`**. Los pasos concretos están en [Configurar `NPM_TOKEN` en GitHub](./github-npm-token.md).
-
----
-
-## Ideas clave
-
-| Concepto | Qué es |
-|----------|--------|
-| **Changeset** | Un archivo en `.changeset/` que describe qué paquetes cambian y el tipo de bump (major / minor / patch). |
-| **PR “Version Packages”** | Pull request que aplica esos bumps, actualiza `package.json`, changelogs y dependencias internas. |
-| **Publicación a npm** | Ocurre cuando ese PR ya está mergeado en `master` y no quedan changesets pendientes: el workflow ejecuta `changeset publish`. |
-
-El paquete **`@step-nc/examples`** está en la lista `ignore` de Changesets: no se versiona ni se publica.
+For automated publishing in GitHub Actions, you must provide the **`NPM_TOKEN`** secret. See [Configure `NPM_TOKEN` in GitHub](./github-npm-token.md).
 
 ---
 
-## Cómo funciona el flujo (resumen)
+## Key ideas
 
-1. **Desarrollo normal:** implementas cambios en ramas y abres PRs hacia `master` (el CI valida typecheck, lint, tests, etc., cuando exista el workflow de CI).
-2. **Registrar la intención de release:** en una rama (o en `master` tras mergear), añades uno o más changesets con `pnpm changeset`. Haces commit y push de los archivos `.changeset/*.md`.
-3. **Push a `master`:** el workflow de release (`.github/workflows/release.yml`, cuando esté en el repo) se ejecuta.
-   - Si **hay** changesets pendientes, [changesets/action](https://github.com/changesets/action) crea o actualiza un PR titulado **“chore: version packages”** con los bumps y changelogs.
-   - Si **no hay** changesets pendientes (porque ya mergeaste ese PR), la acción ejecuta **`pnpm run release`** (`changeset publish`) y publica en npm.
-4. Antes de publicar, el workflow corre **`pnpm run prerelease`** (typecheck, `lint:check`, tests). Si falla, no se publica.
+| Concept | What it is |
+|---------|------------|
+| **Changeset** | A file in `.changeset/` that declares affected packages and bump type (major / minor / patch). |
+| **"Version Packages" PR** | A pull request that applies version bumps, updates `package.json`, changelogs, and internal dependency versions. |
+| **npm publish** | Happens once that PR is merged into `master` and no pending changesets remain: the workflow runs `changeset publish`. |
 
-La autenticación con npm en CI usa el archivo **`.npmrc`** en la raíz:
+`@step-nc/examples` is listed in Changesets `ignore`: it is neither versioned nor published.
+
+---
+
+## How the flow works (summary)
+
+1. **Regular development:** implement changes in feature branches and open PRs to `master` (CI validates typecheck, lint, tests, etc., once workflows are in place).
+2. **Record release intent:** in your branch (or in `master` after merge), add one or more changesets with `pnpm changeset`. Commit and push `.changeset/*.md` files.
+3. **Push to `master`:** release workflow (`.github/workflows/release.yml`, when present) runs.
+   - If there **are** pending changesets, [changesets/action](https://github.com/changesets/action) creates or updates a PR titled **"chore: version packages"**.
+   - If there are **no** pending changesets (because that PR was merged), the action runs **`pnpm run release`** (`changeset publish`) and publishes to npm.
+4. Before publishing, the workflow runs **`pnpm run prerelease`** (typecheck, `lint:check`, tests). If it fails, publishing is blocked.
+
+npm authentication in CI uses root **`.npmrc`**:
 
 ```text
 //registry.npmjs.org/:_authToken=${NPM_TOKEN}
 ```
 
-El valor real de `NPM_TOKEN` lo inyecta GitHub Actions desde los secrets del repositorio.
+GitHub Actions injects the real value from repository secrets.
 
 ---
 
-## Generar una nueva versión (paso a paso)
+## Create a new release (step by step)
 
-### 1. Crear el changeset
+### 1. Create a changeset
 
-En la raíz del monorepo:
+From monorepo root:
 
 ```bash
 pnpm changeset
 ```
 
-El asistente interactivo te pide:
+Interactive prompts ask for:
 
-- Qué paquetes afectan los cambios (puedes elegir varios).
-- El tipo de versión por paquete: **major**, **minor** o **patch**.
-- Un mensaje corto para el changelog (orientado a usuarios).
+- affected package(s);
+- bump type per package (**major**, **minor**, **patch**);
+- short user-facing changelog message.
 
-Se crean uno o más archivos bajo **`.changeset/`** (por ejemplo `brave-foxes-jump.md`). Esos archivos deben **commitearse** junto con el código relacionado, o en un commit dedicado antes del release.
+This creates file(s) in **`.changeset/`** (for example `brave-foxes-jump.md`). Commit those files with related code changes, or as a dedicated pre-release commit.
 
-Para un cambio que no requiere release (solo interno), puedes usar:
+For changes that should not trigger a release:
 
 ```bash
 pnpm changeset --empty
 ```
 
-### 2. Integrar en `master`
+### 2. Merge into `master`
 
-Abre un PR hacia **`master`**, pasa el CI y mergea. Alternativamente, si ya trabajas directamente en `master`, haz push tras el commit del changeset.
+Open a PR to **`master`**, pass CI, and merge. If you work directly on `master`, push after committing the changeset.
 
-### 3. PR “chore: version packages”
+### 3. "chore: version packages" PR
 
-Tras el push a `master` con changesets pendientes, el workflow debería abrir o actualizar el PR **“chore: version packages”**. Revísalo (versiones, changelogs) y **mergealo** cuando esté listo.
+After pushing changesets to `master`, the workflow should create or update the **"chore: version packages"** PR. Review version bumps/changelogs and merge when ready.
 
-### 4. Publicación
+### 4. Publish
 
-Al mergear ese PR, el siguiente run en `master` ya no verá changesets “abiertos” y ejecutará la publicación con **`pnpm run release`**.
+When that PR is merged, the next `master` run sees no open changesets and runs **`pnpm run release`**.
 
-### 5. Comprobar en npm
+### 5. Verify on npm
 
-Por ejemplo:
+For example:
 
 ```bash
 npm view @step-nc/express-parser version
 npm view @step-nc/step-factory version
 ```
 
-Lista de paquetes publicables del workspace: `express-parser`, `express-dictionary`, `p21-parser`, `p21-reader`, `p21-writer`, `step-factory`.
+Publishable workspace packages: `express-parser`, `express-dictionary`, `p21-parser`, `p21-reader`, `p21-writer`, `step-factory`.
 
 ---
 
-## Comandos útiles (referencia)
+## Useful commands (reference)
 
-| Comando | Uso |
-|---------|-----|
-| `pnpm changeset` | Crear changesets nuevos. |
-| `pnpm changeset status` | Ver estado respecto a la rama base (`master`). |
-| `pnpm version-packages` | Aplica versiones y changelogs localmente (`changeset version`). Suele hacerlo la CI vía el PR automatizado. |
-| `pnpm release` | Publica a npm (`changeset publish`). En la práctica lo ejecuta el workflow tras mergear el PR de versiones. |
+| Command | Usage |
+|---------|-------|
+| `pnpm changeset` | Create new changesets. |
+| `pnpm changeset status` | Show status against base branch (`master`). |
+| `pnpm version-packages` | Apply versions/changelog locally (`changeset version`). Usually done in CI via version PR. |
+| `pnpm release` | Publish to npm (`changeset publish`). In normal flow, CI runs this after merging the version PR. |
 
-**No publiques manualmente a npm** salvo emergencia y criterio del equipo: el flujo diseñado asume publicación desde Actions con el mismo proceso reproducible.
-
----
-
-## Dependencias entre paquetes
-
-En `.changeset/config.json`, `updateInternalDependencies` está en **`patch`**: cuando sube la versión de un paquete, las referencias internas (`workspace:*`) se actualizan con bumps de patch de forma coordinada en el PR de versiones.
+Do not publish manually unless there is an emergency and explicit team agreement. The intended process is CI-driven for consistency and reproducibility.
 
 ---
 
-## Más ayuda
+## Internal dependency bump behavior
 
-- [Configurar `NPM_TOKEN` en GitHub](./github-npm-token.md)
-- [Documentación de Changesets](https://github.com/changesets/changesets/blob/main/docs/intro-to-using-changesets.md)
+In `.changeset/config.json`, `updateInternalDependencies` is set to **`patch`**. When one package version changes, internal references are coordinated with patch bumps in the version PR.
+
+---
+
+## More help
+
+- [Configure `NPM_TOKEN` in GitHub](./github-npm-token.md)
+- [Changesets docs](https://github.com/changesets/changesets/blob/main/docs/intro-to-using-changesets.md)
