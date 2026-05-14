@@ -1,18 +1,18 @@
 ---
-description: Estilo de comentarios en archivos TypeScript (JSDoc, secciones, inline)
+description: Comment style for TypeScript files (JSDoc, sections, inline)
 globs: "**/*.ts"
 alwaysApply: false
 ---
 
-# Comentarios en TypeScript
+# TypeScript Comments
 
-Estandar de comentarios alineado con el paquete `@express-parser`. Usar este estilo en todo el monorepo.
+Comment standard aligned with the `@express-parser` package. Use this style across the monorepo.
 
-## 1. JSDoc para API pública
+## 1. JSDoc for public API
 
-- **Funciones/clases exportadas**: bloque `/** ... */` con descripción en una o varias frases. Incluir `@param`, `@returns` cuando aporten valor; `@example` si ayuda a entender el uso.
-- **Descripción**: Frase completa, mayúscula inicial, punto al final. Líneas siguientes con ` * ` (espacio-asterisco-espacio).
-- **Una sola línea**: Si la descripción cabe en una línea, usar `/** Descripción en una frase. */` (espacio después de `/**`, punto al final).
+- **Exported functions/classes**: use a `/** ... */` block with one or more descriptive sentences. Include `@param`, `@returns`, and `@example` when they add value.
+- **Description style**: complete sentence, capitalized first letter, period at the end.
+- **Single-line JSDoc**: if it fits one line, use `/** Description in one sentence. */`.
 
 ```typescript
 /** Advance the parser until a token in `syncTokens` is found (or EOF). */
@@ -28,10 +28,10 @@ export function synchronize(ctx: ParserContext, syncTokens: ReadonlySet<TokenKin
 export function visit(ast: SchemaDeclarationNode, visitor: ExpressVisitor): void { ... }
 ```
 
-## 2. JSDoc en tipos e interfaces
+## 2. JSDoc for types and interfaces
 
-- Propiedades o tipos que necesiten aclaración: una línea `/** Descripción. */` encima del miembro.
-- En interfaces, documentar solo lo no obvio.
+- For properties/types that need clarification, use a one-line `/** Description. */` directly above the member.
+- In interfaces, document only what is not obvious.
 
 ```typescript
 /** When returned from a visitor handler, prevents visiting the node's children. */
@@ -43,11 +43,11 @@ interface ParseOptions {
 }
 ```
 
-## 3. Encabezados de sección dentro del archivo
+## 3. In-file section headers
 
-- Formato: `// ── Nombre de la sección ────────────────────────────────────────`
-- Reglas: un espacio después de `//`, luego `──`, espacio, título, espacio, `──`, y guiones hasta ~60–70 caracteres para alinear visualmente.
-- Usar para agrupar métodos de una clase o bloques de funciones relacionadas.
+- Format: `// ── Section Name ───────────────────────────────────────────────`
+- Rules: one space after `//`, then `──`, one space, title, one space, `──`, and dashes up to ~60-70 characters for visual alignment.
+- Use section headers to group class methods or related function blocks.
 
 ```typescript
 // ── Navigation ────────────────────────────────────────────────
@@ -55,10 +55,10 @@ interface ParseOptions {
 // ── Entity Section Helpers ──────────────────────────────────────────
 ```
 
-## 4. Comentarios inline y agrupación
+## 4. Inline comments and grouping
 
-- **Una línea**: `// Descripción` (un espacio después de `//`). Para agrupar casos en `switch`, aclarar un paso o una condición.
-- **Varias líneas**: cada línea con `//`; preferir frases cortas.
+- **Single line**: `// Description` (one space after `//`). Use for grouping `switch` cases, clarifying a step, or documenting a condition.
+- **Multi-line**: each line starts with `//`; keep sentences short.
 
 ```typescript
 // Simple types
@@ -70,9 +70,9 @@ case 'KW_ARRAY':
 // Configurable limits protect against malformed or huge input.
 ```
 
-## 5. Encabezados de índice / agrupación de exports
+## 5. Export index grouping
 
-- En barril (`index.ts`) o listas de exports: `// Categoría` o `// Categoría / subcategoría`. Sin guiones `──`, solo `//` y el nombre de la categoría.
+- In barrel files (`index.ts`) or export lists: `// Category` or `// Category / subcategory`. No `──` separators here, only `//` and the category name.
 
 ```typescript
 // AST types
@@ -80,9 +80,9 @@ case 'KW_ARRAY':
 // Visitor / AST traversal
 ```
 
-## 6. Comentarios de archivo (opcional)
+## 6. File-level comments (optional)
 
-- Si se documenta el propósito del archivo, usar un JSDoc al inicio: `/** ... */` con descripción y, si aplica, viñetas (` * - ...`) para convenciones o notas.
+- If file purpose needs documentation, add top-level JSDoc: `/** ... */` with a short description and optional bullets (` * - ...`) for conventions or notes.
 
 ```typescript
 /**
@@ -92,15 +92,15 @@ case 'KW_ARRAY':
  */
 ```
 
-## Resumen
+## Summary
 
-| Uso | Formato |
+| Usage | Format |
 |-----|--------|
-| API pública (función/clase) | JSDoc `/** ... */` con @param/@example si aplica |
-| Tipo/propiedad que lo necesite | Una línea `/** Descripción. */` |
-| Sección dentro del archivo | `// ── Título ─── ...` |
-| Agrupación en switch / lógica | `// Descripción` |
-| Índice de exports | `// Categoría` |
-| Propósito del archivo | JSDoc al inicio (opcional) |
+| Public API (function/class) | JSDoc `/** ... */` with `@param`/`@example` when useful |
+| Type/property needing context | Single-line `/** Description. */` |
+| In-file section | `// ── Title ─── ...` |
+| Switch/logical grouping | `// Description` |
+| Export index | `// Category` |
+| File purpose | Top-level JSDoc (optional) |
 
-Excepciones: comentarios de herramienta como `// eslint-disable-next-line ...` se dejan tal cual.
+Exceptions: tool comments like `// eslint-disable-next-line ...` remain unchanged.
